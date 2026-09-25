@@ -22,6 +22,11 @@ describe("BoutonEcouter", () => {
     await waitFor(() => expect(getByRole("button").getAttribute("aria-pressed")).toBe("true"));
   });
 
+  it("en rond seul, garde un nom accessible sans texte visible", () => {
+    const { getByRole } = render(<BoutonEcouter variante="rond" libelle="Écouter la question" texte="Quel jour ?" />);
+    expect(getByRole("button", { name: "Écouter la question" }).textContent).toBe("");
+  });
+
   it("est désactivé sans audio ni synthèse vocale", () => {
     const { getByRole } = render(<BoutonEcouter libelle="Écouter" texte="Bonjour" />);
     expect((getByRole("button") as HTMLButtonElement).disabled).toBe(true);

@@ -14,9 +14,11 @@ type Props = {
   texte?: string;
   langueTexte?: string;
   className?: string;
+  /** « pastille » et « rond » : le rond seul, le libellé devient le nom accessible. */
+  variante?: "complet" | "pastille" | "rond";
 };
 
-export function BoutonEcouter({ libelle, sousLibelle, source, texte, langueTexte = "fr-FR", className = "" }: Props) {
+export function BoutonEcouter({ libelle, sousLibelle, source, texte, langueTexte = "fr-FR", className = "", variante = "complet" }: Props) {
   const [enLecture, setEnLecture] = useState(false);
   const synthese = useSyncExternalStore(aucunAbonnement, syntheseDuNavigateur, syntheseCoteServeur);
   const audio = useRef<HTMLAudioElement | null>(null);
@@ -53,6 +55,25 @@ export function BoutonEcouter({ libelle, sousLibelle, source, texte, langueTexte
       window.speechSynthesis.speak(enonce);
       setEnLecture(true);
     }
+  }
+
+  if (variante !== "complet") {
+    const rond = variante === "rond";
+    return (
+      <button
+        type="button"
+        onClick={enLecture ? arreter : lancer}
+        disabled={!disponible}
+        aria-pressed={enLecture}
+        aria-label={libelle}
+        title={disponible ? libelle : "Audio indisponible"}
+        className={`grid shrink-0 place-items-center rounded-full text-nuit disabled:opacity-50 ${
+          rond ? "size-11 bg-soleil shadow-[0_0_0_6px_rgb(255_194_26_/_0.25)]" : "size-8 bg-soleil-pale"
+        } ${className}`}
+      >
+        <Icone nom={enLecture ? "ph-pause" : "ph-speaker-high"} className={rond ? "size-5" : "size-4"} />
+      </button>
+    );
   }
 
   return (
