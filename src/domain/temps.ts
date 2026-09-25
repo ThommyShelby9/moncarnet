@@ -12,6 +12,12 @@ export function debutDuJourAuBenin(jour: DateISO): Date {
   return new Date(depuisDateISO(jour).getTime() - DECALAGE_BENIN_MS);
 }
 
+/** « 9 h 41 », à l'heure du Bénin. */
+export function heureMinute(instant: Date): string {
+  const local = new Date(instant.getTime() + DECALAGE_BENIN_MS);
+  return `${local.getUTCHours()} h ${String(local.getUTCMinutes()).padStart(2, "0")}`;
+}
+
 export function salutation(heure: number): "Bonjour" | "Bonsoir" {
   return heure >= 5 && heure < 17 ? "Bonjour" : "Bonsoir";
 }

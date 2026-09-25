@@ -4,6 +4,7 @@ import {
   dateLongue,
   debutDuJourAuBenin,
   heureAuBenin,
+  heureMinute,
   libelleDansJours,
   libelleJour,
   majuscule,
@@ -21,6 +22,11 @@ describe("heure et jour au Bénin", () => {
 
   it("fait commencer la journée à minuit, heure du Bénin", () => {
     expect(debutDuJourAuBenin("2026-09-25").toISOString()).toBe("2026-09-24T23:00:00.000Z");
+  });
+
+  it("écrit l'heure à la française, à l'heure du Bénin", () => {
+    expect(heureMinute(new Date("2026-09-25T08:41:00Z"))).toBe("9 h 41");
+    expect(heureMinute(new Date("2026-09-25T19:05:00Z"))).toBe("20 h 05");
   });
 });
 
