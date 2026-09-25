@@ -1,5 +1,6 @@
 import {
   boolean,
+  customType,
   date,
   integer,
   jsonb,
@@ -280,3 +281,21 @@ export const contenusTraductions = pgTable(
   },
   (t) => [primaryKey({ columns: [t.contenuId, t.langue] })],
 );
+
+/** Octets bruts (bytea) : les notes vocales restent en base, sans volume à monter. */
+const octets = customType<{ data: Uint8Array; driverData: Buffer }>({
+  dataType: () => "bytea",
+  toDriver: (valeur) => Buffer.from(valeur),
+  fromDriver: (valeur) => new Uint8Array(valeur),
+});
+
+/** Note vocale d'une visite du relais : même identifiant que l'événement de la visite. */
+export const fichiers = pgTable("fichiers", {
+  evenementId: uuid("evenement_id")
+    .primaryKey()
+    .references(() => evenements.id, { onDelete: "cascade" }),
+  type: text("type").notNull(),
+  taille: integer("taille").notNull(),
+  donnees: octets("donnees").notNull(),
+  recuLe: horodatage("recu_le").defaultNow().notNull(),
+});

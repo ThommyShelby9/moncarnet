@@ -2,7 +2,7 @@ import { and, asc, eq, gt, isNotNull, isNull } from "drizzle-orm";
 import { afterEach, beforeEach, describe, expect, it } from "vitest";
 import { verifierIdentifiants } from "@/server/auth/connexion";
 import type { Db } from "@/server/db/client";
-import { comptes, creneaux, evenements, ordonnances, patients, rendezVous, responsables } from "@/server/db/schema";
+import { comptes, creneaux, evenements, foyers, ordonnances, patients, rendezVous, responsables } from "@/server/db/schema";
 import { COMPTES_DEMO } from "@/server/demo/donnees";
 import { semerDemo } from "@/server/demo/semer";
 import { creerDbDeTest } from "../../aides/base-de-test";
@@ -87,5 +87,16 @@ describe("semerDemo", () => {
     const premier = await semerDemo(db, { aujourdhui });
     const second = await semerDemo(db, { aujourdhui });
     expect(second).toEqual(premier);
+  });
+
+  it("donne à Koffi les foyers de Sèhoun, avec une visite déjà faite chez Rachida", async () => {
+    await semerDemo(db, { aujourdhui });
+    const [koffi] = await db.select().from(comptes).where(eq(comptes.identifiant, "koffi.agbessi"));
+    const suivis = await db.select().from(foyers).where(eq(foyers.relaisId, koffi!.id));
+    expect(suivis.map((f) => f.nom)).toEqual(expect.arrayContaining(["Dossou", "Salifou"]));
+    expect(suivis.map((f) => f.nom)).not.toContain("Houngbo");
+    expect(suivis.every((f) => ["Sèhoun", "Kinta", "Adingnigon"].includes(f.village))).toBe(true);
+    const visites = await db.select().from(evenements).where(eq(evenements.type, "visite_domicile"));
+    expect(visites).toEqual([expect.objectContaining({ auteurId: koffi!.id, donnees: { constat: "tout_va_bien", noteVocale: false } })]);
   });
 });

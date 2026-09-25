@@ -44,7 +44,7 @@ const VILLAGES_SEHOUN = ["Sèhoun", "Kinta", "Adingnigon"] as const;
 const ALPHABET_CODE = "ABCDEFGHJKLMNPQRSTUVWXYZ23456789";
 
 const TABLES = [
-  "alertes", "liste_attente",
+  "fichiers", "alertes", "liste_attente",
   "contenus_traductions", "contenus", "ordonnances", "evenements", "rendez_vous", "creneaux", "modeles_plages",
   "inscriptions", "responsables", "consentements", "contacts", "patients", "foyers", "sessions", "comptes",
   "etablissements", "communes",
@@ -117,7 +117,9 @@ export async function semerDemo(db: Db, { aujourdhui }: { aujourdhui: DateISO })
 
   // --- Foyers ---
   const creerFoyer = async (nom: string, village: string, communeId: string) => {
-    const [f] = await db.insert(t.foyers).values({ nom, village, communeId, relaisId: relais.id }).returning();
+    // Koffi est le relais de Sèhoun : il suit les foyers de Zogbodomey.
+    const relaisId = communeId === zogbodomey!.id ? relais.id : null;
+    const [f] = await db.insert(t.foyers).values({ nom, village, communeId, relaisId }).returning();
     return f!;
   };
   const fHoungbo = await creerFoyer("Houngbo", "Bohicon centre", bohicon!.id);
@@ -266,6 +268,17 @@ export async function semerDemo(db: Db, { aujourdhui }: { aujourdhui: DateISO })
     });
     nbEvenements++;
   }
+
+  // --- Une visite de Koffi chez Rachida, il y a 3 jours ---
+  await db.insert(t.evenements).values({
+    id: randomUUID(),
+    patientId: idsPersonnages.rachida!,
+    type: "visite_domicile",
+    auteurId: relais.id,
+    survenuLe: new Date(depuisDateISO(ajouterJours(aujourdhui, -3)).getTime() + 9 * 3_600_000),
+    donnees: { constat: "tout_va_bien", noteVocale: false },
+  });
+  nbEvenements++;
 
   // --- Carnets familiaux ---
   await db.insert(t.responsables).values([
