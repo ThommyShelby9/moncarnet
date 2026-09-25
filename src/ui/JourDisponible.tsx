@@ -1,6 +1,6 @@
 import Link from "next/link";
 import { libellePlaces, type JourPropose } from "@/domain/rendez-vous";
-import { LIBELLE_MOMENT_RDV } from "@/domain/temps";
+import { LIBELLE_MOMENT_RDV, majuscule, nomDuJour } from "@/domain/temps";
 import { Icone } from "./Icone";
 
 const JOURS_COURTS = ["Dim", "Lun", "Mar", "Mer", "Jeu", "Ven", "Sam"] as const;
@@ -16,7 +16,7 @@ export function JourDisponible({ jour, href }: { jour: JourPropose; href: string
       </span>
       <span className="min-w-0 flex-1">
         <b className="block">
-          {jour.libelle}, {LIBELLE_MOMENT_RDV[jour.moment]}
+          {jour.dansJours < 7 ? jour.libelle : majuscule(nomDuJour(jour.date))}, {LIBELLE_MOMENT_RDV[jour.moment]}
         </b>
         <span className="mt-0.5 flex items-center gap-1 text-sm text-gris">
           {Array.from({ length: jour.soleils }, (_, i) => (
