@@ -3,11 +3,13 @@
 import { redirect } from "next/navigation";
 import { z } from "zod";
 import { aujourdhuiAuBenin } from "@/domain/dates";
+import { CODES_PLAN, type CodePlan } from "@/domain/grossesse";
 import { MOTIFS_RDV } from "@/domain/programmes";
 import { CODES_SIGNES } from "@/domain/signes-danger";
 import { MOMENTS_PRISE } from "@/domain/temps";
 import { exigerRole } from "@/server/auth/cookies";
 import { db } from "@/server/db/client";
+import { enregistrerPlanNaissance } from "@/server/patient/plan-naissance";
 import { noterPrise } from "@/server/patient/prises";
 import { inscrireListeAttente, reserver } from "@/server/patient/reservation";
 import { annulerAlerte, signalerDanger } from "@/server/patient/signalement";
@@ -84,4 +86,15 @@ export async function annulerAlerteAction(formulaire: FormData): Promise<void> {
   const resultat = await annulerAlerte(db(), { compteId: compte.id, alerteId: saisie.data.alerteId });
   const note = resultat.ok ? "alerte_annulee" : resultat.erreur === "deja_prise_en_charge" ? "alerte_deja_prise" : null;
   redirect(`/?${new URLSearchParams({ ...(saisie.data.pour ? { pour: saisie.data.pour } : {}), ...(note ? { note } : {}) })}`);
+}
+
+const champsPlan = z.object({ patientId: z.uuid(), elements: z.array(z.enum(CODES_PLAN)) });
+
+/** « Préparer la naissance » : chaque case cochée est gardée tout de suite. */
+export async function planNaissanceAction(patientId: string, elements: CodePlan[]): Promise<{ ok: boolean }> {
+  const compte = await exigerRole("patient");
+  const lecture = champsPlan.safeParse({ patientId, elements });
+  if (!lecture.success) return { ok: false };
+  const resultat = await enregistrerPlanNaissance(db(), { compteId: compte.id, ...lecture.data });
+  return { ok: resultat.ok };
 }

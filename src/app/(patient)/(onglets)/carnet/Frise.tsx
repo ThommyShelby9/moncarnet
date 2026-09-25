@@ -18,9 +18,16 @@ export function SectionProgramme({ programme, patientId, aujourdhui }: { program
         {programme.nom}
       </h2>
       {programme.code === "grossesse" && (
-        <p className="-mt-1.5 text-sm text-gris">
-          {semainesDeGrossesse(programme.dateReference, aujourdhui)} semaines · terme prévu le {dateLongue(termePrevu(programme.dateReference))}
-        </p>
+        <>
+          <p className="-mt-1.5 text-sm text-gris">
+            {semainesDeGrossesse(programme.dateReference, aujourdhui)} semaines · terme prévu le {dateLongue(termePrevu(programme.dateReference))}
+          </p>
+          <Link href={`/grossesse?pour=${patientId}`} className="flex items-center gap-2 rounded-carte bg-soleil-pale p-3 font-bold text-nuit">
+            <Icone nom="hi-fetus" className="size-7 text-soleil-appuye" />
+            Ma grossesse, semaine par semaine
+            <Icone nom="ph-caret-right" className="ml-auto size-5" />
+          </Link>
+        </>
       )}
       {prochaine && <Prochaine etape={prochaine} patientId={patientId} />}
       <ol className="rounded-carte bg-white px-3.5 py-1">

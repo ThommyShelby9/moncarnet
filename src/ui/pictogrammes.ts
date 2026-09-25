@@ -1,3 +1,4 @@
+import type { CodePlan } from "@/domain/grossesse";
 import type { MotifRdv } from "@/domain/programmes";
 import type { CodeSigne } from "@/domain/signes-danger";
 import type { MomentPrise } from "@/domain/temps";
@@ -33,4 +34,14 @@ export const ICONE_MOMENT: Record<MomentPrise, NomIcone> = {
   matin: "ph-sun-horizon",
   midi: "ph-sun",
   soir: "ph-moon",
+};
+
+/** Préparer la naissance : un pictogramme par chose à prévoir. */
+export const ICONE_PLAN: Record<CodePlan, NomIcone> = {
+  lieu: "hi-hospital",
+  transport: "ph-motorcycle",
+  accompagnant: "ph-users-three",
+  argent: "ph-money",
+  sac: "ph-handbag",
+  sang: "hi-blood-drop",
 };
