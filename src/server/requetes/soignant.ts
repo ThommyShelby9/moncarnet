@@ -306,6 +306,8 @@ export interface Dossier {
   ordonnances: OrdonnanceDetaillee[];
   alertesOuvertes: number;
   visites: VisiteRelais[];
+  mere: { id: string; prenom: string; nom: string } | null;
+  enfants: { id: string; prenom: string; libelleAge: string }[];
 }
 
 /** Dossier d'un patient du centre ; null pour un patient d'un autre centre. */
@@ -325,12 +327,13 @@ export async function dossierPatient(db: Db, etablissementId: string, patientId:
       malvoyant: patients.malvoyant,
       malentendant: patients.malentendant,
       village: foyers.village,
+      mereId: patients.mereId,
     })
     .from(patients)
     .leftJoin(foyers, eq(patients.foyerId, foyers.id))
     .where(eq(patients.id, patientId));
   if (!p) return null;
-  const [telephones, risques, programmes, mesures, lesOrdonnances, ouvertes, visites] = await Promise.all([
+  const [telephones, risques, programmes, mesures, lesOrdonnances, ouvertes, visites, meres, enfants] = await Promise.all([
     telephonesPrincipaux(db, [p.id]),
     risquesDes(db, [p], aujourdhui),
     programmesDuCarnet(db, p.id, aujourdhui),
@@ -341,6 +344,8 @@ export async function dossierPatient(db: Db, etablissementId: string, patientId:
       .from(alertes)
       .where(and(eq(alertes.patientId, p.id), isNull(alertes.priseEnChargeLe), isNull(alertes.annuleeLe))),
     visitesDe(db, p.id),
+    p.mereId ? db.select({ id: patients.id, prenom: patients.prenom, nom: patients.nom }).from(patients).where(eq(patients.id, p.mereId)) : Promise.resolve([]),
+    db.select({ id: patients.id, prenom: patients.prenom, dateNaissance: patients.dateNaissance }).from(patients).where(eq(patients.mereId, p.id)),
   ]);
   return {
     patient: {
@@ -364,5 +369,7 @@ export async function dossierPatient(db: Db, etablissementId: string, patientId:
     ordonnances: lesOrdonnances,
     alertesOuvertes: ouvertes.length,
     visites,
+    mere: meres[0] ?? null,
+    enfants: enfants.map((x) => ({ id: x.id, prenom: x.prenom, libelleAge: libelleAge(x.dateNaissance, aujourdhui) })),
   };
 }

@@ -1,7 +1,7 @@
 import { and, eq } from "drizzle-orm";
 import type { DateISO } from "@/domain/dates";
 import type { InscriptionDonnees } from "@/domain/evenements";
-import { genererCodeRetrait } from "@/domain/ordonnances";
+import { codeDuCarnetLibre } from "../codes";
 import type { Db } from "../db/client";
 import { consentements, contacts, etablissements, evenements, foyers, patients } from "../db/schema";
 import { foyerDuRelais } from "../droits";
@@ -68,13 +68,4 @@ async function centreDuFoyer(db: Db, foyerId: string): Promise<string | null> {
     .where(eq(foyers.id, foyerId))
     .limit(1);
   return centre?.id ?? null;
-}
-
-/** Code écrit dans le carnet, au même format que le code de retrait : on en tire un autre s'il est déjà pris. */
-async function codeDuCarnetLibre(db: Db): Promise<string> {
-  for (;;) {
-    const code = genererCodeRetrait();
-    const [pris] = await db.select({ id: patients.id }).from(patients).where(eq(patients.codeCourt, code)).limit(1);
-    if (!pris) return code;
-  }
 }
