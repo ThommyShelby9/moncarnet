@@ -45,7 +45,8 @@ Un **carnet de santé familial qui parle** : chaque personne (adulte, enfant, pe
 | Canaux | **WhatsApp réel** (API officielle de Meta) + SMS et appel vocal **simulés** + relais | 34 % des femmes seulement ont un téléphone connecté : WhatsApp ne peut pas être seul |
 | Programmes de suivi | Configuration **dans le code** (`domain/programmes/*.ts`) | Règles médicales testées et relues |
 | Gestion de contenu | Espace admin : contenus (texte, audio, pictogramme, par langue), établissements, plages de rendez-vous, comptes | Exigence du challenge |
-| Authentification | Better Auth ; patients : téléphone + code à 4 chiffres ; personnel : identifiant + mot de passe | Pas de saisie de texte pour les patients |
+| Authentification | Module maison : empreintes scrypt, sessions en base, cookie httpOnly ; patients : téléphone + code à 4 chiffres ; personnel : identifiant + mot de passe | Nos patients n'ont pas d'e-mail (Better Auth en exige un) ; verrouillage après 5 essais géré directement et entièrement testé |
+| Bases de données | **Postgres local** (16) en développement, **PGlite** en mémoire pour les tests, Postgres sur Coolify en production | Pas de Docker en local ; tests isolés et sans configuration ; même schéma et mêmes migrations partout |
 | Police | **Fira Sans** auto-hébergée (sous-ensemble woff2, `next/font/local`) | Google Fonts affiche mal les tons du fon |
 | Pictogrammes | **Health Icons** (CC0) pour la santé, **Phosphor** (MIT) pour l'interface | Libres, conçus pour la santé publique |
 | Hébergement | Coolify (Docker, Postgres, tâches planifiées, volume) sur **`<nom>.kheios.com`** en HTTPS | Choix de l'équipe ; HTTPS requis pour l'app installable et le webhook WhatsApp |
@@ -60,7 +61,7 @@ Toutes les personnes et données sont **fictives**. La démo se passe à **Bohic
 |---|---|---|
 | **Codjo Houngbo**, 58 ans | Hypertension. Smartphone, lit un peu, parle fon. Gère sur son téléphone les carnets de sa femme **Mariam Houngbo** (54 ans) et de leur petit-fils **Sèna** (8 mois) | Rappel de prise de médicament, rendez-vous de contrôle, vaccins de Sèna, tout à écouter en fon |
 | **Awa Hounkpatin**, 24 ans | Enceinte de 32 semaines, Cotonou puis Bohicon. Smartphone, WhatsApp | Suivi de grossesse, bouton « J'ai un problème » |
-| **Afiavi Dossou**, 31 ans | Enceinte de 24 semaines, village de Sèhoun. **Téléphone basique**, ne lit pas | Rappels par SMS et appel vocal, suivie par le relais |
+| **Afiavi Dossou**, 31 ans | Enceinte de 29 semaines, village de Sèhoun, a manqué sa 2ᵉ consultation. **Téléphone basique**, ne lit pas | Rappels par SMS et appel vocal, suivie par le relais |
 | **Rachida Salifou**, 71 ans | Diabète, **malvoyante**. Vit avec sa fille, qui l'aide | Lecteur d'écran, voix, médicaments apportés par le relais |
 | **Koffi Agbessi** | Relais communautaire de Sèhoun. Smartphone, réseau intermittent | Tournée par foyer sans réseau, visites dictées, inscriptions |
 | **Adjoa Gbaguidi** | Sage-femme au centre de santé de Bohicon | Poste « Aujourd'hui » : consultations, alertes, salle d'attente |
@@ -170,7 +171,7 @@ Un programme est un objet TypeScript typé : `code`, `nom`, `dateReference`, `et
 | Module | Responsabilité | Dépend de |
 |---|---|---|
 | `src/domain/` | Logique **pure** : programmes, calendriers, règles de risque, statuts calculés, cartes du jour, places disponibles, file d'attente, cascade de rappels (décision, sans envoi), statistiques, schémas Zod | Rien |
-| `src/server/` | Schéma Drizzle, requêtes, Server Actions, **contrôle d'accès centralisé** (`droits.ts`), Better Auth | `domain/` |
+| `src/server/` | Schéma Drizzle, requêtes, Server Actions, **contrôle d'accès centralisé** (`droits.ts`), authentification (`auth/`) | `domain/` |
 | `src/notifications/` | Interface `Canal`, `CanalWhatsApp` (Cloud API, par `fetch`), `CanalSmsSimule`, `CanalVocalSimule`, orchestrateur de cascade, webhook | `server/`, `domain/` |
 | `src/offline/` | Service worker (Serwist), file d'envoi et copie de la tournée (Dexie), notes vocales stockées localement | `domain/` (schémas) |
 | `src/ui/` | Composants de la charte (§8) | — |
@@ -178,7 +179,8 @@ Un programme est un objet TypeScript typé : `code`, `nom`, `dateReference`, `et
 | `src/app/` | Espaces : `/` (patient), `/relais`, `/soignant`, `/pharmacie`, `/pilotage`, `/admin`, `/demo`, routes API | tout ce qui précède |
 
 ### 6.3 Routes API
-- `/api/auth/[...all]` : Better Auth.
+- Connexion et déconnexion : Server Actions (pas de route API dédiée).
+- `/api/sante` : état de l'application et de la base (pour Coolify).
 - `/api/sync` : réception des lots de la file d'envoi (§10).
 - `/api/cron/rappels` (toutes les heures), `/api/cron/alertes` (toutes les minutes, escalade), `/api/cron/liste-attente` (toutes les 15 minutes) : protégées par `CRON_SECRET`.
 - `/api/whatsapp/webhook` : `GET` pour la vérification, `POST` avec vérification de `X-Hub-Signature-256` sur le corps brut, réponse 200 immédiate puis traitement, déduplication par identifiant de message.
@@ -207,7 +209,8 @@ Un programme est un objet TypeScript typé : `code`, `nom`, `dateReference`, `et
 | `patients` | id (uuid), foyer_id, nom, prénom, date_naissance, sexe, langue, canal_prefere (`whatsapp` \| `sms` \| `vocal` \| `relais`), accessibilité (malvoyant, malentendant), code_court (QR du carnet), établissement de rattachement, mère_id |
 | `contacts` | patient_id, téléphone, rôle (`principal` \| `secours`), propriétaire (`soi` \| `proche` \| `relais`), vérifié_le |
 | `consentements` | patient_id, canal, accordé_le, retiré_le, recueilli_par |
-| `comptes` (+ tables Better Auth) | id, rôle (`patient` \| `relais` \| `soignant` \| `pharmacie` \| `pilotage` \| `admin`), établissement_id, commune_id |
+| `comptes` | id, rôle (`patient` \| `relais` \| `soignant` \| `pharmacie` \| `pilotage` \| `admin`), identifiant (téléphone normalisé ou nom d'utilisateur), empreinte du secret, établissement_id, commune_id, échecs de connexion, verrouillé jusqu'à |
+| `sessions` | empreinte SHA-256 du jeton, compte_id, expire_le |
 | `responsables` | compte_id, patient_id, lien (`soi` \| `conjoint` \| `parent` \| `enfant` \| `aidant`) : le **carnet familial** |
 | `inscriptions` | patient_id, programme_code, date_reference, active |
 | `modeles_plages` | établissement_id, motif, jour_semaine, début, fin, capacité |
