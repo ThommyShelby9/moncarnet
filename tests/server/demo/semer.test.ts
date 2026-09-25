@@ -1,8 +1,8 @@
-import { eq } from "drizzle-orm";
+import { and, asc, eq, gt, isNotNull, isNull } from "drizzle-orm";
 import { afterEach, beforeEach, describe, expect, it } from "vitest";
 import { verifierIdentifiants } from "@/server/auth/connexion";
 import type { Db } from "@/server/db/client";
-import { comptes, creneaux, patients, responsables } from "@/server/db/schema";
+import { comptes, creneaux, evenements, patients, rendezVous, responsables } from "@/server/db/schema";
 import { COMPTES_DEMO } from "@/server/demo/donnees";
 import { semerDemo } from "@/server/demo/semer";
 import { creerDbDeTest } from "../../aides/base-de-test";
@@ -49,6 +49,24 @@ describe("semerDemo", () => {
     const places = await db.select().from(creneaux);
     expect(places.length).toBeGreaterThan(30);
     expect(places.every((c) => c.date >= aujourdhui && c.date <= "2026-10-16")).toBe(true);
+  });
+
+  it("prépare l'espace patient : traitements délivrés, places prises et réservations", async () => {
+    await semerDemo(db, { aujourdhui });
+    expect(await db.select().from(evenements).where(eq(evenements.type, "delivrance"))).toHaveLength(2);
+
+    const aVenir = await db.select().from(creneaux).where(gt(creneaux.date, aujourdhui)).orderBy(asc(creneaux.date), asc(creneaux.moment));
+    const reserves = async (id: string) =>
+      (await db.select().from(rendezVous).where(and(eq(rendezVous.creneauId, id), isNull(rendezVous.annuleLe)))).length;
+    const vaccin = aVenir.find((c) => c.motif === "vaccin")!;
+    expect(vaccin.date).toBe("2026-09-30");
+    expect(vaccin.capacite - (await reserves(vaccin.id))).toBe(3);
+    const consultation = aVenir.find((c) => c.motif === "consultation" && c.moment === "matin")!;
+    expect(await reserves(consultation.id)).toBe(consultation.capacite);
+
+    const [codjo] = await db.select().from(patients).where(eq(patients.prenom, "Codjo"));
+    const places = await db.select().from(rendezVous).where(and(eq(rendezVous.patientId, codjo!.id), isNotNull(rendezVous.creneauId)));
+    expect(places).toEqual([expect.objectContaining({ motif: "tension", datePrevue: "2026-10-01", source: "programme" })]);
   });
 
   it("peut être relancée sans erreur et donne le même résultat", async () => {

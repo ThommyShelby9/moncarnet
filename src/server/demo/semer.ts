@@ -1,11 +1,12 @@
 import { randomUUID } from "node:crypto";
-import { sql } from "drizzle-orm";
+import { asc, sql } from "drizzle-orm";
 import { planifier } from "@/domain/calendrier";
 import { ajouterJours, depuisDateISO, joursEntre, type DateISO } from "@/domain/dates";
 import { PROGRAMMES, type CodeProgramme, type MotifRdv } from "@/domain/programmes";
 import { hacher } from "../auth/mots-de-passe";
 import type { Db } from "../db/client";
 import * as t from "../db/schema";
+import { reserver } from "../patient/reservation";
 import { COMPTES_DEMO } from "./donnees";
 
 export interface BilanDemo {
@@ -70,6 +71,7 @@ export async function semerDemo(db: Db, { aujourdhui }: { aujourdhui: DateISO })
   await db.execute(sql.raw(`TRUNCATE TABLE ${TABLES.map((n) => `"${n}"`).join(", ")} RESTART IDENTITY CASCADE`));
 
   const codesUtilises = new Set<string>();
+  codesUtilises.add("K7P4QX");
   const codeUnique = () => {
     let code = "";
     do code = Array.from({ length: 6 }, () => h.parmi([...ALPHABET_CODE])).join("");
@@ -110,6 +112,7 @@ export async function semerDemo(db: Db, { aujourdhui }: { aujourdhui: DateISO })
   const relais = compte("koffi.agbessi");
   const firmin = compte("firmin.akpovi");
   const adjoa = compte("adjoa.gbaguidi");
+  const pharmacien = compte("pharmacie.sainte-rita");
 
   // --- Foyers ---
   const creerFoyer = async (nom: string, village: string, communeId: string) => {
@@ -121,7 +124,8 @@ export async function semerDemo(db: Db, { aujourdhui }: { aujourdhui: DateISO })
   const fDossou = await creerFoyer("Dossou", "Sèhoun", zogbodomey!.id);
   const fSalifou = await creerFoyer("Salifou", "Sèhoun", zogbodomey!.id);
 
-  const naissanceSena = ajouterJours(aujourdhui, -243);
+  // 8 mois et 28 jours : ses vaccins des 9 mois tombent dans 2 jours (scénario de démo, spec §15).
+  const naissanceSena = ajouterJours(aujourdhui, -268);
   const personnages: Personne[] = [
     { cle: "codjo", prenom: "Codjo", nom: "Houngbo", sexe: "M", dateNaissance: "1968-03-12", foyerId: fHoungbo.id, canalPrefere: "whatsapp", telephone: "+2290197000001", proprietaireTelephone: "soi",
       programmes: [{ code: "hypertension", dateReference: "2023-05-10", dateInscription: ajouterJours(aujourdhui, -200) }] },
@@ -184,6 +188,7 @@ export async function semerDemo(db: Db, { aujourdhui }: { aujourdhui: DateISO })
 
   // --- Patients, contacts, consentements, inscriptions, rendez-vous, historique ---
   const idsPersonnages: Record<string, string> = {};
+  const idsPopulation: string[] = [];
   let nbRendezVous = 0;
   let nbEvenements = 0;
 
@@ -205,6 +210,7 @@ export async function semerDemo(db: Db, { aujourdhui }: { aujourdhui: DateISO })
       })
       .returning();
     if (personne.cle) idsPersonnages[personne.cle] = patient!.id;
+    else idsPopulation.push(patient!.id);
 
     if (personne.telephone) {
       await db.insert(t.contacts).values({ patientId: patient!.id, telephone: personne.telephone, role: "principal", proprietaire: personne.proprietaireTelephone ?? "soi" });
@@ -270,13 +276,37 @@ export async function semerDemo(db: Db, { aujourdhui }: { aujourdhui: DateISO })
     { compteId: compte("+2290197000004").id, patientId: idsPersonnages.rachida!, lien: "enfant" },
   ]);
 
-  // --- Ordonnance en cours de Codjo ---
-  await db.insert(t.ordonnances).values({
-    patientId: idsPersonnages.codjo!,
-    prescripteurId: firmin.id,
-    lignes: [{ medicament: "Amlodipine 5 mg", matin: 0, midi: 0, soir: 1, dureeJours: 30 }],
-    codeRetrait: "K7P4QX",
-  });
+  // --- Traitements en cours : ordonnances délivrées à la pharmacie ---
+  const ordonnancesDelivrees = [
+    {
+      patientId: idsPersonnages.codjo!,
+      codeRetrait: "K7P4QX",
+      joursDepuisDelivrance: 10,
+      lignes: [{ medicament: "Amlodipine 5 mg", matin: 0, midi: 0, soir: 1, dureeJours: 30, indication: "la tension", conseil: "avec un verre d'eau" }],
+    },
+    {
+      patientId: idsPersonnages.rachida!,
+      codeRetrait: codeUnique(),
+      joursDepuisDelivrance: 20,
+      lignes: [{ medicament: "Metformine 500 mg", matin: 1, midi: 0, soir: 1, dureeJours: 60, indication: "le diabète", conseil: "pendant le repas" }],
+    },
+  ];
+  for (const o of ordonnancesDelivrees) {
+    const emiseLe = depuisDateISO(ajouterJours(aujourdhui, -o.joursDepuisDelivrance));
+    const [ordonnance] = await db
+      .insert(t.ordonnances)
+      .values({ patientId: o.patientId, prescripteurId: firmin.id, lignes: o.lignes, codeRetrait: o.codeRetrait, emiseLe })
+      .returning();
+    await db.insert(t.evenements).values({
+      id: randomUUID(),
+      patientId: o.patientId,
+      type: "delivrance",
+      auteurId: pharmacien.id,
+      survenuLe: new Date(emiseLe.getTime() + 10 * 3_600_000),
+      donnees: { ordonnanceId: ordonnance!.id },
+    });
+    nbEvenements++;
+  }
 
   // --- Plages de rendez-vous et places des 3 prochaines semaines ---
   const modeles: { motif: MotifRdv; jours: number[]; moment: "matin" | "apres_midi"; capacite: number }[] = [
@@ -299,6 +329,51 @@ export async function semerDemo(db: Db, { aujourdhui }: { aujourdhui: DateISO })
     }
   }
   await db.insert(t.creneaux).values(places);
+
+  // --- Places déjà prises : la première matinée de consultation et le premier contrôle de tension sont complets
+  //     (liste d'attente) ; la séance de vaccination de mercredi garde 3 places (scénario de démo) ---
+  const aVenir = (await db.select().from(t.creneaux).orderBy(asc(t.creneaux.date), asc(t.creneaux.moment))).filter((c) => c.date > aujourdhui);
+  const premier = (motif: MotifRdv, moment?: "matin" | "apres_midi") => aVenir.find((c) => c.motif === motif && (!moment || c.moment === moment))!;
+  const consultationComplete = premier("consultation", "matin");
+  const tensionComplete = premier("tension");
+  const seanceVaccin = premier("vaccin");
+  const reservations = aVenir.flatMap((creneau) => {
+    const nombre =
+      creneau === consultationComplete || creneau === tensionComplete
+        ? creneau.capacite
+        : creneau === seanceVaccin
+          ? creneau.capacite - 3
+          : h.entier(0, Math.floor(creneau.capacite / 2));
+    return Array.from({ length: nombre }, () => ({
+      patientId: h.parmi(idsPopulation),
+      motif: creneau.motif,
+      datePrevue: creneau.date,
+      moment: creneau.moment,
+      creneauId: creneau.id,
+      etablissementId: cs!.id,
+      source: "patient" as const,
+      reserveLe: depuisDateISO(ajouterJours(aujourdhui, -h.entier(1, 10))),
+    }));
+  });
+  await db.insert(t.rendezVous).values(reservations);
+  nbRendezVous += reservations.length;
+
+  // --- Rendez-vous déjà réservés : le contrôle de Codjo et la consultation prénatale d'Awa ---
+  for (const [identifiant, cle, motif] of [
+    ["+2290197000001", "codjo", "tension"],
+    ["+2290197000002", "awa", "grossesse"],
+  ] as const) {
+    const creneau = aVenir.find((c) => c.motif === motif && c !== tensionComplete)!;
+    const resultat = await reserver(db, {
+      compteId: compte(identifiant).id,
+      patientId: idsPersonnages[cle]!,
+      motif,
+      creneauId: creneau.id,
+      aujourdhui,
+      maintenant: depuisDateISO(ajouterJours(aujourdhui, -3)),
+    });
+    if (!resultat.ok) throw new Error(`Réservation de démo impossible (${cle}) : ${resultat.erreur}`);
+  }
 
   // --- Contenus de base (texte français ; l'audio arrive au plan 6) ---
   const contenus = [

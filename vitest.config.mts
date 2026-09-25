@@ -14,5 +14,7 @@ export default defineConfig({
     // Chaque fichier de test crée sa base PGlite en mémoire et applique les migrations :
     // en parallèle sur toute la suite, cette préparation dépasse le délai par défaut de 10 s.
     hookTimeout: 60_000,
+    // Chaque base PGlite réserve beaucoup de mémoire : au-delà de 4 fichiers en parallèle, l'allocation échoue.
+    maxWorkers: 4,
   },
 });
