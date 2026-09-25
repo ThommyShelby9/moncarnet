@@ -3,9 +3,9 @@ import { echeanceAlerte } from "@/domain/alertes";
 import { CODES_SIGNES, LIBELLES_SIGNES, signesProposes } from "@/domain/signes-danger";
 
 describe("signesProposes", () => {
-  it("propose à une femme enceinte les 8 pictogrammes de la spec, « autre » en dernier", () => {
+  it("propose à une femme enceinte le début du travail, puis les 8 pictogrammes de la spec, « autre » en dernier", () => {
     const signes = signesProposes({ enceinte: true, age: 24 });
-    expect(signes).toEqual(["saignement", "fievre", "maux_de_tete", "gonflement", "bebe_ne_bouge_plus", "perte_des_eaux", "douleur", "autre"]);
+    expect(signes).toEqual(["debut_travail", "saignement", "fievre", "maux_de_tete", "gonflement", "bebe_ne_bouge_plus", "perte_des_eaux", "douleur", "autre"]);
   });
 
   it("propose la diarrhée pour un jeune enfant, sans les signes de la grossesse", () => {

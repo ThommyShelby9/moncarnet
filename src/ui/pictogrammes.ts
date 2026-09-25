@@ -20,6 +20,7 @@ export const ICONE_SIGNE: Record<CodeSigne, NomIcone> = {
   gonflement: "hi-foot",
   bebe_ne_bouge_plus: "hi-fetus",
   perte_des_eaux: "ph-drop",
+  debut_travail: "ph-baby",
   douleur: "hi-pain",
   respiration: "hi-lungs",
   vomissements: "hi-vomiting",

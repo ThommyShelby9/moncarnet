@@ -56,4 +56,16 @@ describe("evenementSchema", () => {
     expect(evenementSchema.safeParse({ type: "inscription", donnees: inscription }).success).toBe(true);
     expect(evenementSchema.safeParse({ type: "inscription", donnees: { ...inscription, prenom: " " } }).success).toBe(false);
   });
+
+  it("accepte un accouchement et un plan de naissance", () => {
+    const enfant = { id: "0b8f5c1e-3f8a-4b3a-9a57-6f1f2c3d4e5f", sexe: "F", poidsGrammes: 3200 };
+    expect(evenementSchema.safeParse({ type: "accouchement", donnees: { le: "2026-09-26T05:40:00.000Z", lieu: "centre", mode: "voie_basse", enfant } }).success).toBe(true);
+    expect(evenementSchema.safeParse({ type: "accouchement", donnees: { le: "2026-09-26T05:40:00.000Z", lieu: "lune", mode: "voie_basse", enfant } }).success).toBe(false);
+    expect(evenementSchema.safeParse({ type: "plan_naissance", donnees: { elements: ["lieu", "sac"] } }).success).toBe(true);
+    expect(evenementSchema.safeParse({ type: "plan_naissance", donnees: { elements: ["piscine"] } }).success).toBe(false);
+  });
+
+  it("connaît le début du travail parmi les signes de danger", () => {
+    expect(evenementSchema.safeParse({ type: "signalement_danger", donnees: { signes: ["debut_travail"], source: "patient" } }).success).toBe(true);
+  });
 });

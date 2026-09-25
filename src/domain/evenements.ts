@@ -1,5 +1,7 @@
 import { z } from "zod";
 import { CODES_PROGRAMMES, MOTIFS_RDV } from "./programmes/types";
+import { CODES_PLAN } from "./grossesse";
+import { LIEUX_NAISSANCE, MODES_NAISSANCE } from "./naissance";
 import { CODES_SIGNES } from "./signes-danger";
 import { MOMENTS_PRISE } from "./temps";
 
@@ -80,6 +82,19 @@ export const evenementSchema = z.discriminatedUnion("type", [
   z.object({
     type: z.literal("inscription"),
     donnees: inscriptionDonneesSchema,
+  }),
+  z.object({
+    type: z.literal("accouchement"),
+    donnees: z.object({
+      le: z.iso.datetime({ offset: true }),
+      lieu: z.enum(LIEUX_NAISSANCE),
+      mode: z.enum(MODES_NAISSANCE),
+      enfant: z.object({ id: z.uuid(), sexe: z.enum(["F", "M"]), poidsGrammes: z.number().int().min(400).max(6500) }),
+    }),
+  }),
+  z.object({
+    type: z.literal("plan_naissance"),
+    donnees: z.object({ elements: z.array(z.enum(CODES_PLAN)).max(CODES_PLAN.length) }),
   }),
 ]);
 
