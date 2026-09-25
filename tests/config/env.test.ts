@@ -4,7 +4,7 @@ import { lireEnv } from "@/config/env";
 describe("lireEnv", () => {
   it("applique les valeurs par défaut", () => {
     const env = lireEnv({});
-    expect(env.NEXT_PUBLIC_APP_NAME).toBe("Gbè");
+    expect(env.NEXT_PUBLIC_APP_NAME).toBe("Mon Carnet");
     expect(env.APP_URL).toBe("http://localhost:3000");
     expect(env.DEMO_MODE).toBe(true);
     expect(env.MIGRER_AU_DEMARRAGE).toBe(true);

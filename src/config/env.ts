@@ -3,7 +3,7 @@ import { z } from "zod";
 const schemaEnv = z.object({
   NODE_ENV: z.enum(["development", "test", "production"]).default("development"),
   APP_URL: z.url().default("http://localhost:3000"),
-  NEXT_PUBLIC_APP_NAME: z.string().trim().min(1).default("Gbè"),
+  NEXT_PUBLIC_APP_NAME: z.string().trim().min(1).default("Mon Carnet"),
   DATABASE_URL: z
     .string()
     .regex(/^postgres(ql)?:\/\//, "doit commencer par postgres://")

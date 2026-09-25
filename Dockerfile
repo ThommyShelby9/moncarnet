@@ -9,7 +9,7 @@ RUN pnpm install --frozen-lockfile
 FROM base AS construction
 COPY --from=dependances /app/node_modules ./node_modules
 COPY . .
-ARG NEXT_PUBLIC_APP_NAME=Gbè
+ARG NEXT_PUBLIC_APP_NAME="Mon Carnet"
 ENV NEXT_PUBLIC_APP_NAME=$NEXT_PUBLIC_APP_NAME
 ENV NEXT_TELEMETRY_DISABLED=1
 RUN pnpm build

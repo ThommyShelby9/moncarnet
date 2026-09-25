@@ -1,8 +1,8 @@
-# Carnet de santé familial qui parle
+# Mon Carnet : le carnet de santé familial qui parle
 
 Plateforme de suivi des patients pour le Challenge e-Santé Bénin. Chaque personne a son carnet ; un même téléphone gère les carnets de toute la famille ; tout s'écoute dans sa langue ; les rappels arrivent par WhatsApp, SMS, appel ou par le relais communautaire.
 
-Le nom de la plateforme est configurable (`NEXT_PUBLIC_APP_NAME`, « Gbè » provisoirement).
+La plateforme s'appelle **Mon Carnet** et sera en ligne sur https://moncarnet.kheios.com. Le nom reste configurable (`NEXT_PUBLIC_APP_NAME`).
 
 - Spec : [docs/superpowers/specs/2026-09-25-esante-benin-design.md](docs/superpowers/specs/2026-09-25-esante-benin-design.md)
 - Pourquoi ces choix : [docs/recherche/](docs/recherche/) (usages au Bénin, plateformes existantes, design), avec les sources
