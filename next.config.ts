@@ -7,6 +7,10 @@ const config: NextConfig = {
     // Sans réseau, une Server Action reste en attente et repart au retour du réseau ; `useOffline` le dit à l'écran (spec §10.3).
     useOffline: true,
   },
+  async headers() {
+    // Le sprite est appelé avec sa version (?v=empreinte) : on peut le garder un an, et les pictogrammes restent visibles sans réseau.
+    return [{ source: "/icons/:fichier*", headers: [{ key: "Cache-Control", value: "public, max-age=31536000, immutable" }] }];
+  },
 };
 
 export default config;

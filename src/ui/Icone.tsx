@@ -1,4 +1,4 @@
-import type { NomIcone } from "./icones";
+import { VERSION_SPRITE, type NomIcone } from "./icones";
 
 type Props = { nom: NomIcone; className?: string; titre?: string };
 
@@ -11,7 +11,7 @@ export function Icone({ nom, className = "size-6", titre }: Props) {
       aria-label={titre}
       focusable="false"
     >
-      <use href={`/icons/sprite.svg#${nom}`} />
+      <use href={`/icons/sprite.svg?v=${VERSION_SPRITE}#${nom}`} />
     </svg>
   );
 }

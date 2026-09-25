@@ -10,7 +10,8 @@ describe("Icone", () => {
   it("pointe vers le symbole du sprite", () => {
     const { container } = render(<Icone nom="hi-blood-pressure" />);
     const use = container.querySelector("use");
-    expect(use?.getAttribute("href")).toBe("/icons/sprite.svg#hi-blood-pressure");
+    // La version (empreinte du contenu) permet un cache long : les pictogrammes restent visibles sans réseau.
+    expect(use?.getAttribute("href")).toMatch(/^\/icons\/sprite\.svg\?v=[0-9a-f]{8}#hi-blood-pressure$/);
   });
 
   it("est décorative quand elle n'a pas de titre", () => {

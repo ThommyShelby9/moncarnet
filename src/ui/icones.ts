@@ -62,3 +62,5 @@ export const NOMS_ICONES = [
 ] as const;
 
 export type NomIcone = (typeof NOMS_ICONES)[number];
+
+export const VERSION_SPRITE = "2da6275f";
