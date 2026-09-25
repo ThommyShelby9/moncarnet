@@ -19,7 +19,7 @@ export async function nomEtablissement(db: Db, etablissementId: string): Promise
   return e?.nom ?? "";
 }
 
-async function telephonesPrincipaux(db: Db, patientIds: string[]): Promise<Map<string, string>> {
+export async function telephonesPrincipaux(db: Db, patientIds: string[]): Promise<Map<string, string>> {
   if (patientIds.length === 0) return new Map();
   const lignes = await db
     .select({ patientId: contacts.patientId, telephone: contacts.telephone })
