@@ -41,6 +41,7 @@ export const NOMS_ICONES = [
   "ph-hourglass-medium",
   "ph-house",
   "ph-list-checks",
+  "ph-magnifying-glass",
   "ph-map-pin",
   "ph-microphone",
   "ph-moon",
@@ -49,6 +50,7 @@ export const NOMS_ICONES = [
   "ph-pill",
   "ph-play",
   "ph-plus",
+  "ph-prescription",
   "ph-question",
   "ph-sign-out",
   "ph-speaker-high",
@@ -63,4 +65,4 @@ export const NOMS_ICONES = [
 
 export type NomIcone = (typeof NOMS_ICONES)[number];
 
-export const VERSION_SPRITE = "2da6275f";
+export const VERSION_SPRITE = "f002319c";
