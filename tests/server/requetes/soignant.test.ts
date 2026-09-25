@@ -90,3 +90,10 @@ describe("dossierPatient", () => {
     expect(await dossierPatient(db, autreCentre, await idPatient(db, "Codjo"), aujourdhui)).toBeNull();
   });
 });
+
+describe("visites du relais", () => {
+  it("montre dans le dossier les visites du relais, avec la note vocale à écouter", async () => {
+    const d = await dossierPatient(db, centre, await idPatient(db, "Rachida"), aujourdhui);
+    expect(d?.visites).toEqual([expect.objectContaining({ constat: "tout_va_bien", relais: "Koffi Agbessi", note: false, texte: null })]);
+  });
+});

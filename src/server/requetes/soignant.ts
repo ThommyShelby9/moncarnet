@@ -1,5 +1,6 @@
-import { and, asc, eq, gte, inArray, isNull, lt } from "drizzle-orm";
+import { and, asc, desc, eq, gte, inArray, isNull, lt } from "drizzle-orm";
 import { ageEnAnnees, ajouterJours, libelleAge, type DateISO } from "@/domain/dates";
+import type { ConstatVisite } from "@/domain/evenements";
 import type { MotifRdv, NiveauRisque } from "@/domain/programmes";
 import { semainesDeGrossesse } from "@/domain/programmes/grossesse";
 import { analyserRecherche, correspondAuNom } from "@/domain/recherche";
@@ -7,7 +8,7 @@ import { LIBELLES_PLAGE, LIBELLES_RDV } from "@/domain/rendez-vous";
 import type { CodeSigne } from "@/domain/signes-danger";
 import { debutDuJourAuBenin, LIBELLE_MOMENT_RDV } from "@/domain/temps";
 import type { Db } from "../db/client";
-import { alertes, contacts, creneaux, etablissements, evenements, foyers, inscriptions, patients, rendezVous } from "../db/schema";
+import { alertes, comptes, contacts, creneaux, etablissements, evenements, fichiers, foyers, inscriptions, patients, rendezVous } from "../db/schema";
 import { patientDuCentre } from "../droits";
 import { programmesDuCarnet, type ProgrammeDuCarnet } from "./carnet";
 import { ordonnancesDe, type OrdonnanceDetaillee } from "./ordonnances";
@@ -262,6 +263,36 @@ export async function rechercherPatients(db: Db, etablissementId: string, saisie
     }));
 }
 
+export interface VisiteRelais {
+  id: string;
+  le: Date;
+  constat: ConstatVisite;
+  texte: string | null;
+  relais: string;
+  /** Une note vocale est arrivée : elle s'écoute par /api/fichiers/[id]. */
+  note: boolean;
+}
+
+/** Les visites à domicile du relais, les plus récentes d'abord. */
+export async function visitesDe(db: Db, patientId: string): Promise<VisiteRelais[]> {
+  const lignes = await db
+    .select({ id: evenements.id, le: evenements.survenuLe, donnees: evenements.donnees, relais: comptes.nomAffiche, note: fichiers.evenementId })
+    .from(evenements)
+    .leftJoin(comptes, eq(evenements.auteurId, comptes.id))
+    .leftJoin(fichiers, eq(fichiers.evenementId, evenements.id))
+    .where(and(eq(evenements.patientId, patientId), eq(evenements.type, "visite_domicile")))
+    .orderBy(desc(evenements.survenuLe))
+    .limit(10);
+  return lignes.map((l) => ({
+    id: l.id,
+    le: l.le,
+    constat: l.donnees.constat as ConstatVisite,
+    texte: typeof l.donnees.texte === "string" ? l.donnees.texte : null,
+    relais: l.relais ?? "Relais",
+    note: l.note !== null,
+  }));
+}
+
 export interface Dossier {
   patient: PatientTrouve & {
     langue: string;
@@ -274,6 +305,7 @@ export interface Dossier {
   mesures: MesureDatee[];
   ordonnances: OrdonnanceDetaillee[];
   alertesOuvertes: number;
+  visites: VisiteRelais[];
 }
 
 /** Dossier d'un patient du centre ; null pour un patient d'un autre centre. */
@@ -298,7 +330,7 @@ export async function dossierPatient(db: Db, etablissementId: string, patientId:
     .leftJoin(foyers, eq(patients.foyerId, foyers.id))
     .where(eq(patients.id, patientId));
   if (!p) return null;
-  const [telephones, risques, programmes, mesures, lesOrdonnances, ouvertes] = await Promise.all([
+  const [telephones, risques, programmes, mesures, lesOrdonnances, ouvertes, visites] = await Promise.all([
     telephonesPrincipaux(db, [p.id]),
     risquesDes(db, [p], aujourdhui),
     programmesDuCarnet(db, p.id, aujourdhui),
@@ -308,6 +340,7 @@ export async function dossierPatient(db: Db, etablissementId: string, patientId:
       .select({ id: alertes.id })
       .from(alertes)
       .where(and(eq(alertes.patientId, p.id), isNull(alertes.priseEnChargeLe), isNull(alertes.annuleeLe))),
+    visitesDe(db, p.id),
   ]);
   return {
     patient: {
@@ -330,5 +363,6 @@ export async function dossierPatient(db: Db, etablissementId: string, patientId:
     mesures: mesures.get(p.id) ?? [],
     ordonnances: lesOrdonnances,
     alertesOuvertes: ouvertes.length,
+    visites,
   };
 }

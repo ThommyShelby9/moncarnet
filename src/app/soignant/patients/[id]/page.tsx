@@ -1,14 +1,16 @@
 import Link from "next/link";
 import { notFound } from "next/navigation";
 import { aujourdhuiAuBenin } from "@/domain/dates";
+import { LIBELLES_CONSTAT } from "@/domain/evenements";
 import { dateCourte, dateLongue, heureMinute } from "@/domain/temps";
 import { formaterTelephone, normaliserTelephone } from "@/domain/telephone";
 import { db } from "@/server/db/client";
 import type { EtapeDuCarnet } from "@/server/requetes/carnet";
 import type { OrdonnanceDetaillee } from "@/server/requetes/ordonnances";
 import type { MesureDatee } from "@/server/requetes/risques";
-import { dossierPatient } from "@/server/requetes/soignant";
+import { dossierPatient, type VisiteRelais } from "@/server/requetes/soignant";
 import { iconePourPersonne } from "@/ui/avatar";
+import { BoutonEcouter } from "@/ui/BoutonEcouter";
 import { CodeRetrait } from "@/ui/CodeRetrait";
 import { EtiquetteRisque } from "@/ui/EtiquetteRisque";
 import { Icone } from "@/ui/Icone";
@@ -125,6 +127,7 @@ export default async function DossierPatient({ params, searchParams }: PageProps
           ))}
         </section>
         <Releves mesures={dossier.mesures} />
+        <Visites visites={dossier.visites} />
       </div>
       <Ordonnances ordonnances={dossier.ordonnances} />
     </>
@@ -188,6 +191,46 @@ function Releves({ mesures }: { mesures: MesureDatee[] }) {
           </tbody>
         </table>
       )}
+    </section>
+  );
+}
+
+/** Visites à domicile du relais, avec sa note vocale : ce qu'il a vu chez la personne. */
+function Visites({ visites }: { visites: VisiteRelais[] }) {
+  if (visites.length === 0) return null;
+  return (
+    <section aria-labelledby="titre-visites" className="flex flex-col gap-3 rounded-carte bg-white p-5">
+      <h2 id="titre-visites" className="text-lg font-bold">
+        Visites du relais
+      </h2>
+      <ul className="flex flex-col gap-3">
+        {visites.map((v) => (
+          <li key={v.id} className="flex items-start gap-3">
+            <span className="grid size-10 shrink-0 place-items-center rounded-xl bg-lavande-2 text-marque">
+              <Icone nom="hi-community-healthworker" className="size-7" />
+            </span>
+            <div className="min-w-0 flex-1">
+              <p className="font-bold">
+                {LIBELLES_CONSTAT[v.constat]}
+                <span className="font-normal text-gris">
+                  {" "}
+                  · {dateCourte(aujourdhuiAuBenin(v.le))}, {heureMinute(v.le)} · {v.relais}
+                </span>
+              </p>
+              {v.texte && <p className="text-sm">« {v.texte} »</p>}
+              {v.note && (
+                <BoutonEcouter
+                  variante="complet"
+                  libelle="Écouter la visite"
+                  sousLibelle={`Note vocale de ${v.relais}`}
+                  source={`/api/fichiers/${v.id}`}
+                  className="mt-2"
+                />
+              )}
+            </div>
+          </li>
+        ))}
+      </ul>
     </section>
   );
 }
