@@ -11,5 +11,8 @@ export default defineConfig({
     environment: "node",
     include: ["tests/**/*.test.{ts,tsx}"],
     testTimeout: 30_000,
+    // Chaque fichier de test crée sa base PGlite en mémoire et applique les migrations :
+    // en parallèle sur toute la suite, cette préparation dépasse le délai par défaut de 10 s.
+    hookTimeout: 60_000,
   },
 });
