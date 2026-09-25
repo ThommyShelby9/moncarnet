@@ -1048,7 +1048,7 @@ afterAll(async () => fermer());
 
 describe("droits du relais", () => {
   it("ne donne au relais que les personnes et les foyers de sa tournée", async () => {
-    expect(await patientDuRelais(db, koffi, await idPatient(db, "Afiavi"))).toBe(true);
+    expect(await patientDuRelais(db, koffi, await idPatient(db, "Afiavi", "Dossou"))).toBe(true);
     expect(await patientDuRelais(db, koffi, await idPatient(db, "Codjo"))).toBe(false);
     expect(await patientDuRelais(db, koffi, "pas-un-identifiant")).toBe(false);
     expect(await foyerDuRelais(db, koffi, foyerDossou)).toBe(true);
@@ -1321,7 +1321,7 @@ beforeAll(async () => {
   ({ db, fermer } = await creerDbDeTest());
   await semerDemo(db, { aujourdhui });
   koffi = await idCompte(db, "koffi.agbessi");
-  afiavi = await idPatient(db, "Afiavi");
+  afiavi = await idPatient(db, "Afiavi", "Dossou");
 });
 afterAll(async () => fermer());
 
@@ -1622,7 +1622,7 @@ beforeAll(async () => {
   firmin = await idCompte(db, "firmin.akpovi");
   centreDeFirmin = (await db.select({ id: comptes.etablissementId }).from(comptes).where(eq(comptes.id, firmin)))[0]!.id!;
   codjo = await idCompte(db, COMPTE.codjo);
-  afiavi = await idPatient(db, "Afiavi");
+  afiavi = await idPatient(db, "Afiavi", "Dossou");
 });
 afterAll(async () => fermer());
 
