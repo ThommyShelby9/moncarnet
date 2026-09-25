@@ -1,14 +1,11 @@
+import type { Metadata } from "next";
 import { exigerRole } from "@/server/auth/cookies";
-import { EspaceEnPreparation } from "@/ui/EspaceEnPreparation";
+import { ApplicationTournee } from "./ApplicationTournee";
 
+export const metadata: Metadata = { title: "Ma tournée" };
+
+/** La tournée du relais : une fois la page ouverte, tout se passe sur le téléphone, avec ou sans réseau. */
 export default async function PageRelais() {
   const compte = await exigerRole("relais");
-  return (
-    <EspaceEnPreparation
-      nomAffiche={compte.nomAffiche}
-      titre="Ma tournée"
-      icone="hi-community-healthworker"
-      texte="La tournée par foyer, utilisable sans réseau, est en cours de préparation."
-    />
-  );
+  return <ApplicationTournee relais={compte.nomAffiche} />;
 }
