@@ -1,7 +1,7 @@
 "use client";
 
 import { useOffline } from "next/offline";
-import { useCallback, useEffect, useMemo, useRef, useState } from "react";
+import { useCallback, useEffect, useMemo, useRef, useState, useSyncExternalStore } from "react";
 import type { Tournee } from "@/domain/tournee";
 import { appliquerSaisiesLocales, texteEnAttente, type Refus, type SaisieEnAttente } from "@/offline/file";
 import { stockageNavigateur, type NoteLocale } from "@/offline/stockage";
@@ -10,6 +10,16 @@ import { VueEnvoi } from "./VueEnvoi";
 import { VueInscription } from "./VueInscription";
 import { VueListe } from "./VueListe";
 import { VueVisite } from "./VueVisite";
+
+/** Le navigateur sait tout de suite qu'il n'y a plus de réseau, même avant une requête ratée (page rechargée hors ligne). */
+function abonnerReseau(rappel: () => void) {
+  window.addEventListener("online", rappel);
+  window.addEventListener("offline", rappel);
+  return () => {
+    window.removeEventListener("online", rappel);
+    window.removeEventListener("offline", rappel);
+  };
+}
 
 type Vue = { nom: "liste" } | { nom: "visite"; personneId: string } | { nom: "inscription" } | { nom: "envoi" };
 
@@ -22,7 +32,8 @@ const MESSAGES = {
 export function ApplicationTournee({ relais }: { relais: string }) {
   const stockage = useMemo(() => stockageNavigateur(), []);
   const transport = useMemo(() => transportNavigateur(), []);
-  const horsLigne = useOffline();
+  const navigateurHorsLigne = useSyncExternalStore(abonnerReseau, () => !navigator.onLine, () => false);
+  const horsLigne = useOffline() || navigateurHorsLigne;
   const [tournee, setTournee] = useState<Tournee | null>(null);
   const [file, setFile] = useState<SaisieEnAttente[]>([]);
   const [refus, setRefus] = useState<Refus[]>([]);

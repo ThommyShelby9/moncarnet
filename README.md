@@ -26,6 +26,15 @@ La plateforme s'appelle **Mon Carnet** et sera en ligne sur https://moncarnet.kh
 - **Ordonnance** : comprimés matin, midi et soir, durée, en mots simples ; un code de 6 caractères à donner au patient, qui le retrouve aussi dans son carnet.
 - **Pharmacie** : le code suffit ; la pharmacie voit l'ordonnance, jamais le dossier. Posologie dessinée, écoute de la posologie, délivrance une seule fois : le tampon apparaît chez le soignant et les prises dans le carnet du patient. Code de démonstration : `M4R2TN`.
 
+## Relais hors ligne
+
+- **Ma tournée** : Koffi prépare sa tournée avec du réseau ; ses foyers restent sur le téléphone. Les foyers urgents passent en premier : signe de danger en attente, tension très élevée. On voit aussi, pour chaque personne, pourquoi passer : étape manquée, ordonnance à retirer, vaccin de la semaine.
+- **Visite** : tout va bien, à orienter ou absent ; une note vocale (« Maintenir pour raconter la visite ») ; la tension (« 14 sur 9 » se lit 140/90) ; un signe de danger, qui crée l'alerte du centre dès que le réseau le permet.
+- **Inscrire une personne** : nouveau-né, femme enceinte, tension, diabète, personne âgée. Le carnet et ses rendez-vous sont créés au retour du réseau ; on peut visiter la personne tout de suite.
+- **File d'envoi** : tout part seul quand le réseau revient, sans doublon. Ce que le centre refuse reste dans « À corriger », avec la raison. La déconnexion attend que tout soit parti, puis efface le téléphone.
+- **Chez le soignant** : les visites du relais et leurs notes vocales dans le dossier.
+- **Sans réseau pour tous** : l'application s'installe sur le téléphone ; les pages déjà ouvertes restent lisibles.
+
 ## Démarrer en local
 
 Prérequis : Node 22, pnpm 11, un Postgres local.
