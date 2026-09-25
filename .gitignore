@@ -1,0 +1,23 @@
+# Maquettes du compagnon visuel de brainstorming
+.superpowers/
+
+# Dépendances et builds
+node_modules/
+.next/
+out/
+dist/
+coverage/
+
+# Environnement
+.env
+.env.*
+!.env.example
+
+# Tests
+playwright-report/
+test-results/
+
+# Divers
+*.log
+.DS_Store
+Thumbs.db
