@@ -85,6 +85,15 @@ const REGLES: Record<CodeProgramme, (c: ContexteRisque) => Regle[]> = {
     return [regle, manques(c)];
   },
 
+  postnatal: (c) => {
+    const derniere = releves(c.mesures, "tensionSys").at(-1);
+    return [
+      derniere && tensionAuMoins(derniere, 140, 90) ? eleve(`Tension élevée après l'accouchement (${tension(derniere)})`) : null,
+      c.signalementsOuverts > 0 ? eleve("Signe de danger non pris en charge") : null,
+      manques(c),
+    ];
+  },
+
   vaccination: (c) => [
     c.etapesManquees >= 1
       ? surveillance(c.etapesManquees === 1 ? "1 vaccin en retard" : `${c.etapesManquees} vaccins en retard`)

@@ -1,6 +1,6 @@
 import type { DateISO } from "../dates";
 
-export const CODES_PROGRAMMES = ["consultation", "hypertension", "grossesse", "vaccination", "diabete"] as const;
+export const CODES_PROGRAMMES = ["consultation", "hypertension", "grossesse", "vaccination", "diabete", "postnatal"] as const;
 export type CodeProgramme = (typeof CODES_PROGRAMMES)[number];
 
 export const MOTIFS_RDV = ["consultation", "tension", "grossesse", "vaccin", "diabete", "fievre", "dents"] as const;
