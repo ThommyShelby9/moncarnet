@@ -1,7 +1,8 @@
 # Spec de conception : Gbè, le carnet de santé familial qui parle
 
 - **Date** : 25 septembre 2026 (version 2, remplace la version du matin)
-- **Nom** : « Gbè » est **provisoire** (« gbè » signifie « langue » en fon, adja, goun et mina). À valider par une personne dont le fon est la langue maternelle.
+- **Nom** : **pas encore choisi**. « Gbè » sert de nom provisoire dans les maquettes. L'adresse sera **`<nom>.kheios.com`**.
+- **Nom et adresse configurables** : le nom affiché vient de `NEXT_PUBLIC_APP_NAME` et l'adresse de `APP_URL`. Changer de nom ne demande que ces deux réglages, l'entrée DNS et l'URL du webhook WhatsApp chez Meta.
 - **Contexte** : Challenge e-Santé Bénin. 3 jours pour livrer une plateforme collaborative de suivi des patients, en ligne et testable par le jury, avec le code sur GitHub.
 - **Documents liés** :
   - [Synthèse de recherche sur les usages](../../recherche/2026-09-25-synthese-usages.md)
@@ -47,7 +48,7 @@ Un **carnet de santé familial qui parle** : chaque personne (adulte, enfant, pe
 | Authentification | Better Auth ; patients : téléphone + code à 4 chiffres ; personnel : identifiant + mot de passe | Pas de saisie de texte pour les patients |
 | Police | **Fira Sans** auto-hébergée (sous-ensemble woff2, `next/font/local`) | Google Fonts affiche mal les tons du fon |
 | Pictogrammes | **Health Icons** (CC0) pour la santé, **Phosphor** (MIT) pour l'interface | Libres, conçus pour la santé publique |
-| Hébergement | Coolify (Docker, Postgres, tâches planifiées, volume) + nom de domaine en HTTPS | Choix de l'équipe ; HTTPS requis pour l'app installable et le webhook WhatsApp |
+| Hébergement | Coolify (Docker, Postgres, tâches planifiées, volume) sur **`<nom>.kheios.com`** en HTTPS | Choix de l'équipe ; HTTPS requis pour l'app installable et le webhook WhatsApp |
 
 ---
 
@@ -383,8 +384,9 @@ Ne **jamais** laisser croire qu'une alerte est partie : message « l'alerte n'es
   - volume pour l'audio ;
   - tâches planifiées (`/api/cron/*`) ;
   - déploiement automatique à chaque envoi sur `main` ;
-  - **nom de domaine en HTTPS** (requis pour le webhook WhatsApp).
-- Variables d'environnement : `DATABASE_URL`, `BETTER_AUTH_SECRET`, `BETTER_AUTH_URL`, `CRON_SECRET`, `WHATSAPP_TOKEN`, `WHATSAPP_PHONE_NUMBER_ID`, `WHATSAPP_APP_SECRET`, `WHATSAPP_VERIFY_TOKEN`.
+  - sous-domaine **`<nom>.kheios.com`** en HTTPS (requis pour le webhook WhatsApp), avec certificat géré par Coolify.
+- Variables d'environnement : `APP_URL`, `NEXT_PUBLIC_APP_NAME`, `DATABASE_URL`, `BETTER_AUTH_SECRET`, `BETTER_AUTH_URL`, `CRON_SECRET`, `WHATSAPP_TOKEN`, `WHATSAPP_PHONE_NUMBER_ID`, `WHATSAPP_APP_SECRET`, `WHATSAPP_VERIFY_TOKEN`.
+- Le nom n'apparaît jamais en dur dans le code, les modèles WhatsApp ni les contenus audio : ceux-ci disent « votre carnet de santé » et « le centre de santé ».
 
 ---
 
@@ -422,7 +424,7 @@ Vrais SMS, appels vocaux et USSD via un fournisseur ; interopérabilité DHIS2 /
 ---
 
 ## 16. Questions ouvertes
-- **Nom du produit** : « Gbè » provisoire, à confirmer (et à faire valider par un locuteur natif du fon).
+- **Nom du produit** : pas encore choisi (« Gbè » provisoire). Il fixe le sous-domaine `<nom>.kheios.com`.
 - **Compte Meta et numéro WhatsApp** : à créer par l'équipe dès le jour 1.
-- **Nom de domaine** pour Coolify : à fournir avant la mise en ligne.
+- **Sous-domaine de départ** : pour mettre en ligne sans attendre le nom, utiliser un sous-domaine provisoire de `kheios.com`, puis basculer.
 - **Enregistrements audio** en fon : locuteurs natifs disponibles ou synthèse.
