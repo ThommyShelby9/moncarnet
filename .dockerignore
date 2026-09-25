@@ -1,0 +1,11 @@
+.git
+.next
+node_modules
+.env*
+!.env.example
+docs
+.superpowers
+Sante.pdf
+coverage
+playwright-report
+test-results

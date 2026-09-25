@@ -1,36 +1,56 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+# Carnet de santé familial qui parle
 
-## Getting Started
+Plateforme de suivi des patients pour le Challenge e-Santé Bénin. Chaque personne a son carnet ; un même téléphone gère les carnets de toute la famille ; tout s'écoute dans sa langue ; les rappels arrivent par WhatsApp, SMS, appel ou par le relais communautaire.
 
-First, run the development server:
+Le nom de la plateforme est configurable (`NEXT_PUBLIC_APP_NAME`, « Gbè » provisoirement).
+
+- Spec : [docs/superpowers/specs/2026-09-25-esante-benin-design.md](docs/superpowers/specs/2026-09-25-esante-benin-design.md)
+- Pourquoi ces choix : [docs/recherche/](docs/recherche/) (usages au Bénin, plateformes existantes, design), avec les sources
+- Maquettes validées : [docs/design/maquettes-validees.html](docs/design/maquettes-validees.html)
+- Déploiement : [docs/deploiement.md](docs/deploiement.md)
+
+## Démarrer en local
+
+Prérequis : Node 22, pnpm 11, un Postgres local.
 
 ```bash
-npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
+pnpm install
+psql -U postgres -h localhost -c "CREATE DATABASE sante"
+cp .env.example .env.local   # puis renseigner DATABASE_URL
+pnpm db:seed                 # migrations + données de démonstration
+pnpm dev                     # http://localhost:3000
 ```
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+## Comptes de démonstration
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+Toutes les personnes sont fictives. La page `/demo` ouvre chaque compte en un clic.
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+| Rôle | Identifiant | Secret |
+|---|---|---|
+| Patient (Codjo, carnet familial) | 01 97 00 00 01 | 1234 |
+| Patiente (Awa, enceinte) | 01 97 00 00 02 | 1234 |
+| Patiente (Aïcha, s'occupe de sa mère) | 01 97 00 00 04 | 1234 |
+| Relais | koffi.agbessi | demo1234 |
+| Sage-femme | adjoa.gbaguidi | demo1234 |
+| Infirmier | firmin.akpovi | demo1234 |
+| Pharmacie | pharmacie.sainte-rita | demo1234 |
+| Pilotage | zone.bohicon | demo1234 |
+| Administration | admin | demo1234 |
 
-## Learn More
+## Commandes
 
-To learn more about Next.js, take a look at the following resources:
+| Commande | Rôle |
+|---|---|
+| `pnpm test` | tests (Vitest ; base PGlite en mémoire, aucune configuration) |
+| `pnpm typecheck` / `pnpm lint` | vérification des types et du style |
+| `pnpm db:generate` | génère une migration après modification du schéma |
+| `pnpm db:seed` | réinitialise la base locale avec la démo |
+| `pnpm icones` | reconstruit le sprite de pictogrammes |
 
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
+## Organisation du code
 
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
-
-## Deploy on Vercel
-
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
-
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+- `src/domain/` : logique métier pure (programmes de suivi, calendriers, risques).
+- `src/server/` : base de données, connexion, requêtes.
+- `src/ui/` : composants de la charte.
+- `src/app/` : pages et routes.
+- `tests/` : tous les tests, séparés du code, dans la même arborescence que `src/`.
