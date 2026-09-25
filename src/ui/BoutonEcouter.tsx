@@ -1,7 +1,11 @@
 "use client";
 
-import { useEffect, useRef, useState } from "react";
+import { useEffect, useRef, useState, useSyncExternalStore } from "react";
 import { Icone } from "./Icone";
+
+const aucunAbonnement = () => () => {};
+const syntheseDuNavigateur = () => "speechSynthesis" in window;
+const syntheseCoteServeur = () => false;
 
 type Props = {
   libelle: string;
@@ -14,11 +18,10 @@ type Props = {
 
 export function BoutonEcouter({ libelle, sousLibelle, source, texte, langueTexte = "fr-FR", className = "" }: Props) {
   const [enLecture, setEnLecture] = useState(false);
-  const [synthese, setSynthese] = useState(false);
+  const synthese = useSyncExternalStore(aucunAbonnement, syntheseDuNavigateur, syntheseCoteServeur);
   const audio = useRef<HTMLAudioElement | null>(null);
 
   useEffect(() => {
-    setSynthese("speechSynthesis" in window);
     return () => {
       audio.current?.pause();
       if ("speechSynthesis" in window) window.speechSynthesis.cancel();
