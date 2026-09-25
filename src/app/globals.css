@@ -1,26 +1,46 @@
 @import "tailwindcss";
 
-:root {
-  --background: #ffffff;
-  --foreground: #171717;
+@theme {
+  --color-marque: #3b3ad9;
+  --color-marque-appuye: #2b2ab0;
+  --color-nuit: #16154a;
+  --color-lavande: #f3f3fe;
+  --color-lavande-2: #e8e8fc;
+  --color-lavande-3: #d6d6f6;
+  --color-soleil: #ffc21a;
+  --color-soleil-pale: #fff2cc;
+  --color-soleil-appuye: #e09f00;
+  --color-urgence: #d92d20;
+  --color-urgence-pale: #fdecea;
+  --color-gris: #5d5c7a;
+
+  --font-sans: var(--font-fira), system-ui, sans-serif;
+
+  --radius-bouton: 1rem;
+  --radius-carte: 1.5rem;
+  --radius-grande: 1.875rem;
 }
 
-@theme inline {
-  --color-background: var(--background);
-  --color-foreground: var(--foreground);
-  --font-sans: var(--font-geist-sans);
-  --font-mono: var(--font-geist-mono);
-}
-
-@media (prefers-color-scheme: dark) {
-  :root {
-    --background: #0a0a0a;
-    --foreground: #ededed;
-  }
+html {
+  color: var(--color-nuit);
+  background: var(--color-lavande);
 }
 
 body {
-  background: var(--background);
-  color: var(--foreground);
-  font-family: Arial, Helvetica, sans-serif;
+  font-family: var(--font-sans);
+  -webkit-font-smoothing: antialiased;
+}
+
+:focus-visible {
+  outline: 3px solid var(--color-soleil-appuye);
+  outline-offset: 2px;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    transition-duration: 0.01ms !important;
+  }
 }
