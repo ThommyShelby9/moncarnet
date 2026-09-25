@@ -1931,7 +1931,7 @@ describe("appliquerSaisiesLocales", () => {
     aujourdhui: "2026-09-25",
     foyers: [
       {
-        id: "f-dossou",
+        id: "0b8f5c1e-3f8a-4b3a-9a57-6f1f2c3d4e5f",
         nom: "Dossou",
         village: "Sèhoun",
         urgence: 1,
@@ -1966,7 +1966,7 @@ describe("appliquerSaisiesLocales", () => {
       patientId: "p-yao",
       type: "inscription",
       survenuLe: "2026-09-25T09:00:00.000Z",
-      donnees: { foyerId: "f-dossou", prenom: "Yao", nom: "Dossou", sexe: "M", dateNaissance: "2026-09-20", programme: { code: "vaccination", dateReference: "2026-09-20" } },
+      donnees: { foyerId: "0b8f5c1e-3f8a-4b3a-9a57-6f1f2c3d4e5f", prenom: "Yao", nom: "Dossou", sexe: "M", dateNaissance: "2026-09-20", programme: { code: "vaccination", dateReference: "2026-09-20" } },
       libelle: "Inscription de Yao Dossou",
       groupe: "i1",
       nature: "inscription",
