@@ -2,7 +2,7 @@ import { and, asc, eq, gt, isNotNull, isNull } from "drizzle-orm";
 import { afterEach, beforeEach, describe, expect, it } from "vitest";
 import { verifierIdentifiants } from "@/server/auth/connexion";
 import type { Db } from "@/server/db/client";
-import { comptes, creneaux, evenements, patients, rendezVous, responsables } from "@/server/db/schema";
+import { comptes, creneaux, evenements, ordonnances, patients, rendezVous, responsables } from "@/server/db/schema";
 import { COMPTES_DEMO } from "@/server/demo/donnees";
 import { semerDemo } from "@/server/demo/semer";
 import { creerDbDeTest } from "../../aides/base-de-test";
@@ -67,6 +67,20 @@ describe("semerDemo", () => {
     const [codjo] = await db.select().from(patients).where(eq(patients.prenom, "Codjo"));
     const places = await db.select().from(rendezVous).where(and(eq(rendezVous.patientId, codjo!.id), isNotNull(rendezVous.creneauId)));
     expect(places).toEqual([expect.objectContaining({ motif: "tension", datePrevue: "2026-10-01", source: "programme" })]);
+  });
+
+  it("prépare le poste soignant et la pharmacie : consultations du jour et ordonnance à délivrer", async () => {
+    await semerDemo(db, { aujourdhui });
+    const plagesDuJour = await db.select().from(creneaux).where(eq(creneaux.date, aujourdhui));
+    const prises = await db.select().from(rendezVous).where(and(eq(rendezVous.datePrevue, aujourdhui), isNotNull(rendezVous.creneauId)));
+    expect(plagesDuJour.length).toBeGreaterThan(0);
+    expect(prises.length).toBeGreaterThan(plagesDuJour.length);
+    const vusAujourdhui = (await db.select().from(evenements).where(eq(evenements.type, "consultation"))).filter(
+      (e) => e.survenuLe.toISOString().slice(0, 10) === aujourdhui,
+    );
+    expect(vusAujourdhui.length).toBeGreaterThan(0);
+    const [aDelivrer] = await db.select().from(ordonnances).where(eq(ordonnances.codeRetrait, "M4R2TN"));
+    expect(aDelivrer?.lignes).toEqual([expect.objectContaining({ medicament: "Paracétamol 500 mg", dureeJours: 5 })]);
   });
 
   it("peut être relancée sans erreur et donne le même résultat", async () => {

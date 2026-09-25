@@ -1,5 +1,5 @@
 import { randomUUID } from "node:crypto";
-import { asc, sql } from "drizzle-orm";
+import { asc, eq, sql } from "drizzle-orm";
 import { planifier } from "@/domain/calendrier";
 import { ajouterJours, depuisDateISO, joursEntre, type DateISO } from "@/domain/dates";
 import { PROGRAMMES, type CodeProgramme, type MotifRdv } from "@/domain/programmes";
@@ -72,6 +72,7 @@ export async function semerDemo(db: Db, { aujourdhui }: { aujourdhui: DateISO })
 
   const codesUtilises = new Set<string>();
   codesUtilises.add("K7P4QX");
+  codesUtilises.add("M4R2TN");
   const codeUnique = () => {
     let code = "";
     do code = Array.from({ length: 6 }, () => h.parmi([...ALPHABET_CODE])).join("");
@@ -308,6 +309,14 @@ export async function semerDemo(db: Db, { aujourdhui }: { aujourdhui: DateISO })
     nbEvenements++;
   }
 
+  // --- Ordonnance à délivrer : pour la démonstration de la pharmacie ---
+  await db.insert(t.ordonnances).values({
+    patientId: idsPersonnages.mariam!,
+    prescripteurId: firmin.id,
+    codeRetrait: "M4R2TN",
+    lignes: [{ medicament: "Paracétamol 500 mg", matin: 1, midi: 1, soir: 1, dureeJours: 5, indication: "la fièvre", conseil: "après le repas" }],
+  });
+
   // --- Plages de rendez-vous et places des 3 prochaines semaines ---
   const modeles: { motif: MotifRdv; jours: number[]; moment: "matin" | "apres_midi"; capacite: number }[] = [
     { motif: "consultation", jours: [1, 2, 3, 4, 5], moment: "matin", capacite: 10 },
@@ -373,6 +382,38 @@ export async function semerDemo(db: Db, { aujourdhui }: { aujourdhui: DateISO })
       maintenant: depuisDateISO(ajouterJours(aujourdhui, -3)),
     });
     if (!resultat.ok) throw new Error(`Réservation de démo impossible (${cle}) : ${resultat.erreur}`);
+  }
+
+  // --- Consultations d'aujourd'hui : places prises, et une partie des personnes déjà vues ---
+  const plagesDuJour = await db.select().from(t.creneaux).where(eq(t.creneaux.date, aujourdhui)).orderBy(asc(t.creneaux.moment));
+  const venues = plagesDuJour.flatMap((creneau) =>
+    Array.from({ length: h.entier(Math.ceil(creneau.capacite / 2), creneau.capacite - 1) }, () => ({
+      patientId: h.parmi(idsPopulation),
+      motif: creneau.motif,
+      datePrevue: aujourdhui,
+      moment: creneau.moment,
+      creneauId: creneau.id,
+      etablissementId: cs!.id,
+      source: "patient" as const,
+      reserveLe: depuisDateISO(ajouterJours(aujourdhui, -h.entier(1, 10))),
+    })),
+  );
+  if (venues.length) await db.insert(t.rendezVous).values(venues);
+  nbRendezVous += venues.length;
+  for (const [i, venue] of venues.entries()) {
+    if (venue.moment !== "matin" || !h.chance(0.5)) continue;
+    await db.insert(t.evenements).values({
+      id: randomUUID(),
+      patientId: venue.patientId,
+      type: "consultation",
+      auteurId: venue.motif === "grossesse" ? adjoa.id : firmin.id,
+      survenuLe: new Date(depuisDateISO(aujourdhui).getTime() + (7 * 60 + i * 12) * 60_000),
+      donnees: {
+        motif: venue.motif,
+        mesures: venue.motif === "tension" ? { tensionSys: h.entier(125, 175), tensionDia: h.entier(80, 105) } : {},
+      },
+    });
+    nbEvenements++;
   }
 
   // --- Contenus de base (texte français ; l'audio arrive au plan 6) ---
