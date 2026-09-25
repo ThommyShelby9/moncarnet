@@ -28,4 +28,10 @@ describe("Icone", () => {
       expect(NOMS_ICONES).toContain(nom);
     }
   });
+
+  it("connaît les pictogrammes des signes de danger et du rendez-vous", () => {
+    for (const nom of ["hi-blood-drop", "hi-headache", "hi-foot", "hi-fetus", "hi-lungs", "hi-vomiting", "hi-diarrhea", "ph-drop", "ph-question", "ph-hourglass-medium", "ph-map-pin", "ph-arrow-counter-clockwise", "ph-check"]) {
+      expect(NOMS_ICONES).toContain(nom);
+    }
+  });
 });
