@@ -47,4 +47,13 @@ describe("evenementSchema", () => {
   it("refuse un type inconnu", () => {
     expect(evenementSchema.safeParse({ type: "inconnu", donnees: {} }).success).toBe(false);
   });
+
+  it("accepte une visite à domicile et une inscription faite par le relais", () => {
+    const foyerId = "0b8f5c1e-3f8a-4b3a-9a57-6f1f2c3d4e5f";
+    expect(evenementSchema.safeParse({ type: "visite_domicile", donnees: { constat: "a_orienter", noteVocale: true } }).success).toBe(true);
+    expect(evenementSchema.safeParse({ type: "visite_domicile", donnees: { constat: "peut-etre" } }).success).toBe(false);
+    const inscription = { foyerId, prenom: "Yao", nom: "Dossou", sexe: "M", dateNaissance: "2026-09-20", programme: { code: "vaccination", dateReference: "2026-09-20" } };
+    expect(evenementSchema.safeParse({ type: "inscription", donnees: inscription }).success).toBe(true);
+    expect(evenementSchema.safeParse({ type: "inscription", donnees: { ...inscription, prenom: " " } }).success).toBe(false);
+  });
 });
