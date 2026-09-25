@@ -7,8 +7,10 @@ import { Icone } from "./Icone";
 export function PileDeCartes({ titre, children }: { titre: string; children: ReactNode }) {
   const cartes = Children.toArray(children);
   const liste = useRef<HTMLOListElement>(null);
-  const [index, setIndex] = useState(0);
+  const [position, setIndex] = useState(0);
   const total = cartes.length;
+  // La pile peut raccourcir après « C'est fait » : on reste sur la dernière carte plutôt que d'afficher « 3 sur 2 ».
+  const index = Math.min(position, Math.max(total - 1, 0));
 
   function aller(cible: number) {
     const i = Math.min(Math.max(cible, 0), total - 1);

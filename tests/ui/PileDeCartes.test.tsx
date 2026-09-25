@@ -30,6 +30,25 @@ describe("PileDeCartes", () => {
     expect((screen.getByRole("button", { name: "Carte suivante" }) as HTMLButtonElement).disabled).toBe(true);
   });
 
+  it("reste dans la pile quand elle raccourcit (carte faite retirée)", () => {
+    const { rerender } = render(
+      <PileDeCartes titre="À faire">
+        <p>Vaccin</p>
+        <p>Contrôle</p>
+        <p>Comprimé</p>
+      </PileDeCartes>,
+    );
+    fireEvent.click(screen.getByRole("button", { name: "Carte suivante" }));
+    fireEvent.click(screen.getByRole("button", { name: "Carte suivante" }));
+    rerender(
+      <PileDeCartes titre="À faire">
+        <p>Vaccin</p>
+        <p>Contrôle</p>
+      </PileDeCartes>,
+    );
+    expect(screen.getByText("2 sur 2")).toBeTruthy();
+  });
+
   it("n'affiche pas de flèches pour une seule carte", () => {
     render(
       <PileDeCartes titre="À faire">
