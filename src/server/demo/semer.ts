@@ -1,7 +1,7 @@
 import { randomUUID } from "node:crypto";
 import { asc, eq, sql } from "drizzle-orm";
 import { planifier } from "@/domain/calendrier";
-import { ajouterJours, depuisDateISO, joursEntre, type DateISO } from "@/domain/dates";
+import { ageEnAnnees, ajouterJours, depuisDateISO, joursEntre, type DateISO } from "@/domain/dates";
 import { PROGRAMMES, type CodeProgramme, type MotifRdv } from "@/domain/programmes";
 import { hacher } from "../auth/mots-de-passe";
 import type { Db } from "../db/client";
@@ -189,7 +189,7 @@ export async function semerDemo(db: Db, { aujourdhui }: { aujourdhui: DateISO })
 
   // --- Patients, contacts, consentements, inscriptions, rendez-vous, historique ---
   const idsPersonnages: Record<string, string> = {};
-  const idsPopulation: string[] = [];
+  const patientsPopulation: { id: string; programme: CodeProgramme | null; age: number }[] = [];
   let nbRendezVous = 0;
   let nbEvenements = 0;
 
@@ -211,7 +211,7 @@ export async function semerDemo(db: Db, { aujourdhui }: { aujourdhui: DateISO })
       })
       .returning();
     if (personne.cle) idsPersonnages[personne.cle] = patient!.id;
-    else idsPopulation.push(patient!.id);
+    else patientsPopulation.push({ id: patient!.id, programme: personne.programmes[0]?.code ?? null, age: ageEnAnnees(personne.dateNaissance, aujourdhui) });
 
     if (personne.telephone) {
       await db.insert(t.contacts).values({ patientId: patient!.id, telephone: personne.telephone, role: "principal", proprietaire: personne.proprietaireTelephone ?? "soi" });
@@ -341,6 +341,13 @@ export async function semerDemo(db: Db, { aujourdhui }: { aujourdhui: DateISO })
 
   // --- Places déjà prises : la première matinée de consultation et le premier contrôle de tension sont complets
   //     (liste d'attente) ; la séance de vaccination de mercredi garde 3 places (scénario de démo) ---
+  // Les places vont à des personnes dont le suivi correspond au motif : pas de femme de 67 ans en consultation de grossesse.
+  const PROGRAMME_DU_MOTIF: Partial<Record<MotifRdv, CodeProgramme>> = { grossesse: "grossesse", vaccin: "vaccination", tension: "hypertension", diabete: "diabete" };
+  const candidatsPour = (motif: MotifRdv) => {
+    const programme = PROGRAMME_DU_MOTIF[motif];
+    const liste = programme ? patientsPopulation.filter((p) => p.programme === programme) : patientsPopulation.filter((p) => p.age >= 1);
+    return liste.length ? liste : patientsPopulation;
+  };
   const aVenir = (await db.select().from(t.creneaux).orderBy(asc(t.creneaux.date), asc(t.creneaux.moment))).filter((c) => c.date > aujourdhui);
   const premier = (motif: MotifRdv, moment?: "matin" | "apres_midi") => aVenir.find((c) => c.motif === motif && (!moment || c.moment === moment))!;
   const consultationComplete = premier("consultation", "matin");
@@ -354,7 +361,7 @@ export async function semerDemo(db: Db, { aujourdhui }: { aujourdhui: DateISO })
           ? creneau.capacite - 3
           : h.entier(0, Math.floor(creneau.capacite / 2));
     return Array.from({ length: nombre }, () => ({
-      patientId: h.parmi(idsPopulation),
+      patientId: h.parmi(candidatsPour(creneau.motif)).id,
       motif: creneau.motif,
       datePrevue: creneau.date,
       moment: creneau.moment,
@@ -386,18 +393,26 @@ export async function semerDemo(db: Db, { aujourdhui }: { aujourdhui: DateISO })
 
   // --- Consultations d'aujourd'hui : places prises, et une partie des personnes déjà vues ---
   const plagesDuJour = await db.select().from(t.creneaux).where(eq(t.creneaux.date, aujourdhui)).orderBy(asc(t.creneaux.moment));
-  const venues = plagesDuJour.flatMap((creneau) =>
-    Array.from({ length: h.entier(Math.ceil(creneau.capacite / 2), creneau.capacite - 1) }, () => ({
-      patientId: h.parmi(idsPopulation),
-      motif: creneau.motif,
-      datePrevue: aujourdhui,
-      moment: creneau.moment,
-      creneauId: creneau.id,
-      etablissementId: cs!.id,
-      source: "patient" as const,
-      reserveLe: depuisDateISO(ajouterJours(aujourdhui, -h.entier(1, 10))),
-    })),
-  );
+  // Une personne ne vient qu'une fois dans la journée.
+  const venusAujourdhui = new Set<string>();
+  const venues = plagesDuJour.flatMap((creneau) => {
+    const libres = candidatsPour(creneau.motif).filter((p) => !venusAujourdhui.has(p.id));
+    const nombre = Math.min(h.entier(Math.ceil(creneau.capacite / 2), creneau.capacite - 1), libres.length);
+    return Array.from({ length: nombre }, () => {
+      const choisi = h.parmi(libres.filter((p) => !venusAujourdhui.has(p.id)));
+      venusAujourdhui.add(choisi.id);
+      return {
+        patientId: choisi.id,
+        motif: creneau.motif,
+        datePrevue: aujourdhui,
+        moment: creneau.moment,
+        creneauId: creneau.id,
+        etablissementId: cs!.id,
+        source: "patient" as const,
+        reserveLe: depuisDateISO(ajouterJours(aujourdhui, -h.entier(1, 10))),
+      };
+    });
+  });
   if (venues.length) await db.insert(t.rendezVous).values(venues);
   nbRendezVous += venues.length;
   for (const [i, venue] of venues.entries()) {
