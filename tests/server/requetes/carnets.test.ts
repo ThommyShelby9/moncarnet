@@ -3,7 +3,7 @@ import { afterAll, beforeAll, describe, expect, it } from "vitest";
 import type { Db } from "@/server/db/client";
 import { comptes } from "@/server/db/schema";
 import { semerDemo } from "@/server/demo/semer";
-import { carnetsDuCompte } from "@/server/requetes/carnets";
+import { carnetsDuCompte, choisirCarnet, etablissementDuPatient, type Carnet } from "@/server/requetes/carnets";
 import { creerDbDeTest } from "../../aides/base-de-test";
 
 let db: Db;
@@ -27,5 +27,34 @@ describe("carnetsDuCompte", () => {
   it("ne renvoie rien pour un compte sans carnet", async () => {
     const [firmin] = await db.select().from(comptes).where(eq(comptes.identifiant, "firmin.akpovi"));
     expect(await carnetsDuCompte(db, firmin!.id, "2026-09-25")).toEqual([]);
+  });
+});
+
+describe("programmes et établissement du carnet", () => {
+  it("indique les programmes suivis et le centre de rattachement", async () => {
+    const [codjo] = await db.select().from(comptes).where(eq(comptes.identifiant, "+2290197000001"));
+    const carnets = await carnetsDuCompte(db, codjo!.id, "2026-09-25");
+    expect(carnets.map((c) => c.programmes)).toEqual([["hypertension"], ["consultation"], ["vaccination"]]);
+    expect(await etablissementDuPatient(db, carnets[0]!.patientId)).toEqual({ nom: "Centre de santé de Bohicon", telephone: "+2290121000000" });
+  });
+});
+
+describe("choisirCarnet", () => {
+  const carnets = [
+    { patientId: "a", lien: "conjoint" },
+    { patientId: "b", lien: "soi" },
+  ] as Carnet[];
+
+  it("prend le carnet demandé s'il est dans la famille", () => {
+    expect(choisirCarnet(carnets, "a")?.patientId).toBe("a");
+  });
+
+  it("revient au carnet du titulaire pour un carnet inconnu", () => {
+    expect(choisirCarnet(carnets, "zzz")?.patientId).toBe("b");
+    expect(choisirCarnet(carnets, undefined)?.patientId).toBe("b");
+  });
+
+  it("ne renvoie rien sans carnet", () => {
+    expect(choisirCarnet([], undefined)).toBeNull();
   });
 });

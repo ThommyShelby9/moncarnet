@@ -1,4 +1,7 @@
-import type { RoleCompte } from "./db/schema";
+import { and, eq } from "drizzle-orm";
+import { estUuid } from "@/domain/identifiants";
+import type { Db } from "./db/client";
+import { responsables, type LienResponsable, type RoleCompte } from "./db/schema";
 
 const ACCUEILS: Record<RoleCompte, string> = {
   patient: "/",
@@ -11,4 +14,15 @@ const ACCUEILS: Record<RoleCompte, string> = {
 
 export function accueilDuRole(role: RoleCompte): string {
   return ACCUEILS[role];
+}
+
+/** Lien du compte avec la personne (« soi », « conjoint »…), ou null s'il ne gère pas son carnet. */
+export async function lienAvecPatient(db: Db, compteId: string, patientId: string): Promise<LienResponsable | null> {
+  if (!estUuid(patientId)) return null;
+  const [ligne] = await db
+    .select({ lien: responsables.lien })
+    .from(responsables)
+    .where(and(eq(responsables.compteId, compteId), eq(responsables.patientId, patientId)))
+    .limit(1);
+  return ligne?.lien ?? null;
 }

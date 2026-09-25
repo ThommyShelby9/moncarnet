@@ -14,6 +14,7 @@ import {
 } from "drizzle-orm/pg-core";
 // Imports relatifs uniquement : drizzle-kit ne résout pas l'alias « @/ ».
 import { CODES_PROGRAMMES, MOTIFS_RDV } from "../../domain/programmes/types";
+import type { LigneTraitement } from "../../domain/traitements";
 
 export const ROLES_COMPTE = ["patient", "relais", "soignant", "pharmacie", "pilotage", "admin"] as const;
 export type RoleCompte = (typeof ROLES_COMPTE)[number];
@@ -37,6 +38,7 @@ export const codeProgramme = pgEnum("code_programme", CODES_PROGRAMMES);
 export const motifRdv = pgEnum("motif_rdv", MOTIFS_RDV);
 export const moment = pgEnum("moment", ["matin", "apres_midi"]);
 export const sourceRdv = pgEnum("source_rdv", ["programme", "patient", "relais", "soignant"]);
+export const statutAttente = pgEnum("statut_attente", ["en_attente", "proposee", "acceptee", "expiree", "annulee"]);
 
 const horodatage = (nom: string) => timestamp(nom, { withTimezone: true });
 const creeLe = () => horodatage("cree_le").defaultNow().notNull();
@@ -208,7 +210,8 @@ export const evenements = pgTable("evenements", {
   donnees: jsonb("donnees").$type<Record<string, unknown>>().notNull(),
 });
 
-export type LigneOrdonnance = { medicament: string; matin: number; midi: number; soir: number; dureeJours: number };
+/** Ligne d'ordonnance : médicament, nombre de prises par moment, durée, et en mots simples pourquoi et comment. */
+export type LigneOrdonnance = LigneTraitement;
 
 export const ordonnances = pgTable("ordonnances", {
   id: uuid("id").primaryKey().defaultRandom(),
@@ -219,6 +222,41 @@ export const ordonnances = pgTable("ordonnances", {
   lignes: jsonb("lignes").$type<LigneOrdonnance[]>().notNull(),
   codeRetrait: text("code_retrait").notNull().unique(),
   emiseLe: horodatage("emise_le").defaultNow().notNull(),
+});
+
+export const listeAttente = pgTable("liste_attente", {
+  id: uuid("id").primaryKey().defaultRandom(),
+  patientId: uuid("patient_id")
+    .notNull()
+    .references(() => patients.id, { onDelete: "cascade" }),
+  etablissementId: uuid("etablissement_id").notNull().references(() => etablissements.id),
+  motif: motifRdv("motif").notNull(),
+  dateSouhaitee: date("date_souhaitee", { mode: "string" }).notNull(),
+  moment: moment("moment").notNull(),
+  statut: statutAttente("statut").notNull().default("en_attente"),
+  creeLe: creeLe(),
+  proposeLe: horodatage("propose_le"),
+  expireLe: horodatage("expire_le"),
+});
+
+/** Alerte née d'un signalement de danger : le centre a 15 minutes pour la prendre en charge. */
+export const alertes = pgTable("alertes", {
+  id: uuid("id").primaryKey().defaultRandom(),
+  patientId: uuid("patient_id")
+    .notNull()
+    .references(() => patients.id, { onDelete: "cascade" }),
+  /** Un signalement ne crée qu'une alerte, même s'il arrive deux fois. */
+  evenementId: uuid("evenement_id")
+    .notNull()
+    .unique()
+    .references(() => evenements.id, { onDelete: "cascade" }),
+  etablissementId: uuid("etablissement_id").notNull().references(() => etablissements.id),
+  creeeLe: horodatage("creee_le").defaultNow().notNull(),
+  echeance: horodatage("echeance").notNull(),
+  priseEnChargePar: uuid("prise_en_charge_par").references(() => comptes.id),
+  priseEnChargeLe: horodatage("prise_en_charge_le"),
+  remonteeLe: horodatage("remontee_le"),
+  annuleeLe: horodatage("annulee_le"),
 });
 
 export const contenus = pgTable("contenus", {

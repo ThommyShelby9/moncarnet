@@ -8,6 +8,13 @@
       "when": 1790354633830,
       "tag": "0000_socle",
       "breakpoints": true
+    },
+    {
+      "idx": 1,
+      "version": "7",
+      "when": 1790362848990,
+      "tag": "0001_espace_patient",
+      "breakpoints": true
     }
   ]
 }
