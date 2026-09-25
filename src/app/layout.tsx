@@ -1,6 +1,7 @@
 import type { Metadata, Viewport } from "next";
 import localFont from "next/font/local";
 import { env } from "@/config/env";
+import { EnregistrementServiceWorker } from "@/ui/EnregistrementServiceWorker";
 import "./globals.css";
 
 const fira = localFont({
@@ -27,7 +28,10 @@ export const viewport: Viewport = {
 export default function RacineLayout({ children }: { children: React.ReactNode }) {
   return (
     <html lang="fr" className={fira.variable}>
-      <body className="min-h-dvh">{children}</body>
+      <body className="min-h-dvh">
+        {children}
+        <EnregistrementServiceWorker />
+      </body>
     </html>
   );
 }

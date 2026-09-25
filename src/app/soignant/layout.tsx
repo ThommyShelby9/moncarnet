@@ -1,8 +1,7 @@
-import { seDeconnecter } from "@/app/actions-session";
 import { env } from "@/config/env";
 import { db } from "@/server/db/client";
 import { nomEtablissement } from "@/server/requetes/soignant";
-import { Icone } from "@/ui/Icone";
+import { BoutonDeconnexion } from "@/ui/BoutonDeconnexion";
 import { Logo } from "@/ui/Logo";
 import { MenuLateral } from "@/ui/MenuLateral";
 import { exigerSoignant } from "./contexte";
@@ -37,11 +36,7 @@ export default async function EspaceSoignantLayout({ children }: { children: Rea
         <div className="flex items-center gap-2.5 rounded-2xl bg-lavande p-2.5 md:mt-auto">
           <span className="grid size-9 shrink-0 place-items-center rounded-xl bg-marque text-xs font-bold text-white">{initiales(soignant.nomAffiche)}</span>
           <b className="min-w-0 flex-1 truncate text-sm">{soignant.nomAffiche}</b>
-          <form action={seDeconnecter}>
-            <button aria-label="Se déconnecter" title="Se déconnecter" className="grid size-9 place-items-center rounded-xl text-marque">
-              <Icone nom="ph-sign-out" className="size-5" />
-            </button>
-          </form>
+          <BoutonDeconnexion compact className="grid size-9 place-items-center rounded-xl text-marque" />
         </div>
       </aside>
       <main className="flex min-w-0 flex-col gap-5 p-4 md:p-7">{children}</main>

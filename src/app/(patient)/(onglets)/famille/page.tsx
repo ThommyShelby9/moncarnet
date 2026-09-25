@@ -1,6 +1,6 @@
 import Link from "next/link";
-import { seDeconnecter } from "@/app/actions-session";
 import { iconePourPersonne, libelleLien } from "@/ui/avatar";
+import { BoutonDeconnexion } from "@/ui/BoutonDeconnexion";
 import { Icone } from "@/ui/Icone";
 import { contextePatient } from "../../contexte";
 
@@ -30,12 +30,10 @@ export default async function Famille() {
           </li>
         ))}
       </ul>
-      <form action={seDeconnecter} className="mt-auto">
-        <button className="flex w-full items-center justify-center gap-2 rounded-bouton bg-white py-3.5 font-bold text-marque">
-          <Icone nom="ph-sign-out" className="size-5" />
-          Se déconnecter
-        </button>
-      </form>
+      <BoutonDeconnexion
+        conteneur="mt-auto flex flex-col gap-2"
+        className="flex w-full items-center justify-center gap-2 rounded-bouton bg-white py-3.5 font-bold text-marque"
+      />
       <p className="text-center text-xs text-gris">Compte : {compte.nomAffiche}</p>
     </>
   );
