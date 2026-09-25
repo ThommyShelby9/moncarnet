@@ -35,7 +35,7 @@ describe("alertesOuvertes", () => {
       maintenant: new Date("2026-09-25T08:41:00Z"),
     });
     const [alerte] = await alertesOuvertes(db, centre, aujourdhui);
-    expect(alerte).toMatchObject({ prenom: "Awa", semainesGrossesse: 32, telephone: "+2290197000002", signes: ["saignement"] });
+    expect(alerte).toMatchObject({ prenom: "Awa", semainesGrossesse: 37, telephone: "+2290197000002", signes: ["saignement"] });
     expect(alerte?.echeance.toISOString()).toBe("2026-09-25T08:56:00.000Z");
     expect(await alertesOuvertes(db, autreCentre, aujourdhui)).toEqual([]);
   });

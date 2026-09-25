@@ -2,7 +2,7 @@ import { and, asc, eq, gt, isNotNull, isNull } from "drizzle-orm";
 import { afterEach, beforeEach, describe, expect, it } from "vitest";
 import { verifierIdentifiants } from "@/server/auth/connexion";
 import type { Db } from "@/server/db/client";
-import { comptes, creneaux, evenements, foyers, ordonnances, patients, rendezVous, responsables } from "@/server/db/schema";
+import { comptes, creneaux, evenements, foyers, inscriptions, ordonnances, patients, rendezVous, responsables } from "@/server/db/schema";
 import { COMPTES_DEMO } from "@/server/demo/donnees";
 import { semerDemo } from "@/server/demo/semer";
 import { creerDbDeTest } from "../../aides/base-de-test";
@@ -98,5 +98,18 @@ describe("semerDemo", () => {
     expect(suivis.every((f) => ["Sèhoun", "Kinta", "Adingnigon"].includes(f.village))).toBe(true);
     const visites = await db.select().from(evenements).where(eq(evenements.type, "visite_domicile"));
     expect(visites).toEqual([expect.objectContaining({ auteurId: koffi!.id, donnees: { constat: "tout_va_bien", noteVocale: false } })]);
+  });
+
+  it("met Awa à 37 semaines, consultations faites et naissance en préparation", async () => {
+    await semerDemo(db, { aujourdhui });
+    const [awa] = await db.select().from(patients).where(eq(patients.prenom, "Awa"));
+    const [grossesse] = await db.select().from(inscriptions).where(and(eq(inscriptions.patientId, awa!.id), eq(inscriptions.programme, "grossesse")));
+    expect(grossesse?.dateReference).toBe("2026-01-07");
+    const consultations = await db.select().from(evenements).where(and(eq(evenements.patientId, awa!.id), eq(evenements.type, "consultation")));
+    expect(consultations.map((c) => c.donnees.etape).sort()).toEqual(["cpn1", "cpn2", "cpn3", "cpn4"]);
+    const [plan] = await db.select().from(evenements).where(and(eq(evenements.patientId, awa!.id), eq(evenements.type, "plan_naissance")));
+    expect(plan?.donnees).toEqual({ elements: ["lieu", "accompagnant", "sac"] });
+    const reserves = await db.select().from(rendezVous).where(and(eq(rendezVous.patientId, awa!.id), isNotNull(rendezVous.creneauId)));
+    expect(reserves).toEqual([]);
   });
 });

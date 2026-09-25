@@ -137,7 +137,7 @@ export async function semerDemo(db: Db, { aujourdhui }: { aujourdhui: DateISO })
     { cle: "sena", prenom: "Sèna", nom: "Houngbo", sexe: "M", dateNaissance: naissanceSena, foyerId: fHoungbo.id, canalPrefere: "whatsapp", telephone: "+2290197000001", proprietaireTelephone: "proche",
       programmes: [{ code: "vaccination", dateReference: naissanceSena, dateInscription: naissanceSena }] },
     { cle: "awa", prenom: "Awa", nom: "Hounkpatin", sexe: "F", dateNaissance: "2002-04-18", foyerId: fHounkpatin.id, canalPrefere: "whatsapp", telephone: "+2290197000002", proprietaireTelephone: "soi",
-      programmes: [{ code: "grossesse", dateReference: ajouterJours(aujourdhui, -32 * 7), dateInscription: ajouterJours(aujourdhui, -24 * 7) }] },
+      programmes: [{ code: "grossesse", dateReference: ajouterJours(aujourdhui, -(37 * 7 + 2)), dateInscription: ajouterJours(aujourdhui, -(37 * 7 + 2) + 10 * 7) }] },
     { cle: "afiavi", prenom: "Afiavi", nom: "Dossou", sexe: "F", dateNaissance: "1995-01-09", foyerId: fDossou.id, canalPrefere: "sms", telephone: "+2290197000003", proprietaireTelephone: "soi",
       programmes: [{ code: "grossesse", dateReference: ajouterJours(aujourdhui, -29 * 7), dateInscription: ajouterJours(aujourdhui, -19 * 7) }] },
     { cle: "rachida", prenom: "Rachida", nom: "Salifou", sexe: "F", dateNaissance: "1955-02-14", foyerId: fSalifou.id, canalPrefere: "vocal", malvoyant: true, telephone: "+2290197000004", proprietaireTelephone: "proche",
@@ -280,6 +280,17 @@ export async function semerDemo(db: Db, { aujourdhui }: { aujourdhui: DateISO })
   });
   nbEvenements++;
 
+  // --- Awa prépare la naissance : 3 choses sur 6 ---
+  await db.insert(t.evenements).values({
+    id: randomUUID(),
+    patientId: idsPersonnages.awa!,
+    type: "plan_naissance",
+    auteurId: compte("+2290197000002").id,
+    survenuLe: depuisDateISO(ajouterJours(aujourdhui, -2)),
+    donnees: { elements: ["lieu", "accompagnant", "sac"] },
+  });
+  nbEvenements++;
+
   // --- Carnets familiaux ---
   await db.insert(t.responsables).values([
     { compteId: compte("+2290197000001").id, patientId: idsPersonnages.codjo!, lien: "soi" },
@@ -390,7 +401,6 @@ export async function semerDemo(db: Db, { aujourdhui }: { aujourdhui: DateISO })
   // --- Rendez-vous déjà réservés : le contrôle de Codjo et la consultation prénatale d'Awa ---
   for (const [identifiant, cle, motif] of [
     ["+2290197000001", "codjo", "tension"],
-    ["+2290197000002", "awa", "grossesse"],
   ] as const) {
     const creneau = aVenir.find((c) => c.motif === motif && c !== tensionComplete)!;
     const resultat = await reserver(db, {

@@ -6,12 +6,38 @@ export interface CompteDemo {
   role: RoleCompte;
   nomAffiche: string;
   description: string;
+  /** Les étapes à montrer au jury, dans l'ordre. */
+  parcours?: string[];
 }
 
 /** Comptes fictifs. Codes et mots de passe publics : réservés à la démonstration. */
 export const COMPTES_DEMO: CompteDemo[] = [
-  { identifiant: "+2290197000001", secret: "1234", role: "patient", nomAffiche: "Codjo Houngbo", description: "58 ans, suit sa tension, gère les carnets de sa femme et de son petit-fils" },
-  { identifiant: "+2290197000002", secret: "1234", role: "patient", nomAffiche: "Awa Hounkpatin", description: "Enceinte de 32 semaines" },
+  {
+    identifiant: "+2290197000002",
+    secret: "1234",
+    role: "patient",
+    nomAffiche: "Awa Hounkpatin",
+    description: "Enceinte de 37 semaines, jusqu'à la naissance de son bébé",
+    parcours: [
+      "« Ma grossesse » : la semaine, la taille du bébé, les consultations tamponnées",
+      "Préparer la naissance : cocher ce qui est prêt",
+      "« J'ai un problème » → « Le travail a commencé » : l'alerte part au centre",
+      "Adjoa déclare la naissance : le carnet du bébé apparaît dans « Famille »",
+    ],
+  },
+  {
+    identifiant: "+2290197000001",
+    secret: "1234",
+    role: "patient",
+    nomAffiche: "Codjo Houngbo",
+    description: "Patient au quotidien : sa tension, ses médicaments, ses rendez-vous, les carnets de sa famille",
+    parcours: [
+      "Accueil : « Ce soir, 1 comprimé », l'écouter, « C'est fait »",
+      "Prendre rendez-vous en 4 étapes pour son petit-fils Sèna",
+      "Mon carnet : sa courbe de tension et ses médicaments",
+      "Firmin le reçoit : tension, risque, ordonnance ; la pharmacie la délivre",
+    ],
+  },
   { identifiant: "+2290197000004", secret: "1234", role: "patient", nomAffiche: "Aïcha Salifou", description: "S'occupe de sa mère Rachida, 71 ans, malvoyante et diabétique" },
   { identifiant: "koffi.agbessi", secret: "demo1234", role: "relais", nomAffiche: "Koffi Agbessi", description: "Relais communautaire de Sèhoun" },
   { identifiant: "adjoa.gbaguidi", secret: "demo1234", role: "soignant", nomAffiche: "Adjoa Gbaguidi", description: "Sage-femme, centre de santé de Bohicon" },

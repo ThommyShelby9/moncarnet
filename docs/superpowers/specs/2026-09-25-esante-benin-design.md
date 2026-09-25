@@ -60,7 +60,7 @@ Toutes les personnes et données sont **fictives**. La démo se passe à **Bohic
 | Personnage | Profil | Ce que la plateforme lui apporte |
 |---|---|---|
 | **Codjo Houngbo**, 58 ans | Hypertension. Smartphone, lit un peu, parle fon. Gère sur son téléphone les carnets de sa femme **Mariam Houngbo** (54 ans) et de leur petit-fils **Sèna** (8 mois) | Rappel de prise de médicament, rendez-vous de contrôle, vaccins de Sèna, tout à écouter en fon |
-| **Awa Hounkpatin**, 24 ans | Enceinte de 32 semaines, Cotonou puis Bohicon. Smartphone, WhatsApp | Suivi de grossesse, bouton « J'ai un problème » |
+| **Awa Hounkpatin**, 24 ans | Enceinte de 37 semaines, Cotonou puis Bohicon. Smartphone, WhatsApp. **Premier parcours de la démo, jusqu'à la naissance** | « Ma grossesse » semaine par semaine, préparer la naissance, « Le travail a commencé », carnet du bébé après la naissance |
 | **Afiavi Dossou**, 31 ans | Enceinte de 29 semaines, village de Sèhoun, a manqué sa 2ᵉ consultation. **Téléphone basique**, ne lit pas | Rappels par SMS et appel vocal, suivie par le relais |
 | **Rachida Salifou**, 71 ans | Diabète, **malvoyante**. Vit avec sa fille, qui l'aide | Lecteur d'écran, voix, médicaments apportés par le relais |
 | **Koffi Agbessi** | Relais communautaire de Sèhoun. Smartphone, réseau intermittent | Tournée par foyer sans réseau, visites dictées, inscriptions |
@@ -419,7 +419,7 @@ Vrais SMS, appels vocaux et USSD via un fournisseur ; interopérabilité DHIS2 /
 2. Il prend rendez-vous pour **Sèna** en 4 étapes (vaccin, mercredi, 3 places).
 3. Menu démo, « Déclencher les rappels » : le **vrai WhatsApp** d'un membre du jury (inscrit à l'avance) reçoit le rappel. Il touche « Écouter en fon », la note vocale arrive. Il répond « Je viendrai », et le statut change dans la plateforme.
 4. **Koffi**, relais : on coupe le réseau, il coche la visite du foyer Dossou et la raconte au micro, puis on rétablit le réseau et la synchronisation se voit.
-5. **Awa** : « J'ai un problème », saignement. Chez **Adjoa**, l'alerte apparaît avec son compte à rebours, elle la prend en charge.
+5. **Awa** : « Ma grossesse » (semaine 37, préparer la naissance), puis « J'ai un problème » → « Le travail a commencé ». Chez **Adjoa**, l'alerte apparaît avec son compte à rebours ; elle la prend en charge, puis **déclare la naissance** : le carnet du bébé apparaît chez Awa, avec ses vaccins de naissance.
 6. **Firmin** reçoit Codjo : tension 180/110, risque élevé, ordonnance.
 7. **Pharmacie** : code, posologie dessinée, délivrance, le tampon apparaît chez Firmin.
 8. **Pilotage** : indicateurs par commune. Pour finir, `domain/programmes/diabete.ts` : un programme ajouté en un fichier.
