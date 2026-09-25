@@ -14,6 +14,8 @@ export interface Carnet {
   age: number;
   libelleAge: string;
   etablissementId: string;
+  /** Code écrit dans le carnet papier : le soignant retrouve la personne avec. */
+  codeCourt: string;
   /** Programmes de suivi actifs. */
   programmes: CodeProgramme[];
 }
@@ -30,6 +32,7 @@ export async function carnetsDuCompte(db: Db, compteId: string, aujourdhui: Date
       sexe: patients.sexe,
       dateNaissance: patients.dateNaissance,
       etablissementId: patients.etablissementId,
+      codeCourt: patients.codeCourt,
     })
     .from(responsables)
     .innerJoin(patients, eq(responsables.patientId, patients.id))

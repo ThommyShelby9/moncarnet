@@ -35,6 +35,7 @@ describe("programmes et établissement du carnet", () => {
     const [codjo] = await db.select().from(comptes).where(eq(comptes.identifiant, "+2290197000001"));
     const carnets = await carnetsDuCompte(db, codjo!.id, "2026-09-25");
     expect(carnets.map((c) => c.programmes)).toEqual([["hypertension"], ["consultation"], ["vaccination"]]);
+    expect(carnets[0]?.codeCourt).toMatch(/^[A-HJ-NP-Z2-9]{6}$/);
     expect(await etablissementDuPatient(db, carnets[0]!.patientId)).toEqual({ nom: "Centre de santé de Bohicon", telephone: "+2290121000000" });
   });
 });

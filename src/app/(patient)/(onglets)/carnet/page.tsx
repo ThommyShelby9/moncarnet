@@ -3,12 +3,15 @@ import type { TraitementEnCours } from "@/domain/traitements";
 import { db } from "@/server/db/client";
 import { traitementsDes } from "@/server/requetes/accueil";
 import { programmesDuCarnet } from "@/server/requetes/carnet";
+import { ordonnancesDe, type OrdonnanceDetaillee } from "@/server/requetes/ordonnances";
 import { iconePourPersonne } from "@/ui/avatar";
 import { AvatarsFamille } from "@/ui/AvatarsFamille";
 import { BoutonEcouter } from "@/ui/BoutonEcouter";
+import { CodeRetrait } from "@/ui/CodeRetrait";
 import { Icone } from "@/ui/Icone";
 import { Ondes } from "@/ui/Ondes";
 import { ICONE_MOMENT } from "@/ui/pictogrammes";
+import { Posologie } from "@/ui/Posologie";
 import { contextePatient } from "../../contexte";
 import { SectionProgramme } from "./Frise";
 
@@ -16,10 +19,12 @@ export default async function MonCarnet({ searchParams }: PageProps<"/carnet">) 
   const params = await searchParams;
   const { aujourdhui, carnets, carnet } = await contextePatient(params.pour);
   if (!carnet) return <p className="rounded-carte bg-white p-4">Aucun carnet pour ce compte.</p>;
-  const [programmes, traitements] = await Promise.all([
+  const [programmes, traitements, lesOrdonnances] = await Promise.all([
     programmesDuCarnet(db(), carnet.patientId, aujourdhui),
     traitementsDes(db(), [carnet.patientId], aujourdhui),
+    ordonnancesDe(db(), carnet.patientId),
   ]);
+  const aRetirer = lesOrdonnances.filter((o) => !o.delivrance);
   const suivis = programmes.filter((p) => p.etapes.length > 0);
   const sousTitre = suivis.length ? suivis.map((p) => p.nom).join(" · ") : "Carnet de santé";
   const faites = suivis.flatMap((p) => p.etapes).filter((e) => e.statut === "faite").length;
@@ -41,6 +46,7 @@ export default async function MonCarnet({ searchParams }: PageProps<"/carnet">) 
               {carnet.prenom}, {carnet.libelleAge}
             </h1>
             <p className="text-sm text-lavande-3">{sousTitre}</p>
+            <p className="text-xs text-lavande-3">Code du carnet : {carnet.codeCourt}</p>
           </div>
           <BoutonEcouter variante="rond" libelle="Écouter le carnet" texte={resume} />
         </div>
@@ -48,6 +54,7 @@ export default async function MonCarnet({ searchParams }: PageProps<"/carnet">) 
       {suivis.map((p) => (
         <SectionProgramme key={p.code} programme={p} patientId={carnet.patientId} aujourdhui={aujourdhui} />
       ))}
+      {aRetirer.length > 0 && <ARetirer ordonnances={aRetirer} />}
       {traitements.length > 0 && <Medicaments traitements={traitements} soi={carnet.lien === "soi"} />}
       {suivis.length === 0 && traitements.length === 0 && (
         <p className="rounded-carte bg-white p-4 text-gris">Rien à suivre pour le moment. Les consultations se prennent à la demande.</p>
@@ -87,6 +94,30 @@ function Medicaments({ traitements, soi }: { traitements: TraitementEnCours[]; s
           </li>
         ))}
       </ul>
+    </section>
+  );
+}
+
+function ARetirer({ ordonnances }: { ordonnances: OrdonnanceDetaillee[] }) {
+  return (
+    <section aria-labelledby="a-retirer" className="flex flex-col gap-2.5">
+      <h2 id="a-retirer" className="text-lg font-bold">
+        À retirer à la pharmacie
+      </h2>
+      {ordonnances.map((o) => (
+        <article key={o.id} className="flex flex-col gap-3 rounded-carte bg-white p-3.5">
+          <CodeRetrait code={o.codeRetrait} libelle="Montrez ce code à la pharmacie" />
+          {o.lignes.map((l) => (
+            <div key={l.medicament} className="flex flex-col gap-2">
+              <b>
+                {l.medicament}
+                {l.indication ? <small className="font-normal text-gris"> · pour {l.indication}</small> : null}
+              </b>
+              <Posologie ligne={l} />
+            </div>
+          ))}
+        </article>
+      ))}
     </section>
   );
 }
