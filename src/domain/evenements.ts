@@ -1,5 +1,7 @@
 import { z } from "zod";
 import { MOTIFS_RDV } from "./programmes/types";
+import { CODES_SIGNES } from "./signes-danger";
+import { MOMENTS_PRISE } from "./temps";
 
 export const mesuresSchema = z.object({
   tensionSys: z.number().int().min(50).max(300).optional(),
@@ -31,9 +33,20 @@ export const evenementSchema = z.discriminatedUnion("type", [
     type: z.literal("prise_medicament"),
     donnees: z.object({
       traitement: z.string().min(1),
-      moment: z.enum(["matin", "midi", "soir"]),
-      statut: z.enum(["fait", "plus_tard"]),
+      moment: z.enum(MOMENTS_PRISE),
+      statut: z.enum(["fait", "plus_tard", "annule"]),
     }),
+  }),
+  z.object({
+    type: z.literal("signalement_danger"),
+    donnees: z.object({
+      signes: z.array(z.enum(CODES_SIGNES)).min(1),
+      source: z.enum(["patient", "relais", "proche"]),
+    }),
+  }),
+  z.object({
+    type: z.literal("delivrance"),
+    donnees: z.object({ ordonnanceId: z.uuid() }),
   }),
 ]);
 
