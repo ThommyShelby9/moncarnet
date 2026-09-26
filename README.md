@@ -8,6 +8,7 @@ La plateforme s'appelle **Mon Carnet** ; elle est en ligne sur https://moncarnet
 - Pourquoi ces choix : [docs/recherche/](docs/recherche/) (usages au Bénin, plateformes existantes, design), avec les sources
 - Maquettes validées : [docs/design/maquettes-validees.html](docs/design/maquettes-validees.html)
 - Déploiement : [docs/deploiement.md](docs/deploiement.md)
+- **Dossier de présentation (PDF, 24 pages, avec captures)** : [docs/Mon-Carnet-dossier-de-presentation.pdf](docs/Mon-Carnet-dossier-de-presentation.pdf), la plateforme de bout en bout et sa conformité au challenge
 
 ## Deux parcours à suivre
 
