@@ -35,6 +35,13 @@ Ouvrez https://moncarnet.kheios.com/demo : un clic entre dans un compte.
 - **Courbe de tension** : les derniers relevés, avec la limite 140/90.
 - **J'ai un problème** : les signes de danger en images (ceux de la grossesse pour une femme enceinte). L'alerte part au centre avec 15 minutes pour la prendre en charge. Sans réseau, l'écran dit que l'alerte n'est pas encore partie, donne le numéro du centre, et l'envoi repart seul au retour du réseau, sans doublon.
 
+## Salle d'attente
+
+- **« Je suis arrivé au centre »** : la personne qui a rendez-vous (ou une alerte du jour) prend un numéro de passage depuis son téléphone. Le même numéro revient si elle touche deux fois, et deux arrivées au même instant n'ont jamais le même.
+- Son téléphone suit son tour : « 3 personnes avant vous », puis « C'est bientôt votre tour » (2 personnes ou moins, avec vibration), puis « C'est votre tour : entrez en consultation ».
+- **Chez le soignant** : la salle d'attente du jour, et « Appeler le suivant » en un clic, qui ouvre son dossier. **Une urgence passe toujours devant.**
+- C'est notre réponse aux 90 minutes d'attente relevées pour une consultation prénatale (voir la recherche).
+
 ## Poste soignant et pharmacie
 
 - **Aujourd'hui** : les alertes en haut avec leur compte à rebours de 15 minutes (une alerte en retard est marquée, et remonte à la zone sanitaire) et « Je la prends en charge » (un seul soignant la prend) ; les consultations du jour par plage, avec le risque de chacun et le tampon « VU » pour les personnes déjà vues ; les patients à surveiller. La page se met à jour seule.
@@ -60,6 +67,10 @@ Ouvrez https://moncarnet.kheios.com/demo : un clic entre dans un compte.
 - **Ministère de la Santé** : la vue nationale. Elle réunit la zone de la démo (en direct) et dix autres zones du pays (**données fictives**, signalées comme telles), le classement des zones par indicateur, la tendance nationale et les zones à appuyer.
 - **Export CSV au format DHIS2** (unité, période, élément, numérateur, dénominateur, valeur).
 - **Aucun nom** ne sort du pilotage. Un chiffre qui porte sur moins de 5 personnes est masqué, à l'écran comme dans l'export : la petite commune de Zogbodomey le montre.
+
+## Administration
+
+- L'état de la démo (comptes, carnets, foyers, alertes en cours, salle d'attente) et **« Réinitialiser la démo »** en un clic, pour rejouer les parcours (compte `admin`).
 
 ## Accessibilité
 
