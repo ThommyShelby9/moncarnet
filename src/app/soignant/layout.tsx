@@ -32,6 +32,7 @@ export default async function EspaceSoignantLayout({ children }: { children: Rea
             { href: "/soignant", libelle: "Aujourd'hui", icone: "ph-house" },
             { href: "/soignant/agenda", libelle: "Agenda", icone: "ph-calendar-dots" },
             { href: "/soignant/patients", libelle: "Patients", icone: "ph-users-three" },
+            { href: "/soignant/suivis", libelle: "Suivis", icone: "ph-list-checks" },
           ]}
         />
         <div className="flex items-center gap-2.5 rounded-2xl bg-lavande p-2.5 md:mt-auto">

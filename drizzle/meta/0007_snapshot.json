@@ -1,0 +1,2284 @@
+{
+  "id": "f350bdd1-a0b6-4973-a3db-d23df4437fec",
+  "prevId": "0596c147-58ad-427f-9be8-9490ae35070c",
+  "version": "7",
+  "dialect": "postgresql",
+  "tables": {
+    "public.alertes": {
+      "name": "alertes",
+      "schema": "",
+      "columns": {
+        "id": {
+          "name": "id",
+          "type": "uuid",
+          "primaryKey": true,
+          "notNull": true,
+          "default": "gen_random_uuid()"
+        },
+        "patient_id": {
+          "name": "patient_id",
+          "type": "uuid",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "evenement_id": {
+          "name": "evenement_id",
+          "type": "uuid",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "etablissement_id": {
+          "name": "etablissement_id",
+          "type": "uuid",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "creee_le": {
+          "name": "creee_le",
+          "type": "timestamp with time zone",
+          "primaryKey": false,
+          "notNull": true,
+          "default": "now()"
+        },
+        "echeance": {
+          "name": "echeance",
+          "type": "timestamp with time zone",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "prise_en_charge_par": {
+          "name": "prise_en_charge_par",
+          "type": "uuid",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "prise_en_charge_le": {
+          "name": "prise_en_charge_le",
+          "type": "timestamp with time zone",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "remontee_le": {
+          "name": "remontee_le",
+          "type": "timestamp with time zone",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "annulee_le": {
+          "name": "annulee_le",
+          "type": "timestamp with time zone",
+          "primaryKey": false,
+          "notNull": false
+        }
+      },
+      "indexes": {},
+      "foreignKeys": {
+        "alertes_patient_id_patients_id_fk": {
+          "name": "alertes_patient_id_patients_id_fk",
+          "tableFrom": "alertes",
+          "tableTo": "patients",
+          "columnsFrom": [
+            "patient_id"
+          ],
+          "columnsTo": [
+            "id"
+          ],
+          "onDelete": "cascade",
+          "onUpdate": "no action"
+        },
+        "alertes_evenement_id_evenements_id_fk": {
+          "name": "alertes_evenement_id_evenements_id_fk",
+          "tableFrom": "alertes",
+          "tableTo": "evenements",
+          "columnsFrom": [
+            "evenement_id"
+          ],
+          "columnsTo": [
+            "id"
+          ],
+          "onDelete": "cascade",
+          "onUpdate": "no action"
+        },
+        "alertes_etablissement_id_etablissements_id_fk": {
+          "name": "alertes_etablissement_id_etablissements_id_fk",
+          "tableFrom": "alertes",
+          "tableTo": "etablissements",
+          "columnsFrom": [
+            "etablissement_id"
+          ],
+          "columnsTo": [
+            "id"
+          ],
+          "onDelete": "no action",
+          "onUpdate": "no action"
+        },
+        "alertes_prise_en_charge_par_comptes_id_fk": {
+          "name": "alertes_prise_en_charge_par_comptes_id_fk",
+          "tableFrom": "alertes",
+          "tableTo": "comptes",
+          "columnsFrom": [
+            "prise_en_charge_par"
+          ],
+          "columnsTo": [
+            "id"
+          ],
+          "onDelete": "no action",
+          "onUpdate": "no action"
+        }
+      },
+      "compositePrimaryKeys": {},
+      "uniqueConstraints": {
+        "alertes_evenement_id_unique": {
+          "name": "alertes_evenement_id_unique",
+          "nullsNotDistinct": false,
+          "columns": [
+            "evenement_id"
+          ]
+        }
+      },
+      "policies": {},
+      "checkConstraints": {},
+      "isRLSEnabled": false
+    },
+    "public.communes": {
+      "name": "communes",
+      "schema": "",
+      "columns": {
+        "id": {
+          "name": "id",
+          "type": "uuid",
+          "primaryKey": true,
+          "notNull": true,
+          "default": "gen_random_uuid()"
+        },
+        "nom": {
+          "name": "nom",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "departement": {
+          "name": "departement",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "zone_sanitaire": {
+          "name": "zone_sanitaire",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": false
+        }
+      },
+      "indexes": {},
+      "foreignKeys": {},
+      "compositePrimaryKeys": {},
+      "uniqueConstraints": {},
+      "policies": {},
+      "checkConstraints": {},
+      "isRLSEnabled": false
+    },
+    "public.comptes": {
+      "name": "comptes",
+      "schema": "",
+      "columns": {
+        "id": {
+          "name": "id",
+          "type": "uuid",
+          "primaryKey": true,
+          "notNull": true,
+          "default": "gen_random_uuid()"
+        },
+        "role": {
+          "name": "role",
+          "type": "role_compte",
+          "typeSchema": "public",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "identifiant": {
+          "name": "identifiant",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "nom_affiche": {
+          "name": "nom_affiche",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "empreinte_secret": {
+          "name": "empreinte_secret",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "etablissement_id": {
+          "name": "etablissement_id",
+          "type": "uuid",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "commune_id": {
+          "name": "commune_id",
+          "type": "uuid",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "echecs_connexion": {
+          "name": "echecs_connexion",
+          "type": "integer",
+          "primaryKey": false,
+          "notNull": true,
+          "default": 0
+        },
+        "verrouille_jusqua": {
+          "name": "verrouille_jusqua",
+          "type": "timestamp with time zone",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "cree_le": {
+          "name": "cree_le",
+          "type": "timestamp with time zone",
+          "primaryKey": false,
+          "notNull": true,
+          "default": "now()"
+        }
+      },
+      "indexes": {},
+      "foreignKeys": {
+        "comptes_etablissement_id_etablissements_id_fk": {
+          "name": "comptes_etablissement_id_etablissements_id_fk",
+          "tableFrom": "comptes",
+          "tableTo": "etablissements",
+          "columnsFrom": [
+            "etablissement_id"
+          ],
+          "columnsTo": [
+            "id"
+          ],
+          "onDelete": "no action",
+          "onUpdate": "no action"
+        },
+        "comptes_commune_id_communes_id_fk": {
+          "name": "comptes_commune_id_communes_id_fk",
+          "tableFrom": "comptes",
+          "tableTo": "communes",
+          "columnsFrom": [
+            "commune_id"
+          ],
+          "columnsTo": [
+            "id"
+          ],
+          "onDelete": "no action",
+          "onUpdate": "no action"
+        }
+      },
+      "compositePrimaryKeys": {},
+      "uniqueConstraints": {
+        "comptes_identifiant_unique": {
+          "name": "comptes_identifiant_unique",
+          "nullsNotDistinct": false,
+          "columns": [
+            "identifiant"
+          ]
+        }
+      },
+      "policies": {},
+      "checkConstraints": {},
+      "isRLSEnabled": false
+    },
+    "public.consentements": {
+      "name": "consentements",
+      "schema": "",
+      "columns": {
+        "id": {
+          "name": "id",
+          "type": "uuid",
+          "primaryKey": true,
+          "notNull": true,
+          "default": "gen_random_uuid()"
+        },
+        "patient_id": {
+          "name": "patient_id",
+          "type": "uuid",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "canal": {
+          "name": "canal",
+          "type": "canal",
+          "typeSchema": "public",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "accorde_le": {
+          "name": "accorde_le",
+          "type": "timestamp with time zone",
+          "primaryKey": false,
+          "notNull": true,
+          "default": "now()"
+        },
+        "retire_le": {
+          "name": "retire_le",
+          "type": "timestamp with time zone",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "recueilli_par": {
+          "name": "recueilli_par",
+          "type": "uuid",
+          "primaryKey": false,
+          "notNull": false
+        }
+      },
+      "indexes": {},
+      "foreignKeys": {
+        "consentements_patient_id_patients_id_fk": {
+          "name": "consentements_patient_id_patients_id_fk",
+          "tableFrom": "consentements",
+          "tableTo": "patients",
+          "columnsFrom": [
+            "patient_id"
+          ],
+          "columnsTo": [
+            "id"
+          ],
+          "onDelete": "cascade",
+          "onUpdate": "no action"
+        },
+        "consentements_recueilli_par_comptes_id_fk": {
+          "name": "consentements_recueilli_par_comptes_id_fk",
+          "tableFrom": "consentements",
+          "tableTo": "comptes",
+          "columnsFrom": [
+            "recueilli_par"
+          ],
+          "columnsTo": [
+            "id"
+          ],
+          "onDelete": "no action",
+          "onUpdate": "no action"
+        }
+      },
+      "compositePrimaryKeys": {},
+      "uniqueConstraints": {},
+      "policies": {},
+      "checkConstraints": {},
+      "isRLSEnabled": false
+    },
+    "public.consignes": {
+      "name": "consignes",
+      "schema": "",
+      "columns": {
+        "id": {
+          "name": "id",
+          "type": "uuid",
+          "primaryKey": true,
+          "notNull": true,
+          "default": "gen_random_uuid()"
+        },
+        "patient_id": {
+          "name": "patient_id",
+          "type": "uuid",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "auteur_id": {
+          "name": "auteur_id",
+          "type": "uuid",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "texte": {
+          "name": "texte",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "cree_le": {
+          "name": "cree_le",
+          "type": "timestamp with time zone",
+          "primaryKey": false,
+          "notNull": true,
+          "default": "now()"
+        }
+      },
+      "indexes": {},
+      "foreignKeys": {
+        "consignes_patient_id_patients_id_fk": {
+          "name": "consignes_patient_id_patients_id_fk",
+          "tableFrom": "consignes",
+          "tableTo": "patients",
+          "columnsFrom": [
+            "patient_id"
+          ],
+          "columnsTo": [
+            "id"
+          ],
+          "onDelete": "cascade",
+          "onUpdate": "no action"
+        },
+        "consignes_auteur_id_comptes_id_fk": {
+          "name": "consignes_auteur_id_comptes_id_fk",
+          "tableFrom": "consignes",
+          "tableTo": "comptes",
+          "columnsFrom": [
+            "auteur_id"
+          ],
+          "columnsTo": [
+            "id"
+          ],
+          "onDelete": "no action",
+          "onUpdate": "no action"
+        }
+      },
+      "compositePrimaryKeys": {},
+      "uniqueConstraints": {},
+      "policies": {},
+      "checkConstraints": {},
+      "isRLSEnabled": false
+    },
+    "public.contacts": {
+      "name": "contacts",
+      "schema": "",
+      "columns": {
+        "id": {
+          "name": "id",
+          "type": "uuid",
+          "primaryKey": true,
+          "notNull": true,
+          "default": "gen_random_uuid()"
+        },
+        "patient_id": {
+          "name": "patient_id",
+          "type": "uuid",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "telephone": {
+          "name": "telephone",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "role": {
+          "name": "role",
+          "type": "role_contact",
+          "typeSchema": "public",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "proprietaire": {
+          "name": "proprietaire",
+          "type": "proprietaire_contact",
+          "typeSchema": "public",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "verifie_le": {
+          "name": "verifie_le",
+          "type": "timestamp with time zone",
+          "primaryKey": false,
+          "notNull": false
+        }
+      },
+      "indexes": {},
+      "foreignKeys": {
+        "contacts_patient_id_patients_id_fk": {
+          "name": "contacts_patient_id_patients_id_fk",
+          "tableFrom": "contacts",
+          "tableTo": "patients",
+          "columnsFrom": [
+            "patient_id"
+          ],
+          "columnsTo": [
+            "id"
+          ],
+          "onDelete": "cascade",
+          "onUpdate": "no action"
+        }
+      },
+      "compositePrimaryKeys": {},
+      "uniqueConstraints": {},
+      "policies": {},
+      "checkConstraints": {},
+      "isRLSEnabled": false
+    },
+    "public.contenus": {
+      "name": "contenus",
+      "schema": "",
+      "columns": {
+        "id": {
+          "name": "id",
+          "type": "uuid",
+          "primaryKey": true,
+          "notNull": true,
+          "default": "gen_random_uuid()"
+        },
+        "code": {
+          "name": "code",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "categorie": {
+          "name": "categorie",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "pictogramme": {
+          "name": "pictogramme",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true
+        }
+      },
+      "indexes": {},
+      "foreignKeys": {},
+      "compositePrimaryKeys": {},
+      "uniqueConstraints": {
+        "contenus_code_unique": {
+          "name": "contenus_code_unique",
+          "nullsNotDistinct": false,
+          "columns": [
+            "code"
+          ]
+        }
+      },
+      "policies": {},
+      "checkConstraints": {},
+      "isRLSEnabled": false
+    },
+    "public.contenus_traductions": {
+      "name": "contenus_traductions",
+      "schema": "",
+      "columns": {
+        "contenu_id": {
+          "name": "contenu_id",
+          "type": "uuid",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "langue": {
+          "name": "langue",
+          "type": "langue",
+          "typeSchema": "public",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "texte": {
+          "name": "texte",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "audio_mp3": {
+          "name": "audio_mp3",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "audio_ogg": {
+          "name": "audio_ogg",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "video_signes": {
+          "name": "video_signes",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": false
+        }
+      },
+      "indexes": {},
+      "foreignKeys": {
+        "contenus_traductions_contenu_id_contenus_id_fk": {
+          "name": "contenus_traductions_contenu_id_contenus_id_fk",
+          "tableFrom": "contenus_traductions",
+          "tableTo": "contenus",
+          "columnsFrom": [
+            "contenu_id"
+          ],
+          "columnsTo": [
+            "id"
+          ],
+          "onDelete": "cascade",
+          "onUpdate": "no action"
+        }
+      },
+      "compositePrimaryKeys": {
+        "contenus_traductions_contenu_id_langue_pk": {
+          "name": "contenus_traductions_contenu_id_langue_pk",
+          "columns": [
+            "contenu_id",
+            "langue"
+          ]
+        }
+      },
+      "uniqueConstraints": {},
+      "policies": {},
+      "checkConstraints": {},
+      "isRLSEnabled": false
+    },
+    "public.creneaux": {
+      "name": "creneaux",
+      "schema": "",
+      "columns": {
+        "id": {
+          "name": "id",
+          "type": "uuid",
+          "primaryKey": true,
+          "notNull": true,
+          "default": "gen_random_uuid()"
+        },
+        "etablissement_id": {
+          "name": "etablissement_id",
+          "type": "uuid",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "motif": {
+          "name": "motif",
+          "type": "motif_rdv",
+          "typeSchema": "public",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "date": {
+          "name": "date",
+          "type": "date",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "moment": {
+          "name": "moment",
+          "type": "moment",
+          "typeSchema": "public",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "capacite": {
+          "name": "capacite",
+          "type": "integer",
+          "primaryKey": false,
+          "notNull": true
+        }
+      },
+      "indexes": {
+        "creneaux_unique": {
+          "name": "creneaux_unique",
+          "columns": [
+            {
+              "expression": "etablissement_id",
+              "isExpression": false,
+              "asc": true,
+              "nulls": "last"
+            },
+            {
+              "expression": "motif",
+              "isExpression": false,
+              "asc": true,
+              "nulls": "last"
+            },
+            {
+              "expression": "date",
+              "isExpression": false,
+              "asc": true,
+              "nulls": "last"
+            },
+            {
+              "expression": "moment",
+              "isExpression": false,
+              "asc": true,
+              "nulls": "last"
+            }
+          ],
+          "isUnique": true,
+          "concurrently": false,
+          "method": "btree",
+          "with": {}
+        }
+      },
+      "foreignKeys": {
+        "creneaux_etablissement_id_etablissements_id_fk": {
+          "name": "creneaux_etablissement_id_etablissements_id_fk",
+          "tableFrom": "creneaux",
+          "tableTo": "etablissements",
+          "columnsFrom": [
+            "etablissement_id"
+          ],
+          "columnsTo": [
+            "id"
+          ],
+          "onDelete": "no action",
+          "onUpdate": "no action"
+        }
+      },
+      "compositePrimaryKeys": {},
+      "uniqueConstraints": {},
+      "policies": {},
+      "checkConstraints": {},
+      "isRLSEnabled": false
+    },
+    "public.etablissements": {
+      "name": "etablissements",
+      "schema": "",
+      "columns": {
+        "id": {
+          "name": "id",
+          "type": "uuid",
+          "primaryKey": true,
+          "notNull": true,
+          "default": "gen_random_uuid()"
+        },
+        "nom": {
+          "name": "nom",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "type": {
+          "name": "type",
+          "type": "type_etablissement",
+          "typeSchema": "public",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "commune_id": {
+          "name": "commune_id",
+          "type": "uuid",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "telephone": {
+          "name": "telephone",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": false
+        }
+      },
+      "indexes": {},
+      "foreignKeys": {
+        "etablissements_commune_id_communes_id_fk": {
+          "name": "etablissements_commune_id_communes_id_fk",
+          "tableFrom": "etablissements",
+          "tableTo": "communes",
+          "columnsFrom": [
+            "commune_id"
+          ],
+          "columnsTo": [
+            "id"
+          ],
+          "onDelete": "no action",
+          "onUpdate": "no action"
+        }
+      },
+      "compositePrimaryKeys": {},
+      "uniqueConstraints": {},
+      "policies": {},
+      "checkConstraints": {},
+      "isRLSEnabled": false
+    },
+    "public.evenements": {
+      "name": "evenements",
+      "schema": "",
+      "columns": {
+        "id": {
+          "name": "id",
+          "type": "uuid",
+          "primaryKey": true,
+          "notNull": true
+        },
+        "patient_id": {
+          "name": "patient_id",
+          "type": "uuid",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "type": {
+          "name": "type",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "auteur_id": {
+          "name": "auteur_id",
+          "type": "uuid",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "survenu_le": {
+          "name": "survenu_le",
+          "type": "timestamp with time zone",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "recu_le": {
+          "name": "recu_le",
+          "type": "timestamp with time zone",
+          "primaryKey": false,
+          "notNull": true,
+          "default": "now()"
+        },
+        "donnees": {
+          "name": "donnees",
+          "type": "jsonb",
+          "primaryKey": false,
+          "notNull": true
+        }
+      },
+      "indexes": {},
+      "foreignKeys": {
+        "evenements_patient_id_patients_id_fk": {
+          "name": "evenements_patient_id_patients_id_fk",
+          "tableFrom": "evenements",
+          "tableTo": "patients",
+          "columnsFrom": [
+            "patient_id"
+          ],
+          "columnsTo": [
+            "id"
+          ],
+          "onDelete": "cascade",
+          "onUpdate": "no action"
+        },
+        "evenements_auteur_id_comptes_id_fk": {
+          "name": "evenements_auteur_id_comptes_id_fk",
+          "tableFrom": "evenements",
+          "tableTo": "comptes",
+          "columnsFrom": [
+            "auteur_id"
+          ],
+          "columnsTo": [
+            "id"
+          ],
+          "onDelete": "no action",
+          "onUpdate": "no action"
+        }
+      },
+      "compositePrimaryKeys": {},
+      "uniqueConstraints": {},
+      "policies": {},
+      "checkConstraints": {},
+      "isRLSEnabled": false
+    },
+    "public.fichiers": {
+      "name": "fichiers",
+      "schema": "",
+      "columns": {
+        "evenement_id": {
+          "name": "evenement_id",
+          "type": "uuid",
+          "primaryKey": true,
+          "notNull": true
+        },
+        "type": {
+          "name": "type",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "taille": {
+          "name": "taille",
+          "type": "integer",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "donnees": {
+          "name": "donnees",
+          "type": "bytea",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "recu_le": {
+          "name": "recu_le",
+          "type": "timestamp with time zone",
+          "primaryKey": false,
+          "notNull": true,
+          "default": "now()"
+        }
+      },
+      "indexes": {},
+      "foreignKeys": {
+        "fichiers_evenement_id_evenements_id_fk": {
+          "name": "fichiers_evenement_id_evenements_id_fk",
+          "tableFrom": "fichiers",
+          "tableTo": "evenements",
+          "columnsFrom": [
+            "evenement_id"
+          ],
+          "columnsTo": [
+            "id"
+          ],
+          "onDelete": "cascade",
+          "onUpdate": "no action"
+        }
+      },
+      "compositePrimaryKeys": {},
+      "uniqueConstraints": {},
+      "policies": {},
+      "checkConstraints": {},
+      "isRLSEnabled": false
+    },
+    "public.foyers": {
+      "name": "foyers",
+      "schema": "",
+      "columns": {
+        "id": {
+          "name": "id",
+          "type": "uuid",
+          "primaryKey": true,
+          "notNull": true,
+          "default": "gen_random_uuid()"
+        },
+        "nom": {
+          "name": "nom",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "village": {
+          "name": "village",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "commune_id": {
+          "name": "commune_id",
+          "type": "uuid",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "relais_id": {
+          "name": "relais_id",
+          "type": "uuid",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "cree_le": {
+          "name": "cree_le",
+          "type": "timestamp with time zone",
+          "primaryKey": false,
+          "notNull": true,
+          "default": "now()"
+        }
+      },
+      "indexes": {},
+      "foreignKeys": {
+        "foyers_commune_id_communes_id_fk": {
+          "name": "foyers_commune_id_communes_id_fk",
+          "tableFrom": "foyers",
+          "tableTo": "communes",
+          "columnsFrom": [
+            "commune_id"
+          ],
+          "columnsTo": [
+            "id"
+          ],
+          "onDelete": "no action",
+          "onUpdate": "no action"
+        },
+        "foyers_relais_id_comptes_id_fk": {
+          "name": "foyers_relais_id_comptes_id_fk",
+          "tableFrom": "foyers",
+          "tableTo": "comptes",
+          "columnsFrom": [
+            "relais_id"
+          ],
+          "columnsTo": [
+            "id"
+          ],
+          "onDelete": "no action",
+          "onUpdate": "no action"
+        }
+      },
+      "compositePrimaryKeys": {},
+      "uniqueConstraints": {},
+      "policies": {},
+      "checkConstraints": {},
+      "isRLSEnabled": false
+    },
+    "public.indicateurs_zones": {
+      "name": "indicateurs_zones",
+      "schema": "",
+      "columns": {
+        "id": {
+          "name": "id",
+          "type": "uuid",
+          "primaryKey": true,
+          "notNull": true,
+          "default": "gen_random_uuid()"
+        },
+        "zone": {
+          "name": "zone",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "departement": {
+          "name": "departement",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "mois": {
+          "name": "mois",
+          "type": "date",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "code": {
+          "name": "code",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "numerateur": {
+          "name": "numerateur",
+          "type": "integer",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "denominateur": {
+          "name": "denominateur",
+          "type": "integer",
+          "primaryKey": false,
+          "notNull": true
+        }
+      },
+      "indexes": {
+        "indicateurs_zones_unique": {
+          "name": "indicateurs_zones_unique",
+          "columns": [
+            {
+              "expression": "zone",
+              "isExpression": false,
+              "asc": true,
+              "nulls": "last"
+            },
+            {
+              "expression": "mois",
+              "isExpression": false,
+              "asc": true,
+              "nulls": "last"
+            },
+            {
+              "expression": "code",
+              "isExpression": false,
+              "asc": true,
+              "nulls": "last"
+            }
+          ],
+          "isUnique": true,
+          "concurrently": false,
+          "method": "btree",
+          "with": {}
+        }
+      },
+      "foreignKeys": {},
+      "compositePrimaryKeys": {},
+      "uniqueConstraints": {},
+      "policies": {},
+      "checkConstraints": {},
+      "isRLSEnabled": false
+    },
+    "public.inscriptions": {
+      "name": "inscriptions",
+      "schema": "",
+      "columns": {
+        "id": {
+          "name": "id",
+          "type": "uuid",
+          "primaryKey": true,
+          "notNull": true,
+          "default": "gen_random_uuid()"
+        },
+        "patient_id": {
+          "name": "patient_id",
+          "type": "uuid",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "programme": {
+          "name": "programme",
+          "type": "code_programme",
+          "typeSchema": "public",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "date_reference": {
+          "name": "date_reference",
+          "type": "date",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "date_inscription": {
+          "name": "date_inscription",
+          "type": "date",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "active": {
+          "name": "active",
+          "type": "boolean",
+          "primaryKey": false,
+          "notNull": true,
+          "default": true
+        },
+        "cree_le": {
+          "name": "cree_le",
+          "type": "timestamp with time zone",
+          "primaryKey": false,
+          "notNull": true,
+          "default": "now()"
+        }
+      },
+      "indexes": {},
+      "foreignKeys": {
+        "inscriptions_patient_id_patients_id_fk": {
+          "name": "inscriptions_patient_id_patients_id_fk",
+          "tableFrom": "inscriptions",
+          "tableTo": "patients",
+          "columnsFrom": [
+            "patient_id"
+          ],
+          "columnsTo": [
+            "id"
+          ],
+          "onDelete": "cascade",
+          "onUpdate": "no action"
+        }
+      },
+      "compositePrimaryKeys": {},
+      "uniqueConstraints": {},
+      "policies": {},
+      "checkConstraints": {},
+      "isRLSEnabled": false
+    },
+    "public.liste_attente": {
+      "name": "liste_attente",
+      "schema": "",
+      "columns": {
+        "id": {
+          "name": "id",
+          "type": "uuid",
+          "primaryKey": true,
+          "notNull": true,
+          "default": "gen_random_uuid()"
+        },
+        "patient_id": {
+          "name": "patient_id",
+          "type": "uuid",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "etablissement_id": {
+          "name": "etablissement_id",
+          "type": "uuid",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "motif": {
+          "name": "motif",
+          "type": "motif_rdv",
+          "typeSchema": "public",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "date_souhaitee": {
+          "name": "date_souhaitee",
+          "type": "date",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "moment": {
+          "name": "moment",
+          "type": "moment",
+          "typeSchema": "public",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "statut": {
+          "name": "statut",
+          "type": "statut_attente",
+          "typeSchema": "public",
+          "primaryKey": false,
+          "notNull": true,
+          "default": "'en_attente'"
+        },
+        "cree_le": {
+          "name": "cree_le",
+          "type": "timestamp with time zone",
+          "primaryKey": false,
+          "notNull": true,
+          "default": "now()"
+        },
+        "propose_le": {
+          "name": "propose_le",
+          "type": "timestamp with time zone",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "expire_le": {
+          "name": "expire_le",
+          "type": "timestamp with time zone",
+          "primaryKey": false,
+          "notNull": false
+        }
+      },
+      "indexes": {},
+      "foreignKeys": {
+        "liste_attente_patient_id_patients_id_fk": {
+          "name": "liste_attente_patient_id_patients_id_fk",
+          "tableFrom": "liste_attente",
+          "tableTo": "patients",
+          "columnsFrom": [
+            "patient_id"
+          ],
+          "columnsTo": [
+            "id"
+          ],
+          "onDelete": "cascade",
+          "onUpdate": "no action"
+        },
+        "liste_attente_etablissement_id_etablissements_id_fk": {
+          "name": "liste_attente_etablissement_id_etablissements_id_fk",
+          "tableFrom": "liste_attente",
+          "tableTo": "etablissements",
+          "columnsFrom": [
+            "etablissement_id"
+          ],
+          "columnsTo": [
+            "id"
+          ],
+          "onDelete": "no action",
+          "onUpdate": "no action"
+        }
+      },
+      "compositePrimaryKeys": {},
+      "uniqueConstraints": {},
+      "policies": {},
+      "checkConstraints": {},
+      "isRLSEnabled": false
+    },
+    "public.modeles_plages": {
+      "name": "modeles_plages",
+      "schema": "",
+      "columns": {
+        "id": {
+          "name": "id",
+          "type": "uuid",
+          "primaryKey": true,
+          "notNull": true,
+          "default": "gen_random_uuid()"
+        },
+        "etablissement_id": {
+          "name": "etablissement_id",
+          "type": "uuid",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "motif": {
+          "name": "motif",
+          "type": "motif_rdv",
+          "typeSchema": "public",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "jour_semaine": {
+          "name": "jour_semaine",
+          "type": "integer",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "moment": {
+          "name": "moment",
+          "type": "moment",
+          "typeSchema": "public",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "capacite": {
+          "name": "capacite",
+          "type": "integer",
+          "primaryKey": false,
+          "notNull": true
+        }
+      },
+      "indexes": {},
+      "foreignKeys": {
+        "modeles_plages_etablissement_id_etablissements_id_fk": {
+          "name": "modeles_plages_etablissement_id_etablissements_id_fk",
+          "tableFrom": "modeles_plages",
+          "tableTo": "etablissements",
+          "columnsFrom": [
+            "etablissement_id"
+          ],
+          "columnsTo": [
+            "id"
+          ],
+          "onDelete": "no action",
+          "onUpdate": "no action"
+        }
+      },
+      "compositePrimaryKeys": {},
+      "uniqueConstraints": {},
+      "policies": {},
+      "checkConstraints": {},
+      "isRLSEnabled": false
+    },
+    "public.ordonnances": {
+      "name": "ordonnances",
+      "schema": "",
+      "columns": {
+        "id": {
+          "name": "id",
+          "type": "uuid",
+          "primaryKey": true,
+          "notNull": true,
+          "default": "gen_random_uuid()"
+        },
+        "patient_id": {
+          "name": "patient_id",
+          "type": "uuid",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "prescripteur_id": {
+          "name": "prescripteur_id",
+          "type": "uuid",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "lignes": {
+          "name": "lignes",
+          "type": "jsonb",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "code_retrait": {
+          "name": "code_retrait",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "emise_le": {
+          "name": "emise_le",
+          "type": "timestamp with time zone",
+          "primaryKey": false,
+          "notNull": true,
+          "default": "now()"
+        }
+      },
+      "indexes": {},
+      "foreignKeys": {
+        "ordonnances_patient_id_patients_id_fk": {
+          "name": "ordonnances_patient_id_patients_id_fk",
+          "tableFrom": "ordonnances",
+          "tableTo": "patients",
+          "columnsFrom": [
+            "patient_id"
+          ],
+          "columnsTo": [
+            "id"
+          ],
+          "onDelete": "cascade",
+          "onUpdate": "no action"
+        },
+        "ordonnances_prescripteur_id_comptes_id_fk": {
+          "name": "ordonnances_prescripteur_id_comptes_id_fk",
+          "tableFrom": "ordonnances",
+          "tableTo": "comptes",
+          "columnsFrom": [
+            "prescripteur_id"
+          ],
+          "columnsTo": [
+            "id"
+          ],
+          "onDelete": "no action",
+          "onUpdate": "no action"
+        }
+      },
+      "compositePrimaryKeys": {},
+      "uniqueConstraints": {
+        "ordonnances_code_retrait_unique": {
+          "name": "ordonnances_code_retrait_unique",
+          "nullsNotDistinct": false,
+          "columns": [
+            "code_retrait"
+          ]
+        }
+      },
+      "policies": {},
+      "checkConstraints": {},
+      "isRLSEnabled": false
+    },
+    "public.passages": {
+      "name": "passages",
+      "schema": "",
+      "columns": {
+        "id": {
+          "name": "id",
+          "type": "uuid",
+          "primaryKey": true,
+          "notNull": true,
+          "default": "gen_random_uuid()"
+        },
+        "etablissement_id": {
+          "name": "etablissement_id",
+          "type": "uuid",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "patient_id": {
+          "name": "patient_id",
+          "type": "uuid",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "jour": {
+          "name": "jour",
+          "type": "date",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "numero": {
+          "name": "numero",
+          "type": "integer",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "urgent": {
+          "name": "urgent",
+          "type": "boolean",
+          "primaryKey": false,
+          "notNull": true,
+          "default": false
+        },
+        "arrive_le": {
+          "name": "arrive_le",
+          "type": "timestamp with time zone",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "appele_le": {
+          "name": "appele_le",
+          "type": "timestamp with time zone",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "appele_par": {
+          "name": "appele_par",
+          "type": "uuid",
+          "primaryKey": false,
+          "notNull": false
+        }
+      },
+      "indexes": {
+        "passages_numero": {
+          "name": "passages_numero",
+          "columns": [
+            {
+              "expression": "etablissement_id",
+              "isExpression": false,
+              "asc": true,
+              "nulls": "last"
+            },
+            {
+              "expression": "jour",
+              "isExpression": false,
+              "asc": true,
+              "nulls": "last"
+            },
+            {
+              "expression": "numero",
+              "isExpression": false,
+              "asc": true,
+              "nulls": "last"
+            }
+          ],
+          "isUnique": true,
+          "concurrently": false,
+          "method": "btree",
+          "with": {}
+        },
+        "passages_patient": {
+          "name": "passages_patient",
+          "columns": [
+            {
+              "expression": "etablissement_id",
+              "isExpression": false,
+              "asc": true,
+              "nulls": "last"
+            },
+            {
+              "expression": "jour",
+              "isExpression": false,
+              "asc": true,
+              "nulls": "last"
+            },
+            {
+              "expression": "patient_id",
+              "isExpression": false,
+              "asc": true,
+              "nulls": "last"
+            }
+          ],
+          "isUnique": true,
+          "concurrently": false,
+          "method": "btree",
+          "with": {}
+        }
+      },
+      "foreignKeys": {
+        "passages_etablissement_id_etablissements_id_fk": {
+          "name": "passages_etablissement_id_etablissements_id_fk",
+          "tableFrom": "passages",
+          "tableTo": "etablissements",
+          "columnsFrom": [
+            "etablissement_id"
+          ],
+          "columnsTo": [
+            "id"
+          ],
+          "onDelete": "no action",
+          "onUpdate": "no action"
+        },
+        "passages_patient_id_patients_id_fk": {
+          "name": "passages_patient_id_patients_id_fk",
+          "tableFrom": "passages",
+          "tableTo": "patients",
+          "columnsFrom": [
+            "patient_id"
+          ],
+          "columnsTo": [
+            "id"
+          ],
+          "onDelete": "cascade",
+          "onUpdate": "no action"
+        },
+        "passages_appele_par_comptes_id_fk": {
+          "name": "passages_appele_par_comptes_id_fk",
+          "tableFrom": "passages",
+          "tableTo": "comptes",
+          "columnsFrom": [
+            "appele_par"
+          ],
+          "columnsTo": [
+            "id"
+          ],
+          "onDelete": "no action",
+          "onUpdate": "no action"
+        }
+      },
+      "compositePrimaryKeys": {},
+      "uniqueConstraints": {},
+      "policies": {},
+      "checkConstraints": {},
+      "isRLSEnabled": false
+    },
+    "public.patients": {
+      "name": "patients",
+      "schema": "",
+      "columns": {
+        "id": {
+          "name": "id",
+          "type": "uuid",
+          "primaryKey": true,
+          "notNull": true,
+          "default": "gen_random_uuid()"
+        },
+        "foyer_id": {
+          "name": "foyer_id",
+          "type": "uuid",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "prenom": {
+          "name": "prenom",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "nom": {
+          "name": "nom",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "date_naissance": {
+          "name": "date_naissance",
+          "type": "date",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "sexe": {
+          "name": "sexe",
+          "type": "sexe",
+          "typeSchema": "public",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "langue": {
+          "name": "langue",
+          "type": "langue",
+          "typeSchema": "public",
+          "primaryKey": false,
+          "notNull": true,
+          "default": "'fon'"
+        },
+        "canal_prefere": {
+          "name": "canal_prefere",
+          "type": "canal",
+          "typeSchema": "public",
+          "primaryKey": false,
+          "notNull": true,
+          "default": "'sms'"
+        },
+        "malvoyant": {
+          "name": "malvoyant",
+          "type": "boolean",
+          "primaryKey": false,
+          "notNull": true,
+          "default": false
+        },
+        "malentendant": {
+          "name": "malentendant",
+          "type": "boolean",
+          "primaryKey": false,
+          "notNull": true,
+          "default": false
+        },
+        "code_court": {
+          "name": "code_court",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "etablissement_id": {
+          "name": "etablissement_id",
+          "type": "uuid",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "mere_id": {
+          "name": "mere_id",
+          "type": "uuid",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "antecedents": {
+          "name": "antecedents",
+          "type": "jsonb",
+          "primaryKey": false,
+          "notNull": true,
+          "default": "'{}'::jsonb"
+        },
+        "cree_le": {
+          "name": "cree_le",
+          "type": "timestamp with time zone",
+          "primaryKey": false,
+          "notNull": true,
+          "default": "now()"
+        }
+      },
+      "indexes": {},
+      "foreignKeys": {
+        "patients_foyer_id_foyers_id_fk": {
+          "name": "patients_foyer_id_foyers_id_fk",
+          "tableFrom": "patients",
+          "tableTo": "foyers",
+          "columnsFrom": [
+            "foyer_id"
+          ],
+          "columnsTo": [
+            "id"
+          ],
+          "onDelete": "no action",
+          "onUpdate": "no action"
+        },
+        "patients_etablissement_id_etablissements_id_fk": {
+          "name": "patients_etablissement_id_etablissements_id_fk",
+          "tableFrom": "patients",
+          "tableTo": "etablissements",
+          "columnsFrom": [
+            "etablissement_id"
+          ],
+          "columnsTo": [
+            "id"
+          ],
+          "onDelete": "no action",
+          "onUpdate": "no action"
+        },
+        "patients_mere_id_patients_id_fk": {
+          "name": "patients_mere_id_patients_id_fk",
+          "tableFrom": "patients",
+          "tableTo": "patients",
+          "columnsFrom": [
+            "mere_id"
+          ],
+          "columnsTo": [
+            "id"
+          ],
+          "onDelete": "no action",
+          "onUpdate": "no action"
+        }
+      },
+      "compositePrimaryKeys": {},
+      "uniqueConstraints": {
+        "patients_code_court_unique": {
+          "name": "patients_code_court_unique",
+          "nullsNotDistinct": false,
+          "columns": [
+            "code_court"
+          ]
+        }
+      },
+      "policies": {},
+      "checkConstraints": {},
+      "isRLSEnabled": false
+    },
+    "public.rappels": {
+      "name": "rappels",
+      "schema": "",
+      "columns": {
+        "id": {
+          "name": "id",
+          "type": "uuid",
+          "primaryKey": true,
+          "notNull": true,
+          "default": "gen_random_uuid()"
+        },
+        "patient_id": {
+          "name": "patient_id",
+          "type": "uuid",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "rendez_vous_id": {
+          "name": "rendez_vous_id",
+          "type": "uuid",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "canal": {
+          "name": "canal",
+          "type": "canal",
+          "typeSchema": "public",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "telephone": {
+          "name": "telephone",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "contenu": {
+          "name": "contenu",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "envoye_le": {
+          "name": "envoye_le",
+          "type": "timestamp with time zone",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "statut": {
+          "name": "statut",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true,
+          "default": "'envoye'"
+        },
+        "reponse": {
+          "name": "reponse",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "repondu_le": {
+          "name": "repondu_le",
+          "type": "timestamp with time zone",
+          "primaryKey": false,
+          "notNull": false
+        }
+      },
+      "indexes": {
+        "rappels_rendez_vous_canal": {
+          "name": "rappels_rendez_vous_canal",
+          "columns": [
+            {
+              "expression": "rendez_vous_id",
+              "isExpression": false,
+              "asc": true,
+              "nulls": "last"
+            },
+            {
+              "expression": "canal",
+              "isExpression": false,
+              "asc": true,
+              "nulls": "last"
+            }
+          ],
+          "isUnique": true,
+          "concurrently": false,
+          "method": "btree",
+          "with": {}
+        }
+      },
+      "foreignKeys": {
+        "rappels_patient_id_patients_id_fk": {
+          "name": "rappels_patient_id_patients_id_fk",
+          "tableFrom": "rappels",
+          "tableTo": "patients",
+          "columnsFrom": [
+            "patient_id"
+          ],
+          "columnsTo": [
+            "id"
+          ],
+          "onDelete": "cascade",
+          "onUpdate": "no action"
+        },
+        "rappels_rendez_vous_id_rendez_vous_id_fk": {
+          "name": "rappels_rendez_vous_id_rendez_vous_id_fk",
+          "tableFrom": "rappels",
+          "tableTo": "rendez_vous",
+          "columnsFrom": [
+            "rendez_vous_id"
+          ],
+          "columnsTo": [
+            "id"
+          ],
+          "onDelete": "cascade",
+          "onUpdate": "no action"
+        }
+      },
+      "compositePrimaryKeys": {},
+      "uniqueConstraints": {},
+      "policies": {},
+      "checkConstraints": {},
+      "isRLSEnabled": false
+    },
+    "public.rendez_vous": {
+      "name": "rendez_vous",
+      "schema": "",
+      "columns": {
+        "id": {
+          "name": "id",
+          "type": "uuid",
+          "primaryKey": true,
+          "notNull": true,
+          "default": "gen_random_uuid()"
+        },
+        "patient_id": {
+          "name": "patient_id",
+          "type": "uuid",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "inscription_id": {
+          "name": "inscription_id",
+          "type": "uuid",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "etape_code": {
+          "name": "etape_code",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "motif": {
+          "name": "motif",
+          "type": "motif_rdv",
+          "typeSchema": "public",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "date_prevue": {
+          "name": "date_prevue",
+          "type": "date",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "moment": {
+          "name": "moment",
+          "type": "moment",
+          "typeSchema": "public",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "creneau_id": {
+          "name": "creneau_id",
+          "type": "uuid",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "etablissement_id": {
+          "name": "etablissement_id",
+          "type": "uuid",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "source": {
+          "name": "source",
+          "type": "source_rdv",
+          "typeSchema": "public",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "reserve_le": {
+          "name": "reserve_le",
+          "type": "timestamp with time zone",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "annule_le": {
+          "name": "annule_le",
+          "type": "timestamp with time zone",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "cree_le": {
+          "name": "cree_le",
+          "type": "timestamp with time zone",
+          "primaryKey": false,
+          "notNull": true,
+          "default": "now()"
+        }
+      },
+      "indexes": {},
+      "foreignKeys": {
+        "rendez_vous_patient_id_patients_id_fk": {
+          "name": "rendez_vous_patient_id_patients_id_fk",
+          "tableFrom": "rendez_vous",
+          "tableTo": "patients",
+          "columnsFrom": [
+            "patient_id"
+          ],
+          "columnsTo": [
+            "id"
+          ],
+          "onDelete": "cascade",
+          "onUpdate": "no action"
+        },
+        "rendez_vous_inscription_id_inscriptions_id_fk": {
+          "name": "rendez_vous_inscription_id_inscriptions_id_fk",
+          "tableFrom": "rendez_vous",
+          "tableTo": "inscriptions",
+          "columnsFrom": [
+            "inscription_id"
+          ],
+          "columnsTo": [
+            "id"
+          ],
+          "onDelete": "set null",
+          "onUpdate": "no action"
+        },
+        "rendez_vous_creneau_id_creneaux_id_fk": {
+          "name": "rendez_vous_creneau_id_creneaux_id_fk",
+          "tableFrom": "rendez_vous",
+          "tableTo": "creneaux",
+          "columnsFrom": [
+            "creneau_id"
+          ],
+          "columnsTo": [
+            "id"
+          ],
+          "onDelete": "no action",
+          "onUpdate": "no action"
+        },
+        "rendez_vous_etablissement_id_etablissements_id_fk": {
+          "name": "rendez_vous_etablissement_id_etablissements_id_fk",
+          "tableFrom": "rendez_vous",
+          "tableTo": "etablissements",
+          "columnsFrom": [
+            "etablissement_id"
+          ],
+          "columnsTo": [
+            "id"
+          ],
+          "onDelete": "no action",
+          "onUpdate": "no action"
+        }
+      },
+      "compositePrimaryKeys": {},
+      "uniqueConstraints": {},
+      "policies": {},
+      "checkConstraints": {},
+      "isRLSEnabled": false
+    },
+    "public.responsables": {
+      "name": "responsables",
+      "schema": "",
+      "columns": {
+        "compte_id": {
+          "name": "compte_id",
+          "type": "uuid",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "patient_id": {
+          "name": "patient_id",
+          "type": "uuid",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "lien": {
+          "name": "lien",
+          "type": "lien_responsable",
+          "typeSchema": "public",
+          "primaryKey": false,
+          "notNull": true
+        }
+      },
+      "indexes": {},
+      "foreignKeys": {
+        "responsables_compte_id_comptes_id_fk": {
+          "name": "responsables_compte_id_comptes_id_fk",
+          "tableFrom": "responsables",
+          "tableTo": "comptes",
+          "columnsFrom": [
+            "compte_id"
+          ],
+          "columnsTo": [
+            "id"
+          ],
+          "onDelete": "cascade",
+          "onUpdate": "no action"
+        },
+        "responsables_patient_id_patients_id_fk": {
+          "name": "responsables_patient_id_patients_id_fk",
+          "tableFrom": "responsables",
+          "tableTo": "patients",
+          "columnsFrom": [
+            "patient_id"
+          ],
+          "columnsTo": [
+            "id"
+          ],
+          "onDelete": "cascade",
+          "onUpdate": "no action"
+        }
+      },
+      "compositePrimaryKeys": {
+        "responsables_compte_id_patient_id_pk": {
+          "name": "responsables_compte_id_patient_id_pk",
+          "columns": [
+            "compte_id",
+            "patient_id"
+          ]
+        }
+      },
+      "uniqueConstraints": {},
+      "policies": {},
+      "checkConstraints": {},
+      "isRLSEnabled": false
+    },
+    "public.sessions": {
+      "name": "sessions",
+      "schema": "",
+      "columns": {
+        "id": {
+          "name": "id",
+          "type": "text",
+          "primaryKey": true,
+          "notNull": true
+        },
+        "compte_id": {
+          "name": "compte_id",
+          "type": "uuid",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "expire_le": {
+          "name": "expire_le",
+          "type": "timestamp with time zone",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "cree_le": {
+          "name": "cree_le",
+          "type": "timestamp with time zone",
+          "primaryKey": false,
+          "notNull": true,
+          "default": "now()"
+        }
+      },
+      "indexes": {},
+      "foreignKeys": {
+        "sessions_compte_id_comptes_id_fk": {
+          "name": "sessions_compte_id_comptes_id_fk",
+          "tableFrom": "sessions",
+          "tableTo": "comptes",
+          "columnsFrom": [
+            "compte_id"
+          ],
+          "columnsTo": [
+            "id"
+          ],
+          "onDelete": "cascade",
+          "onUpdate": "no action"
+        }
+      },
+      "compositePrimaryKeys": {},
+      "uniqueConstraints": {},
+      "policies": {},
+      "checkConstraints": {},
+      "isRLSEnabled": false
+    }
+  },
+  "enums": {
+    "public.canal": {
+      "name": "canal",
+      "schema": "public",
+      "values": [
+        "whatsapp",
+        "sms",
+        "vocal",
+        "relais"
+      ]
+    },
+    "public.code_programme": {
+      "name": "code_programme",
+      "schema": "public",
+      "values": [
+        "consultation",
+        "hypertension",
+        "grossesse",
+        "vaccination",
+        "diabete",
+        "postnatal"
+      ]
+    },
+    "public.langue": {
+      "name": "langue",
+      "schema": "public",
+      "values": [
+        "fr",
+        "fon",
+        "adja",
+        "yo",
+        "bariba",
+        "dendi"
+      ]
+    },
+    "public.lien_responsable": {
+      "name": "lien_responsable",
+      "schema": "public",
+      "values": [
+        "soi",
+        "conjoint",
+        "parent",
+        "enfant",
+        "aidant"
+      ]
+    },
+    "public.moment": {
+      "name": "moment",
+      "schema": "public",
+      "values": [
+        "matin",
+        "apres_midi"
+      ]
+    },
+    "public.motif_rdv": {
+      "name": "motif_rdv",
+      "schema": "public",
+      "values": [
+        "consultation",
+        "tension",
+        "grossesse",
+        "vaccin",
+        "diabete",
+        "fievre",
+        "dents"
+      ]
+    },
+    "public.proprietaire_contact": {
+      "name": "proprietaire_contact",
+      "schema": "public",
+      "values": [
+        "soi",
+        "proche",
+        "relais"
+      ]
+    },
+    "public.role_compte": {
+      "name": "role_compte",
+      "schema": "public",
+      "values": [
+        "patient",
+        "relais",
+        "soignant",
+        "pharmacie",
+        "pilotage",
+        "admin"
+      ]
+    },
+    "public.role_contact": {
+      "name": "role_contact",
+      "schema": "public",
+      "values": [
+        "principal",
+        "secours"
+      ]
+    },
+    "public.sexe": {
+      "name": "sexe",
+      "schema": "public",
+      "values": [
+        "F",
+        "M"
+      ]
+    },
+    "public.source_rdv": {
+      "name": "source_rdv",
+      "schema": "public",
+      "values": [
+        "programme",
+        "patient",
+        "relais",
+        "soignant"
+      ]
+    },
+    "public.statut_attente": {
+      "name": "statut_attente",
+      "schema": "public",
+      "values": [
+        "en_attente",
+        "proposee",
+        "acceptee",
+        "expiree",
+        "annulee"
+      ]
+    },
+    "public.type_etablissement": {
+      "name": "type_etablissement",
+      "schema": "public",
+      "values": [
+        "centre_sante",
+        "pharmacie"
+      ]
+    }
+  },
+  "schemas": {},
+  "sequences": {},
+  "roles": {},
+  "policies": {},
+  "views": {},
+  "_meta": {
+    "columns": {},
+    "schemas": {},
+    "tables": {}
+  }
+}

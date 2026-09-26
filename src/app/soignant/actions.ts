@@ -6,6 +6,7 @@ import { aujourdhuiAuBenin } from "@/domain/dates";
 import { lireDeclarationNaissance } from "@/domain/naissance";
 import { lireLignes } from "@/domain/ordonnances";
 import type { MotifRdv } from "@/domain/programmes/types";
+import { confierAuRelais } from "@/server/consignes";
 import { db } from "@/server/db/client";
 import { donnerPlace, modifierCapacite, ouvrirPlage } from "@/server/soignant/agenda";
 import { prendreEnCharge } from "@/server/soignant/alertes";
@@ -106,4 +107,14 @@ export async function donnerPlaceAction(formulaire: FormData): Promise<void> {
   const creneauId = String(formulaire.get("creneauId") ?? "");
   const resultat = await donnerPlace(db(), { soignant, creneauId, attenteId: String(formulaire.get("attenteId") ?? "") });
   redirect(`/soignant/agenda/${encodeURIComponent(creneauId)}?note=${resultat.ok ? "place_donnee" : resultat.erreur}`);
+}
+
+const LISTES_SUIVI = ["grossesses", "vaccins", "tension", "perdus"] as const;
+
+/** « Confier au relais » depuis une liste de suivi : la consigne part dans la tournée du relais du foyer. */
+export async function confierAuRelaisAction(formulaire: FormData): Promise<void> {
+  const soignant = await exigerSoignant();
+  const liste = LISTES_SUIVI.find((l) => l === formulaire.get("liste")) ?? "grossesses";
+  const resultat = await confierAuRelais(db(), { soignant, patientId: String(formulaire.get("patientId") ?? ""), texte: String(formulaire.get("texte") ?? "") });
+  redirect(`/soignant/suivis?liste=${liste}&note=${resultat.ok ? "confiee" : resultat.erreur}`);
 }

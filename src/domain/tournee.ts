@@ -17,6 +17,8 @@ export interface EtatPersonne {
   etapesProches: string[];
   /** La cascade de rappels (WhatsApp, SMS, appel) n'a joint personne : au relais de passer. */
   rappelsSansReponse?: boolean;
+  /** Ce que le centre demande au relais de faire chez cette personne. */
+  consignes?: string[];
 }
 
 export interface PersonneTournee {
@@ -60,6 +62,7 @@ export function raisonsDe(etat: EtatPersonne): Raison[] {
   const motifs = etat.risque.motifs.filter((m) => !DEJA_DIT.test(m));
   if (etat.risque.niveau === "eleve") for (const m of motifs) raisons.push({ texte: m, urgence: 0 });
   for (const e of etat.etapesManquees) raisons.push({ texte: `${e} manquée`, urgence: 1 });
+  for (const c of etat.consignes ?? []) raisons.push({ texte: `Consigne du centre : ${c}`, urgence: 1 });
   if (etat.rappelsSansReponse) raisons.push({ texte: "Rappels sans réponse (SMS, appel) : prévenir de vive voix", urgence: 1 });
   if (etat.risque.niveau === "surveillance") for (const m of motifs) raisons.push({ texte: m, urgence: 2 });
   for (const code of etat.ordonnancesARetirer) raisons.push({ texte: `Ordonnance à retirer à la pharmacie (code ${code})`, urgence: 2 });

@@ -4,6 +4,13 @@ import { avancement, raisonsDe, trierFoyers, urgenceDuFoyer, type EtatPersonne }
 const calme: EtatPersonne = { alertesOuvertes: 0, etapesManquees: [], risque: { niveau: "normal", motifs: [] }, ordonnancesARetirer: [], etapesProches: [] };
 
 describe("raisonsDe", () => {
+  it("dit la consigne du centre, à faire pendant la tournée", () => {
+    expect(raisonsDe({ ...calme, consignes: ["Rappeler la CPN3 de mardi"], etapesProches: ["Vaccins des 9 mois"] })).toEqual([
+      { texte: "Consigne du centre : Rappeler la CPN3 de mardi", urgence: 1 },
+      { texte: "Vaccins des 9 mois à prévoir cette semaine", urgence: 2 },
+    ]);
+  });
+
   it("ne donne aucune raison de passer quand tout va bien", () => {
     expect(raisonsDe(calme)).toEqual([]);
   });

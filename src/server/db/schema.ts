@@ -358,3 +358,16 @@ export const rappels = pgTable(
   },
   (t) => [uniqueIndex("rappels_rendez_vous_canal").on(t.rendezVousId, t.canal)],
 );
+
+/** Ce que le centre confie au relais pour une personne (« passer rappeler la CPN3 ») : faite dès que le relais note une visite. */
+export const consignes = pgTable("consignes", {
+  id: uuid("id").primaryKey().defaultRandom(),
+  patientId: uuid("patient_id")
+    .notNull()
+    .references(() => patients.id, { onDelete: "cascade" }),
+  auteurId: uuid("auteur_id")
+    .notNull()
+    .references(() => comptes.id),
+  texte: text("texte").notNull(),
+  creeLe: creeLe(),
+});
