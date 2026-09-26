@@ -105,7 +105,7 @@ const CAPOT: { icone: NomIcone; texte: string }[] = [
   { icone: "ph-device-mobile", texte: "Application installable (PWA), service worker, pages de moins de 300 Ko : pensée pour la 2G." },
   { icone: "ph-cloud-arrow-up", texte: "File d'envoi sans doublon : chaque saisie porte un identifiant créé sur le téléphone (UUID v7)." },
   { icone: "ph-heartbeat", texte: "Un programme de suivi tient dans un fichier : le suivi après l'accouchement a été ajouté ainsi." },
-  { icone: "ph-list-checks", texte: "Près de 400 tests automatiques ; Next.js 16, TypeScript strict, Postgres ; déployée sur Coolify." },
+  { icone: "ph-list-checks", texte: "Plus de 400 tests automatiques ; Next.js 16, TypeScript strict, Postgres ; déployée sur Coolify." },
   { icone: "ph-download-simple", texte: "Export des indicateurs au format DHIS2, l'outil du système national d'information sanitaire." },
   { icone: "ph-shield-check", texte: "Droits stricts : un soignant ne voit que son centre, un relais que ses foyers, l'État que des chiffres." },
 ];
