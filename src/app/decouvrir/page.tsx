@@ -246,11 +246,15 @@ export default function PageDecouvrir() {
                   Pour qui, pour quoi, quel jour : les soleils disent dans combien de jours, avec les places restantes. Deux personnes pour la dernière place : une
                   seule l&apos;obtient.
                 </Etape>
-                <Etape numero={3} titre="Le jour du rendez-vous, sans attendre debout">
+                <Etape numero={3} titre="Des rappels qui finissent par joindre">
+                  À J-2, WhatsApp, puis SMS, puis un appel vocal ; sans réponse, le relais passe prévenir. « 2 : Je ne peux pas » libère la place pour
+                  quelqu&apos;un d&apos;autre.
+                </Etape>
+                <Etape numero={4} titre="Le jour du rendez-vous, sans attendre debout">
                   « Je suis arrivé au centre » : un numéro de passage. Le téléphone dit combien de personnes restent, puis « C&apos;est bientôt votre tour ». Une
                   urgence passe toujours devant.
                 </Etape>
-                <Etape numero={4} titre="Chez l'infirmier puis à la pharmacie">
+                <Etape numero={5} titre="Chez l'infirmier puis à la pharmacie">
                   Firmin mesure 180/110 : risque élevé, ordonnance. La pharmacie retrouve l&apos;ordonnance avec un code de 6 caractères, sans voir le dossier.
                 </Etape>
               </ol>

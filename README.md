@@ -35,6 +35,15 @@ Ouvrez https://moncarnet.kheios.com/demo : un clic entre dans un compte.
 - **Courbe de tension** : les derniers relevés, avec la limite 140/90.
 - **J'ai un problème** : les signes de danger en images (ceux de la grossesse pour une femme enceinte). L'alerte part au centre avec 15 minutes pour la prendre en charge. Sans réseau, l'écran dit que l'alerte n'est pas encore partie, donne le numéro du centre, et l'envoi repart seul au retour du réseau, sans doublon.
 
+## Rappels en cascade (canaux simulés)
+
+- **À J-2**, chaque place réservée reçoit un rappel sur le premier canal de la personne : WhatsApp si elle l'a et y consent, sinon SMS, un appel vocal si elle préfère la voix, le relais si elle n'a pas de téléphone.
+- **Sans réponse après 2 heures**, le rappel passe au canal suivant : WhatsApp → SMS → appel vocal → relais. Au bout de la cascade, la personne apparaît dans la tournée du relais : « Rappels sans réponse : prévenir de vive voix ».
+- **« 1 : Je viendrai »** confirme ; **« 2 : Je ne peux pas »** libère la place, et l'application propose un autre jour. Le rappel s'affiche aussi sur l'accueil, avec les mêmes réponses.
+- **Contenu neutre** : date, lieu, « vaccin » ou « rendez-vous », jamais la maladie, car un téléphone se partage.
+- **Le faux téléphone** (`/demo/telephone`) montre ce que reçoivent Codjo, Afiavi (téléphone basique) et Aïcha : WhatsApp, SMS, appel vocal lu à voix haute. Rien n'est vraiment envoyé ; un fournisseur réel (WhatsApp Cloud API, SMS, voix) se branche à la place de la simulation.
+- L'administration envoie les rappels de J-2 et fait passer les relances d'un clic ; le dossier du soignant garde l'historique.
+
 ## Salle d'attente
 
 - **« Je suis arrivé au centre »** : la personne qui a rendez-vous (ou une alerte du jour) prend un numéro de passage depuis son téléphone. Le même numéro revient si elle touche deux fois, et deux arrivées au même instant n'ont jamais le même.
