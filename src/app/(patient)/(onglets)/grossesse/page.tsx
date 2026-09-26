@@ -62,7 +62,7 @@ export default async function MaGrossesse({ searchParams }: PageProps<"/grossess
               {suivi.semaines} semaines et {suivi.jours} jour{suivi.jours > 1 ? "s" : ""}
             </p>
             <p className="mt-1.5 font-bold">Terme prévu : {dateLongue(suivi.terme)}</p>
-            {suivi.joursAvantTerme > 0 && <p className="text-sm text-soleil">{majuscule(libelleDansJours(suivi.joursAvantTerme))}</p>}
+            {suivi.joursAvantTerme > 0 && <p className="text-sm text-soleil-pale">{majuscule(libelleDansJours(suivi.joursAvantTerme))}</p>}
           </div>
         </div>
       </header>

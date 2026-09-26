@@ -137,7 +137,7 @@ export default function PageDecouvrir() {
           <Ondes className="-bottom-52 -left-52 size-[34rem] text-white opacity-5" />
           <div className="relative mx-auto grid max-w-6xl items-center gap-10 px-4 py-14 lg:grid-cols-[1.1fr_1fr] lg:py-20">
             <div className="flex flex-col gap-6">
-              <p className="w-fit rounded-full bg-white/10 px-3 py-1 text-sm font-bold text-soleil">Challenge e-Santé Bénin 2026</p>
+              <p className="w-fit rounded-full bg-white/10 px-3 py-1 text-sm font-bold text-soleil-pale">Challenge e-Santé Bénin 2026</p>
               <h1 className="text-4xl leading-[1.05] font-bold sm:text-5xl lg:text-6xl">Le carnet de santé familial qui parle.</h1>
               <p className="max-w-xl text-lg text-lavande-3">
                 {nom} suit chaque personne de la famille : la grossesse jusqu&apos;à la naissance, les vaccins des enfants, la tension des parents. Il parle fon

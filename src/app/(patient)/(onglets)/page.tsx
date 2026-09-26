@@ -195,7 +195,7 @@ function CarteGrossesse({
   return (
     <Link href={`/grossesse?pour=${patientId}`} className="relative flex flex-col overflow-hidden rounded-grande bg-marque p-5 text-white shadow-[0_18px_34px_-18px_rgb(59_58_217_/_0.8)]">
       <Ondes className="-top-12 -right-14 size-60 text-white opacity-10" />
-      <span className="relative flex items-center gap-2 text-sm font-bold text-soleil">
+      <span className="relative flex items-center gap-2 text-sm font-bold text-soleil-pale">
         <Icone nom="hi-pregnant" className="size-5" />
         {prenom ? `Grossesse de ${prenom}` : "Ma grossesse"}
       </span>
