@@ -2,7 +2,7 @@ import { and, asc, eq, gt, isNotNull, isNull } from "drizzle-orm";
 import { afterEach, beforeEach, describe, expect, it } from "vitest";
 import { verifierIdentifiants } from "@/server/auth/connexion";
 import type { Db } from "@/server/db/client";
-import { comptes, creneaux, evenements, foyers, inscriptions, ordonnances, patients, rendezVous, responsables } from "@/server/db/schema";
+import { comptes, creneaux, evenements, foyers, inscriptions, ordonnances, passages, patients, rendezVous, responsables } from "@/server/db/schema";
 import { COMPTES_DEMO } from "@/server/demo/donnees";
 import { semerDemo } from "@/server/demo/semer";
 import { creerDbDeTest } from "../../aides/base-de-test";
@@ -112,5 +112,15 @@ describe("semerDemo", () => {
     expect(plan?.donnees).toEqual({ elements: ["lieu", "accompagnant", "sac"] });
     const reserves = await db.select().from(rendezVous).where(and(eq(rendezVous.patientId, awa!.id), isNotNull(rendezVous.creneauId)));
     expect(reserves).toEqual([]);
+  });
+
+  it("prépare la salle d'attente du jour : des personnes attendent, Mariam a rendez-vous ce matin", async () => {
+    await semerDemo(db, { aujourdhui });
+    const [mariam] = await db.select().from(patients).where(eq(patients.prenom, "Mariam"));
+    const rdvDuJour = await db.select().from(rendezVous).where(and(eq(rendezVous.patientId, mariam!.id), eq(rendezVous.datePrevue, aujourdhui), isNotNull(rendezVous.creneauId)));
+    expect(rdvDuJour).toHaveLength(1);
+    const lesPassages = await db.select().from(passages).where(eq(passages.jour, aujourdhui));
+    expect(lesPassages.filter((p) => p.appeleLe === null).length).toBeGreaterThanOrEqual(2);
+    expect(lesPassages.filter((p) => p.appeleLe !== null).length).toBeGreaterThanOrEqual(1);
   });
 });

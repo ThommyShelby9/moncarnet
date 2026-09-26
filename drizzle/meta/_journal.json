@@ -36,6 +36,13 @@
       "when": 1790382386537,
       "tag": "0004_pilotage",
       "breakpoints": true
+    },
+    {
+      "idx": 5,
+      "version": "7",
+      "when": 1790387029649,
+      "tag": "0005_salle_attente",
+      "breakpoints": true
     }
   ]
 }

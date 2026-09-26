@@ -316,3 +316,22 @@ export const indicateursZones = pgTable(
   },
   (t) => [uniqueIndex("indicateurs_zones_unique").on(t.zone, t.mois, t.code)],
 );
+
+/** Salle d'attente : un numéro de passage par personne, par jour et par centre ; une urgence passe devant (spec §4.4). */
+export const passages = pgTable(
+  "passages",
+  {
+    id: uuid("id").primaryKey().defaultRandom(),
+    etablissementId: uuid("etablissement_id").notNull().references(() => etablissements.id),
+    patientId: uuid("patient_id")
+      .notNull()
+      .references(() => patients.id, { onDelete: "cascade" }),
+    jour: date("jour", { mode: "string" }).notNull(),
+    numero: integer("numero").notNull(),
+    urgent: boolean("urgent").notNull().default(false),
+    arriveLe: horodatage("arrive_le").notNull(),
+    appeleLe: horodatage("appele_le"),
+    appelePar: uuid("appele_par").references(() => comptes.id),
+  },
+  (t) => [uniqueIndex("passages_numero").on(t.etablissementId, t.jour, t.numero), uniqueIndex("passages_patient").on(t.etablissementId, t.jour, t.patientId)],
+);

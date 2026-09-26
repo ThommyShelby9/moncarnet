@@ -33,10 +33,11 @@ describe("donneesAccueil", () => {
     );
   });
 
-  it("donne à Codjo, le soir : son comprimé, puis le vaccin de Sèna, puis son contrôle", async () => {
+  it("donne à Codjo, le soir : son comprimé, la consultation de Mariam du jour, puis le vaccin de Sèna, puis son contrôle", async () => {
     const { pile, ensuite } = cartesDuJour({ aujourdhui, heure: 20, ...(await donneesAccueil(db, Object.values(famille), aujourdhui)) });
     expect(pile.map((c) => [c.type, c.patientId])).toEqual([
       ["prise", famille.codjo],
+      ["rendez_vous", famille.mariam],
       ["rendez_vous", famille.sena],
       ["rendez_vous", famille.codjo],
     ]);

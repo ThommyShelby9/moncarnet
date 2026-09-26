@@ -46,7 +46,7 @@ const VILLAGES_SEHOUN = ["Sèhoun", "Kinta", "Adingnigon"] as const;
 const ALPHABET_CODE = "ABCDEFGHJKLMNPQRSTUVWXYZ23456789";
 
 const TABLES = [
-  "indicateurs_zones", "fichiers", "alertes", "liste_attente",
+  "passages", "indicateurs_zones", "fichiers", "alertes", "liste_attente",
   "contenus_traductions", "contenus", "ordonnances", "evenements", "rendez_vous", "creneaux", "modeles_plages",
   "inscriptions", "responsables", "consentements", "contacts", "patients", "foyers", "sessions", "comptes",
   "etablissements", "communes",
@@ -448,20 +448,53 @@ export async function semerDemo(db: Db, { aujourdhui }: { aujourdhui: DateISO })
   });
   if (venues.length) await db.insert(t.rendezVous).values(venues);
   nbRendezVous += venues.length;
+  const vusLe = new Map<string, Date>();
   for (const [i, venue] of venues.entries()) {
     if (venue.moment !== "matin" || !h.chance(0.5)) continue;
+    const vuLe = new Date(depuisDateISO(aujourdhui).getTime() + (7 * 60 + i * 12) * 60_000);
+    vusLe.set(venue.patientId, vuLe);
     await db.insert(t.evenements).values({
       id: randomUUID(),
       patientId: venue.patientId,
       type: "consultation",
       auteurId: venue.motif === "grossesse" ? adjoa.id : firmin.id,
-      survenuLe: new Date(depuisDateISO(aujourdhui).getTime() + (7 * 60 + i * 12) * 60_000),
+      survenuLe: vuLe,
       donnees: {
         motif: venue.motif,
         mesures: venue.motif === "tension" ? { tensionSys: h.entier(125, 175), tensionDia: h.entier(80, 105) } : {},
       },
     });
     nbEvenements++;
+  }
+
+  // --- Salle d'attente du matin : chaque venue a son numéro ; les personnes déjà vues ont été appelées (graine à part) ---
+  const hSalle = hasard(20260929);
+  const venuesDuMatin = venues.filter((v) => v.moment === "matin");
+  if (venuesDuMatin.length) {
+    await db.insert(t.passages).values(
+      venuesDuMatin.map((v, i) => {
+        const appeleLe = vusLe.get(v.patientId) ?? null;
+        // Arrivées entre 7 h et 9 h (heure du Bénin), avant l'appel pour les personnes déjà vues.
+        const arriveLe = new Date(depuisDateISO(aujourdhui).getTime() + (6 * 60 + i * 9 + hSalle.entier(0, 5)) * 60_000);
+        return { etablissementId: cs!.id, patientId: v.patientId, jour: aujourdhui, numero: i + 1, arriveLe: appeleLe && appeleLe < arriveLe ? new Date(appeleLe.getTime() - 20 * 60_000) : arriveLe, appeleLe, appelePar: appeleLe ? firmin.id : null };
+      }),
+    );
+  }
+
+  // --- Mariam a une place ce matin : Codjo dira qu'ils sont arrivés, et suivra son tour ---
+  const consultationDuMatin = plagesDuJour.find((c) => c.motif === "consultation" && c.moment === "matin");
+  if (consultationDuMatin) {
+    await db.insert(t.rendezVous).values({
+      patientId: idsPersonnages.mariam!,
+      motif: "consultation",
+      datePrevue: aujourdhui,
+      moment: "matin",
+      creneauId: consultationDuMatin.id,
+      etablissementId: cs!.id,
+      source: "patient",
+      reserveLe: depuisDateISO(ajouterJours(aujourdhui, -2)),
+    });
+    nbRendezVous++;
   }
 
   // --- Alertes des 30 derniers jours, toutes prises en charge : délais réalistes pour le pilotage ---
