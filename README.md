@@ -53,6 +53,13 @@ Ouvrez https://moncarnet.kheios.com/demo : un clic entre dans un compte.
 - **Chez le soignant** : les visites du relais et leurs notes vocales dans le dossier.
 - **Sans réseau pour tous** : l'application s'installe sur le téléphone ; les pages déjà ouvertes restent lisibles.
 
+## Pilotage (État)
+
+- **Agents de l'État, zone sanitaire Zogbodomey-Bohicon-Zakpota** : les indicateurs de la zone calculés en direct depuis les carnets, commune par commune. On y lit la 4ᵉ consultation prénatale, les naissances au centre, les vaccins Penta3 et rougeole-rubéole, la tension contrôlée, les alertes prises en charge en moins de 15 minutes et leur délai moyen, les visites des relais et les rendez-vous manqués. S'y ajoutent la tendance sur 6 mois et l'écart avec le mois dernier.
+- **Ministère de la Santé** : la vue nationale. Elle réunit la zone de la démo (en direct) et dix autres zones du pays (**données fictives**, signalées comme telles), le classement des zones par indicateur, la tendance nationale et les zones à appuyer.
+- **Export CSV au format DHIS2** (unité, période, élément, numérateur, dénominateur, valeur).
+- **Aucun nom** ne sort du pilotage. Un chiffre qui porte sur moins de 5 personnes est masqué, à l'écran comme dans l'export : la petite commune de Zogbodomey le montre.
+
 ## Démarrer en local
 
 Prérequis : Node 22, pnpm 11, un Postgres local.
@@ -78,7 +85,8 @@ Toutes les personnes sont fictives. La page `/demo` ouvre chaque compte en un cl
 | Sage-femme | adjoa.gbaguidi | demo1234 |
 | Infirmier | firmin.akpovi | demo1234 |
 | Pharmacie | pharmacie.sainte-rita | demo1234 |
-| Pilotage | zone.bohicon | demo1234 |
+| Agents de l'État (zone sanitaire) | zone.bohicon | demo1234 |
+| Ministère de la Santé (vue nationale) | ministere.sante | demo1234 |
 | Administration | admin | demo1234 |
 
 ## Commandes
