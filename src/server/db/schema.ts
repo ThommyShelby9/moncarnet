@@ -2,6 +2,7 @@ import {
   boolean,
   customType,
   date,
+  doublePrecision,
   integer,
   jsonb,
   pgEnum,
@@ -58,6 +59,9 @@ export const etablissements = pgTable("etablissements", {
   type: typeEtablissement("type").notNull(),
   communeId: uuid("commune_id").notNull().references(() => communes.id),
   telephone: text("telephone"),
+  /** Position sur les cartes du pilotage. */
+  latitude: doublePrecision("latitude"),
+  longitude: doublePrecision("longitude"),
 });
 
 export const comptes = pgTable("comptes", {

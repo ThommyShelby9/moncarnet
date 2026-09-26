@@ -2,6 +2,7 @@ import { randomUUID } from "node:crypto";
 import { and, asc, eq, isNotNull, isNull, sql } from "drizzle-orm";
 import { planifier } from "@/domain/calendrier";
 import { ageEnAnnees, ajouterJours, depuisDateISO, joursEntre, type DateISO } from "@/domain/dates";
+import { ZONES_SANITAIRES } from "@/domain/geographie";
 import { agreger, CODES_INDICATEURS, INDICATEURS, moisPrecedents, premierDuMois, type CodeIndicateur, type Valeurs } from "@/domain/pilotage";
 import { PROGRAMMES, type CodeProgramme, type MotifRdv } from "@/domain/programmes";
 import { texteRappel } from "@/domain/rappels";
@@ -95,8 +96,8 @@ export async function semerDemo(db: Db, { aujourdhui }: { aujourdhui: DateISO })
   const [cs, pharmacie] = await db
     .insert(t.etablissements)
     .values([
-      { nom: "Centre de santé de Bohicon", type: "centre_sante", communeId: bohicon!.id, telephone: "+2290121000000" },
-      { nom: "Pharmacie Sainte-Rita", type: "pharmacie", communeId: bohicon!.id, telephone: "+2290121000001" },
+      { nom: "Centre de santé de Bohicon", type: "centre_sante", communeId: bohicon!.id, telephone: "+2290121000000", latitude: 7.1782, longitude: 2.0667 },
+      { nom: "Pharmacie Sainte-Rita", type: "pharmacie", communeId: bohicon!.id, telephone: "+2290121000001", latitude: 7.1747, longitude: 2.0712 },
     ])
     .returning();
 
@@ -768,7 +769,10 @@ function mesuresPour(programme: CodeProgramme, h: Hasard, cle: string | null): R
   return {};
 }
 
-const ZONES_FICTIVES: [string, string][] = [
+const ZONE_DEMO = "Zogbodomey-Bohicon-Zakpota";
+
+/** Les dix premières zones fictives de la démo, dans leur ordre d'origine (leurs valeurs n'en dépendent pas) ; puis toutes les autres. */
+const ZONES_HISTORIQUES: [string, string][] = [
   ["Abomey-Calavi / Sô-Ava", "Atlantique"],
   ["Cotonou 1-4", "Littoral"],
   ["Covè / Ouinhi / Zangnanado", "Zou"],
@@ -779,6 +783,10 @@ const ZONES_FICTIVES: [string, string][] = [
   ["Natitingou / Boukoumbé / Toucountouna", "Atacora"],
   ["Parakou / N'Dali", "Borgou"],
   ["Porto-Novo / Aguégués / Sèmè-Podji", "Ouémé"],
+];
+const ZONES_FICTIVES: [string, string][] = [
+  ...ZONES_HISTORIQUES,
+  ...ZONES_SANITAIRES.filter((z) => z.zone !== ZONE_DEMO && !ZONES_HISTORIQUES.some(([nom]) => nom === z.zone)).map((z): [string, string] => [z.zone, z.departement]),
 ];
 
 /** Taux de départ (bas, haut) et effectifs (petit, grand) par indicateur : valeurs fictives mais plausibles. */
@@ -821,7 +829,6 @@ function indicateursFictifs(aujourdhui: DateISO) {
   return lignes;
 }
 
-const ZONE_DEMO = "Zogbodomey-Bohicon-Zakpota";
 
 /**
  * Un an de suivi dans la commune de Bohicon, en carnets sans compte (insérés par lots) : grossesses menées à terme et naissances,

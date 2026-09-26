@@ -2,7 +2,7 @@ import { and, asc, eq, gt, isNotNull, isNull } from "drizzle-orm";
 import { afterEach, beforeEach, describe, expect, it } from "vitest";
 import { verifierIdentifiants } from "@/server/auth/connexion";
 import type { Db } from "@/server/db/client";
-import { comptes, creneaux, evenements, foyers, inscriptions, listeAttente, ordonnances, passages, patients, rendezVous, responsables } from "@/server/db/schema";
+import { comptes, creneaux, etablissements, evenements, foyers, inscriptions, listeAttente, ordonnances, passages, patients, rendezVous, responsables } from "@/server/db/schema";
 import { COMPTES_DEMO } from "@/server/demo/donnees";
 import { semerDemo } from "@/server/demo/semer";
 import { creerDbDeTest } from "../../aides/base-de-test";
@@ -135,5 +135,17 @@ describe("semerDemo", () => {
     const cles = places.map((p) => `${p.patientId}|${p.jour}`);
     expect(new Set(cles).size).toBe(cles.length);
     expect((await db.select().from(listeAttente)).length).toBe(5);
+  });
+
+  it("place le centre de santé et la pharmacie de Bohicon sur la carte", async () => {
+    await semerDemo(db, { aujourdhui });
+    const lieux = await db.select().from(etablissements);
+    expect(lieux).toHaveLength(2);
+    for (const e of lieux) {
+      expect(e.latitude).toBeGreaterThan(7.1);
+      expect(e.latitude).toBeLessThan(7.25);
+      expect(e.longitude).toBeGreaterThan(2);
+      expect(e.longitude).toBeLessThan(2.12);
+    }
   });
 });

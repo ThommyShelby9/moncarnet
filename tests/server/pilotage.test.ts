@@ -1,6 +1,7 @@
 import { randomUUID } from "node:crypto";
 import { eq } from "drizzle-orm";
 import { afterAll, beforeAll, describe, expect, it } from "vitest";
+import { ZONES_SANITAIRES } from "@/domain/geographie";
 import { lireIndicateur } from "@/domain/pilotage";
 import type { Db } from "@/server/db/client";
 import { comptes } from "@/server/db/schema";
@@ -46,7 +47,9 @@ describe("vueNationale", () => {
   it("réunit la zone de la démo (en direct) et les autres zones du pays", async () => {
     const vue = await vueNationale(db, aujourdhui, maintenant);
     expect(vue.mois).toBe("2026-09-01");
-    expect(vue.zones).toHaveLength(11);
+    // Les 34 zones sanitaires du pays, toutes connues du fond de carte.
+    expect(vue.zones).toHaveLength(34);
+    expect(vue.zones.map((z) => z.zone).sort()).toEqual(ZONES_SANITAIRES.map((z) => z.zone).sort());
     expect(vue.zones.filter((z) => z.direct).map((z) => z.zone)).toEqual(["Zogbodomey-Bohicon-Zakpota"]);
     expect(vue.national.cpn4.denominateur).toBe(vue.zones.reduce((s, z) => s + z.valeurs.cpn4.denominateur, 0));
     expect(vue.tendance.map((t) => t.mois)).toEqual(["2026-04-01", "2026-05-01", "2026-06-01", "2026-07-01", "2026-08-01", "2026-09-01"]);
