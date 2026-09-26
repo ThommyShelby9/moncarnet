@@ -2,12 +2,13 @@ import { randomUUID } from "node:crypto";
 import { asc, eq, sql } from "drizzle-orm";
 import { planifier } from "@/domain/calendrier";
 import { ageEnAnnees, ajouterJours, depuisDateISO, joursEntre, type DateISO } from "@/domain/dates";
-import { CODES_INDICATEURS, moisPrecedents, premierDuMois, type CodeIndicateur } from "@/domain/pilotage";
+import { agreger, CODES_INDICATEURS, INDICATEURS, moisPrecedents, premierDuMois, type CodeIndicateur, type Valeurs } from "@/domain/pilotage";
 import { PROGRAMMES, type CodeProgramme, type MotifRdv } from "@/domain/programmes";
 import { hacher } from "../auth/mots-de-passe";
 import type { Db } from "../db/client";
 import * as t from "../db/schema";
 import { reserver } from "../patient/reservation";
+import { indicateursDesCommunes } from "../requetes/pilotage";
 import { COMPTES_DEMO } from "./donnees";
 
 export interface BilanDemo {
@@ -509,8 +510,13 @@ export async function semerDemo(db: Db, { aujourdhui }: { aujourdhui: DateISO })
     nbEvenements++;
   }
 
-  // --- Historique des 5 derniers mois et autres zones du pays (données fictives, générées à part) ---
-  await db.insert(t.indicateursZones).values(indicateursFictifs(aujourdhui));
+  // --- Un an de suivi à Bohicon (carnets sans compte) : des chiffres parlants pour le pilotage de la zone ---
+  nbEvenements += await semerSuiviBohicon(db, { aujourdhui, communeId: bohicon!.id, etablissementId: cs!.id, sageFemme: adjoa.id, infirmier: firmin.id, codeUnique });
+
+  // --- Historique : les autres zones du pays (fictives), et les 5 mois passés de la zone de la démo autour de ses valeurs du jour ---
+  const maintenantDemo = new Date(depuisDateISO(aujourdhui).getTime() + 12 * 3_600_000);
+  const zoneEnDirect = agreger([...(await indicateursDesCommunes(db, [bohicon!.id, zogbodomey!.id], aujourdhui, maintenantDemo)).values()]);
+  await db.insert(t.indicateursZones).values([...indicateursFictifs(aujourdhui), ...historiqueDeLaZone(zoneEnDirect, aujourdhui)]);
 
   // --- Contenus de base (texte français ; l'audio arrive au plan 6) ---
   const contenus = [
@@ -574,22 +580,18 @@ const PROFILS: Record<CodeIndicateur, { taux?: [number, number]; effectif: [numb
   etapes_manquees: { effectif: [40, 300] },
 };
 
-/**
- * Indicateurs mensuels fictifs : les 10 autres zones (6 mois, dont le mois en cours), et l'historique de la zone de la démo
- * (5 mois passés, à l'échelle de ses carnets). Graine à part : le reste de la démo ne change pas.
- */
+/** Indicateurs mensuels fictifs des 10 autres zones du pays (6 mois, dont le mois en cours). Graine à part : le reste de la démo ne change pas. */
 function indicateursFictifs(aujourdhui: DateISO) {
   const h = hasard(20260926);
   const mois = premierDuMois(aujourdhui);
   const lignes: (typeof t.indicateursZones.$inferInsert)[] = [];
-  const zones: [string, string, number, boolean][] = [...ZONES_FICTIVES.map(([z, d]) => [z, d, 1, false] as [string, string, number, boolean]), ["Zogbodomey-Bohicon-Zakpota", "Zou", 0.03, true]];
-  for (const [zone, departement, echelle, demo] of zones) {
+  for (const [zone, departement] of ZONES_FICTIVES) {
     const base = Object.fromEntries(CODES_INDICATEURS.map((c) => [c, h.nombre()])) as Record<CodeIndicateur, number>;
-    const lesMois = [...moisPrecedents(mois, 5), ...(demo ? [] : [mois])];
+    const lesMois = [...moisPrecedents(mois, 5), mois];
     for (const [rang, m] of lesMois.entries()) {
       for (const code of CODES_INDICATEURS) {
         const p = PROFILS[code];
-        const effectif = Math.max(demo ? 5 : 1, Math.round((p.effectif[0] + base[code] * (p.effectif[1] - p.effectif[0])) * echelle * (0.9 + h.nombre() * 0.2)));
+        const effectif = Math.max(1, Math.round((p.effectif[0] + base[code] * (p.effectif[1] - p.effectif[0])) * (0.9 + h.nombre() * 0.2)));
         if (p.taux) {
           const taux = Math.min(0.99, p.taux[0] + base[code] * (p.taux[1] - p.taux[0]) + rang * 0.01 + (h.nombre() - 0.5) * 0.04);
           lignes.push({ zone, departement, mois: m, code, numerateur: Math.round(effectif * taux), denominateur: effectif });
@@ -603,4 +605,154 @@ function indicateursFictifs(aujourdhui: DateISO) {
     }
   }
   return lignes;
+}
+
+const ZONE_DEMO = "Zogbodomey-Bohicon-Zakpota";
+
+/**
+ * Un an de suivi dans la commune de Bohicon, en carnets sans compte (insérés par lots) : grossesses menées à terme et naissances,
+ * bébés vaccinés, grossesses en cours, jeunes enfants, hypertendus et leurs relevés. Assez de monde pour que la zone ait des chiffres
+ * parlants, alors que Zogbodomey reste une petite commune où le masquage se voit. Graine à part : le reste de la démo ne bouge pas.
+ */
+async function semerSuiviBohicon(
+  db: Db,
+  e: { aujourdhui: DateISO; communeId: string; etablissementId: string; sageFemme: string; infirmier: string; codeUnique: () => string },
+): Promise<number> {
+  const h = hasard(20260927);
+  const lesFoyers: { id: string; nom: string; village: string; communeId: string }[] = [];
+  const lesPatients: (typeof t.patients.$inferInsert & { id: string; dateNaissance: DateISO })[] = [];
+  const lesInscriptions: (typeof t.inscriptions.$inferInsert)[] = [];
+  const lesEvenements: (typeof t.evenements.$inferInsert)[] = [];
+  const le = (d: DateISO, heures = 9) => new Date(depuisDateISO(d).getTime() + heures * 3_600_000);
+  const nouveauFoyer = () => {
+    const foyer = { id: randomUUID(), nom: h.parmi(NOMS), village: h.parmi(VILLAGES_BOHICON), communeId: e.communeId };
+    lesFoyers.push(foyer);
+    return foyer;
+  };
+  const personne = (foyer: { id: string; nom: string }, sexe: "F" | "M", dateNaissance: DateISO, mereId?: string) => {
+    const p = {
+      id: randomUUID(),
+      foyerId: foyer.id,
+      prenom: h.parmi(sexe === "F" ? PRENOMS_F : PRENOMS_M),
+      nom: foyer.nom,
+      sexe,
+      dateNaissance,
+      codeCourt: e.codeUnique(),
+      etablissementId: e.etablissementId,
+      canalPrefere: h.parmi(["whatsapp", "sms", "sms", "vocal"] as const),
+      mereId,
+    };
+    lesPatients.push(p);
+    return p;
+  };
+  const consulter = (patientId: string, jour: DateISO, donnees: Record<string, unknown>, auteurId: string) =>
+    lesEvenements.push({ id: randomUUID(), patientId, type: "consultation", auteurId, survenuLe: le(jour), donnees });
+  const vacciner = (enfantId: string, naissance: DateISO) => {
+    lesInscriptions.push({ patientId: enfantId, programme: "vaccination", dateReference: naissance, dateInscription: naissance });
+    const chances: Record<string, number> = { naissance: 0.95, "6sem": 0.9, "10sem": 0.86, "14sem": 0.8, "9mois": 0.74, "15mois": 0.62 };
+    for (const etape of planifier(PROGRAMMES.vaccination, naissance, naissance)) {
+      if (joursEntre(etape.datePrevue, e.aujourdhui) < 0 || !h.chance(chances[etape.code] ?? 0.7)) continue;
+      lesEvenements.push({
+        id: randomUUID(),
+        patientId: enfantId,
+        type: "vaccination",
+        auteurId: e.sageFemme,
+        survenuLe: le(ajouterJours(etape.datePrevue, h.entier(0, 6))),
+        donnees: { etape: etape.code, vaccins: (etape.details ?? "").split(", ") },
+      });
+    }
+  };
+  const suivreGrossesse = (mereId: string, ddr: DateISO, active: boolean) => {
+    const inscription = ajouterJours(ddr, 8 * 7);
+    lesInscriptions.push({ patientId: mereId, programme: "grossesse", dateReference: ddr, dateInscription: inscription, active });
+    const chances: Record<string, number> = { cpn1: 0.95, cpn2: 0.85, cpn3: 0.72, cpn4: 0.62 };
+    for (const etape of planifier(PROGRAMMES.grossesse, ddr, inscription)) {
+      if (!etape.rendezVous || joursEntre(etape.datePrevue, e.aujourdhui) < 0 || !h.chance(chances[etape.code] ?? 0)) continue;
+      const mesures = { tensionSys: h.entier(100, 138), tensionDia: h.entier(60, 88), poidsKg: h.entier(55, 85) };
+      consulter(mereId, ajouterJours(etape.datePrevue, h.entier(-3, 5)), { motif: "grossesse", etape: etape.code, mesures }, e.sageFemme);
+    }
+  };
+
+  // Mères qui ont accouché dans l'année, et leur bébé.
+  for (let i = 0; i < 16; i++) {
+    const foyer = nouveauFoyer();
+    const mere = personne(foyer, "F", ajouterJours(e.aujourdhui, -h.entier(18, 38) * 365));
+    const naissance = ajouterJours(e.aujourdhui, -h.entier(20, 350));
+    suivreGrossesse(mere.id, ajouterJours(naissance, -h.entier(266, 287)), false);
+    const sexe = h.chance(0.5) ? "F" : "M";
+    const bebe = personne(foyer, sexe, naissance, mere.id);
+    const lieu = h.chance(0.86) ? "centre" : h.chance(0.5) ? "hopital" : "domicile";
+    lesEvenements.push({
+      id: randomUUID(),
+      patientId: mere.id,
+      type: "accouchement",
+      auteurId: e.sageFemme,
+      survenuLe: le(naissance, 5),
+      donnees: {
+        le: le(naissance, 5).toISOString(),
+        lieu,
+        mode: h.chance(0.88) ? "voie_basse" : "cesarienne",
+        enfant: { id: bebe.id, sexe, poidsGrammes: h.entier(2500, 3900) },
+      },
+    });
+    vacciner(bebe.id, naissance);
+  }
+  // Grossesses en cours.
+  for (let i = 0; i < 8; i++) {
+    const mere = personne(nouveauFoyer(), "F", ajouterJours(e.aujourdhui, -h.entier(17, 40) * 365));
+    suivreGrossesse(mere.id, ajouterJours(e.aujourdhui, -h.entier(14, 39) * 7), true);
+  }
+  // Enfants de 10 mois à 2 ans : vaccins des 9 et 15 mois.
+  for (let i = 0; i < 12; i++) {
+    const enfant = personne(nouveauFoyer(), h.chance(0.5) ? "F" : "M", ajouterJours(e.aujourdhui, -h.entier(300, 720)));
+    vacciner(enfant.id, enfant.dateNaissance);
+  }
+  // Hypertendus, deux relevés dans les 6 derniers mois ; un peu moins de la moitié ont une tension contrôlée.
+  for (let i = 0; i < 30; i++) {
+    const foyer = i % 2 === 0 ? nouveauFoyer() : lesFoyers[lesFoyers.length - 1]!;
+    const malade = personne(foyer, h.chance(0.5) ? "F" : "M", ajouterJours(e.aujourdhui, -h.entier(42, 75) * 365));
+    lesInscriptions.push({
+      patientId: malade.id,
+      programme: "hypertension",
+      dateReference: ajouterJours(e.aujourdhui, -h.entier(200, 1500)),
+      dateInscription: ajouterJours(e.aujourdhui, -h.entier(150, 360)),
+    });
+    const controlee = h.chance(0.46);
+    for (const jours of [h.entier(100, 170), h.entier(10, 90)]) {
+      const mesures = controlee
+        ? { tensionSys: h.entier(118, 138), tensionDia: h.entier(70, 88) }
+        : { tensionSys: h.entier(142, 178), tensionDia: h.entier(91, 106) };
+      consulter(malade.id, ajouterJours(e.aujourdhui, -jours), { motif: "tension", mesures }, e.infirmier);
+    }
+  }
+
+  await db.insert(t.foyers).values(lesFoyers);
+  // Les mères et leurs bébés dans la même instruction : la contrainte mere_id est vérifiée à la fin de l'instruction.
+  await db.insert(t.patients).values(lesPatients);
+  await db.insert(t.inscriptions).values(lesInscriptions);
+  await db.insert(t.evenements).values(lesEvenements);
+  return lesEvenements.length;
+}
+
+/** Les 5 mois passés de la zone de la démo, autour de ses valeurs du jour : une tendance qui a du sens. */
+function historiqueDeLaZone(actuel: Valeurs, aujourdhui: DateISO) {
+  const h = hasard(20260928);
+  return moisPrecedents(premierDuMois(aujourdhui), 5).flatMap((mois, rang) =>
+    CODES_INDICATEURS.map((code) => {
+      const { numerateur, denominateur } = actuel[code];
+      // Plus le mois est ancien, plus on s'éloigne de la valeur du jour : les indicateurs progressent doucement.
+      const recul = 5 - rang;
+      const ligne = { zone: ZONE_DEMO, departement: "Zou", mois, code };
+      const unite = INDICATEURS[code].unite;
+      if (unite === "nombre") return { ...ligne, numerateur: Math.max(0, Math.round(numerateur * (0.8 + h.nombre() * 0.4))), denominateur: 0 };
+      const effectif = Math.max(5, Math.round(Math.max(denominateur, 5) * (0.85 + h.nombre() * 0.3)));
+      if (unite === "minutes") {
+        const moyenne = denominateur ? numerateur / denominateur : 14;
+        return { ...ligne, numerateur: Math.round(effectif * (moyenne + recul * 0.6 + (h.nombre() - 0.5) * 2)), denominateur: effectif };
+      }
+      const taux = denominateur ? numerateur / denominateur : 0.5;
+      const t = Math.min(0.99, Math.max(0.05, taux - recul * 0.015 + (h.nombre() - 0.5) * 0.04));
+      return { ...ligne, numerateur: Math.round(effectif * t), denominateur: effectif };
+    }),
+  );
 }

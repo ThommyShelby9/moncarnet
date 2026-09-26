@@ -20,7 +20,8 @@ describe("semerDemo", () => {
   it("crée les personnages, les comptes et un historique", async () => {
     const bilan = await semerDemo(db, { aujourdhui });
     expect(bilan.comptes).toBe(COMPTES_DEMO.length);
-    expect(bilan.foyers).toBe(24);
+    // 24 foyers des personnages et de la population, 51 foyers suivis depuis un an à Bohicon (pilotage).
+    expect(bilan.foyers).toBe(75);
     expect(bilan.patients).toBeGreaterThanOrEqual(47);
     expect(bilan.rendezVous).toBeGreaterThan(80);
     expect(bilan.evenements).toBeGreaterThan(40);
