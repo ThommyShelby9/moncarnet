@@ -92,6 +92,13 @@ const CONSTAT: { chiffre: string; texte: string; source: string }[] = [
   { chiffre: "38 %", texte: "des abonnements mobiles sont encore en 2G ; la 4G ne couvre que 63 % des zones rurales.", source: "ARCEP Bénin (2025)" },
 ];
 
+const POSTE: { icone: NomIcone; titre: string; texte: string }[] = [
+  { icone: "ph-calendar-dots", titre: "Agenda", texte: "Les plages des 7 jours, les places prises et la liste d'attente ; une place de plus, « Donner la place », une plage à ouvrir." },
+  { icone: "ph-list-checks", titre: "Suivis", texte: "Grossesses par terme, vaccins en retard, tensions trop hautes, perdus de vue : qui relancer aujourd'hui." },
+  { icone: "hi-community-healthworker", titre: "Relais et alertes", texte: "Les visites à orienter d'abord, les notes vocales ; l'historique des alertes et le délai de 15 minutes." },
+  { icone: "ph-package", titre: "Pharmacie", texte: "Délivrer par le code, l'historique des délivrances, les ruptures que les soignants voient avant de prescrire." },
+];
+
 const PRINCIPES: { icone: NomIcone; titre: string; texte: string }[] = [
   { icone: "ph-speaker-high", titre: "Tout s'écoute", texte: "Chaque carte, chaque conseil, chaque posologie se lit à voix haute : on n'a pas besoin de savoir lire." },
   { icone: "ph-list-checks", titre: "Un pictogramme et un mot", texte: "Les signes de danger, les moments de prise et les motifs de rendez-vous sont dessinés." },
@@ -302,6 +309,33 @@ export default function PageDecouvrir() {
                 </li>
               </ul>
             </div>
+            <div className="grid gap-6">
+              <div className="max-w-3xl">
+                <h3 className="text-2xl font-bold">Un vrai poste de travail</h3>
+                <p className="mt-1 text-gris">Au centre et à la pharmacie, chaque menu répond à une question de tous les jours.</p>
+              </div>
+              <ul className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
+                {POSTE.map((p) => (
+                  <li key={p.titre} className="flex flex-col gap-2 rounded-carte bg-lavande p-4">
+                    <Icone nom={p.icone} className="size-7 text-marque" />
+                    <b>{p.titre}</b>
+                    <p className="text-sm text-gris">{p.texte}</p>
+                  </li>
+                ))}
+              </ul>
+              <div className="grid gap-8 lg:grid-cols-2">
+                <Navigateur
+                  src="soignant-agenda"
+                  alt="Agenda du centre sur 7 jours : 65 places prises sur 144, 2 plages complètes, 5 personnes en attente, et le formulaire « Ouvrir une plage »"
+                  legende="L'agenda : places prises, plages complètes, liste d'attente ; une plage de plus en un geste."
+                />
+                <Navigateur
+                  src="soignant-suivis"
+                  alt="Suivis : 17 grossesses, 12 vaccins, 40 tensions, 10 perdus de vue ; « Confier au relais » ouvert pour Rose Tossou"
+                  legende="Les listes de suivi : appeler, ouvrir le dossier ou confier une visite au relais."
+                />
+              </div>
+            </div>
           </div>
         </section>
 
@@ -314,12 +348,14 @@ export default function PageDecouvrir() {
               </h2>
               <p className="mt-2 text-lg text-lavande-3">Les agents de la zone sanitaire et le ministère voient les mêmes indicateurs, à leur échelle, sans jamais une personne.</p>
             </div>
-            <ul className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
+            <ul className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
               {[
                 { icone: "ph-heartbeat" as NomIcone, texte: "Calculés en direct depuis les carnets : 4ᵉ consultation, naissances au centre, vaccins, tension, alertes." },
                 { icone: "ph-shield-check" as NomIcone, texte: "Un chiffre qui porte sur moins de 5 personnes est masqué, à l'écran comme dans l'export." },
                 { icone: "ph-chart-line-up" as NomIcone, texte: "Tendance sur 6 mois, classement des zones et zones à appuyer pour le ministère." },
-                { icone: "ph-download-simple" as NomIcone, texte: "Export au format DHIS2, pour rejoindre le système national d'information sanitaire." },
+                { icone: "hi-ambulatory-clinic" as NomIcone, texte: "Centre par centre : consultations, attente en salle, délai des alertes ; relais par relais : foyers visités." },
+                { icone: "ph-map-trifold" as NomIcone, texte: "Pour le ministère, une fiche par zone sanitaire, et les alertes prises à temps zone par zone." },
+                { icone: "ph-download-simple" as NomIcone, texte: "Exports au format DHIS2 (mois, 6 mois, centres), pour rejoindre le système national d'information sanitaire." },
               ].map((p) => (
                 <li key={p.texte} className="flex flex-col gap-2 rounded-carte bg-white/5 p-4">
                   <Icone nom={p.icone} className="size-7 text-soleil" />
@@ -327,7 +363,7 @@ export default function PageDecouvrir() {
                 </li>
               ))}
             </ul>
-            <div className="grid gap-8 lg:grid-cols-2">
+            <div className="grid gap-8 lg:grid-cols-3">
               <Navigateur
                 src="pilotage-zone"
                 alt="Pilotage de la zone sanitaire Zogbodomey-Bohicon-Zakpota : 4ᵉ consultation 61 %, naissances au centre 95 %, Penta3 86 %, avec les objectifs"
@@ -338,6 +374,12 @@ export default function PageDecouvrir() {
                 src="pilotage-ministere"
                 alt="Vue nationale du ministère : classement des zones sanitaires pour le vaccin Penta3, tendance nationale et zones à appuyer"
                 legende="Le ministère : toutes les zones, la tendance nationale, les zones à appuyer (données fictives)."
+                sombre
+              />
+              <Navigateur
+                src="pilotage-centres"
+                alt="Centres et relais de la zone : le centre de santé de Bohicon (consultations, 59 minutes d'attente, 12 minutes pour prendre une alerte) et le relais Koffi (8 foyers, 17 visites)"
+                legende="Centre par centre et relais par relais : l'activité du mois, sans aucun nom de patient."
                 sombre
               />
             </div>

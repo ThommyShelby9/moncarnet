@@ -54,12 +54,18 @@ Ouvrez https://moncarnet.kheios.com/demo : un clic entre dans un compte.
 ## Poste soignant et pharmacie
 
 - **Aujourd'hui** : les alertes en haut avec leur compte à rebours de 15 minutes (une alerte en retard est marquée, et remonte à la zone sanitaire) et « Je la prends en charge » (un seul soignant la prend) ; les consultations du jour par plage, avec le risque de chacun et le tampon « VU » pour les personnes déjà vues ; les patients à surveiller. La page se met à jour seule.
+- **Agenda** : les plages des 7 jours à venir, avec les places prises, les plages complètes et la liste d'attente. Dans une plage : les personnes inscrites, celles qui attendent, une place de plus ou de moins (jamais sous le nombre d'inscrits) et « Donner la place » à une personne qui attend. « Ouvrir une plage » ajoute un samedi de vaccination ou une matinée de rattrapage.
+- **Suivis** : les listes de travail du centre. Grossesses du terme le plus proche au plus lointain, vaccins en retard ou à faire dans la semaine, tensions trop hautes ou contrôles manqués, perdus de vue. Chaque ligne permet d'appeler, d'ouvrir le dossier ou de **confier une visite au relais** : la consigne entre dans sa tournée jusqu'à sa prochaine visite.
+- **Relais** : les visites des 30 derniers jours, celles « à orienter » d'abord, les notes vocales à écouter, et le suivi des visites confiées.
+- **Alertes** : l'historique des signes de danger avec leur délai de prise en charge et qui les a prises, le délai moyen et la part prise en 15 minutes.
 - **Retrouver un patient** par son nom (sans accent), son numéro ou le code écrit dans son carnet. Un soignant ne voit que les patients de son centre.
 - **Dossier** : risque et motifs (règles de la spec, valeurs indicatives), étapes des programmes, relevés, ordonnances avec leur délivrance.
 - **Déclarer la naissance** (sage-femme) : heure, lieu, voie basse ou césarienne, sexe, poids (« 3,2 » ou « 3200 »), vaccins de naissance ; une seule fois par grossesse.
 - **Consultation** : tension, glycémie, poids, hémoglobine ; le risque est recalculé tout de suite (180/110 : risque élevé). Un vaccin fait coche l'étape dans le carnet de l'enfant.
-- **Ordonnance** : comprimés matin, midi et soir, durée, en mots simples ; un code de 6 caractères à donner au patient, qui le retrouve aussi dans son carnet.
+- **Ordonnance** : comprimés matin, midi et soir, durée, en mots simples ; un code de 6 caractères à donner au patient, qui le retrouve aussi dans son carnet. Les ruptures signalées par les pharmacies s'affichent au-dessus du formulaire.
 - **Pharmacie** : le code suffit ; la pharmacie voit l'ordonnance, jamais le dossier. Posologie dessinée, écoute de la posologie, délivrance une seule fois : le tampon apparaît chez le soignant et les prises dans le carnet du patient. Code de démonstration : `M4R2TN`.
+- **Historique de la pharmacie** : les délivrances des 30 derniers jours (code et initiales seulement) et les médicaments les plus délivrés.
+- **Ruptures de stock** : la pharmacie signale ce qui manque et dit quand il revient ; les soignants le voient avant de prescrire.
 
 ## Relais hors ligne
 
@@ -74,7 +80,11 @@ Ouvrez https://moncarnet.kheios.com/demo : un clic entre dans un compte.
 
 - **Agents de l'État, zone sanitaire Zogbodomey-Bohicon-Zakpota** : les indicateurs de la zone calculés en direct depuis les carnets, commune par commune. On y lit la 4ᵉ consultation prénatale, les naissances au centre, les vaccins Penta3 et rougeole-rubéole, la tension contrôlée, les alertes prises en charge en moins de 15 minutes et leur délai moyen, les visites des relais et les rendez-vous manqués. S'y ajoutent la tendance sur 6 mois et l'écart avec le mois dernier.
 - **Ministère de la Santé** : la vue nationale. Elle réunit la zone de la démo (en direct) et dix autres zones du pays (**données fictives**, signalées comme telles), le classement des zones par indicateur, la tendance nationale et les zones à appuyer.
-- **Export CSV au format DHIS2** (unité, période, élément, numérateur, dénominateur, valeur).
+- **Indicateurs** : un indicateur à la fois, avec sa définition, son objectif, sa tendance, puis le détail commune par commune (zone) ou zone par zone (ministère).
+- **Centres et relais** (zone) : pour chaque centre, les consultations, l'attente moyenne en salle, les alertes et leur délai, les places des 7 jours à venir ; pour chaque relais, les foyers suivis, les visites et la part des foyers visités.
+- **Alertes** : en direct et semaine par semaine pour la zone, centre par centre ; zone par zone pour le ministère.
+- **Zones** (ministère) : toutes les zones côte à côte, et la fiche de chacune (en direct pour la zone de la démo).
+- **Exports CSV au format DHIS2** (unité, période, élément, numérateur, dénominateur, valeur) : indicateurs du mois, historique sur 6 mois, activité des centres et des relais.
 - **Aucun nom** ne sort du pilotage. Un chiffre qui porte sur moins de 5 personnes est masqué, à l'écran comme dans l'export : la petite commune de Zogbodomey le montre.
 
 ## Administration
