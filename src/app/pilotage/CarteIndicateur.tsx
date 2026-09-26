@@ -3,7 +3,7 @@ import { Icone } from "@/ui/Icone";
 
 export const STYLE_NIVEAU: Record<Niveau, { texte: string; badge: string; barre: string; libelle: string }> = {
   bon: { texte: "text-marque", badge: "bg-lavande-2 text-marque", barre: "bg-marque", libelle: "Objectif atteint" },
-  moyen: { texte: "text-soleil-appuye", badge: "bg-soleil-pale text-nuit", barre: "bg-soleil", libelle: "Presque" },
+  moyen: { texte: "text-soleil-fonce", badge: "bg-soleil-pale text-nuit", barre: "bg-soleil", libelle: "Presque" },
   faible: { texte: "text-urgence", badge: "bg-urgence-pale text-urgence", barre: "bg-urgence", libelle: "À appuyer" },
 };
 

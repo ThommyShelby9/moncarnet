@@ -53,7 +53,7 @@ export default async function MaGrossesse({ searchParams }: PageProps<"/grossess
           <div className="grid size-24 shrink-0 place-items-center rounded-full border-[6px] border-white/25 bg-white/10 text-center">
             <span>
               <b className="block text-4xl leading-none">{suivi.semaines}</b>
-              <small className="text-xs text-lavande-3">semaines</small>
+              <small className="text-xs text-white">semaines</small>
             </span>
           </div>
           <div className="min-w-0 flex-1">

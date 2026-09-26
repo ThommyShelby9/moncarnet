@@ -42,7 +42,7 @@ function Telephone({ src, alt, legende, prioritaire = false }: { src: string; al
   );
 }
 
-function Navigateur({ src, alt, legende }: { src: string; alt: string; legende?: string }) {
+function Navigateur({ src, alt, legende, sombre = false }: { src: string; alt: string; legende?: string; sombre?: boolean }) {
   return (
     <figure className="flex min-w-0 flex-col gap-3">
       <div className="overflow-hidden rounded-2xl bg-white shadow-[0_30px_60px_-30px_rgb(22_21_74_/_0.45)] ring-1 ring-lavande-3">
@@ -54,7 +54,7 @@ function Navigateur({ src, alt, legende }: { src: string; alt: string; legende?:
         </div>
         <Image src={`/decouvrir/${src}.webp`} alt={alt} width={1280} height={800} unoptimized loading="lazy" className="h-auto w-full" />
       </div>
-      {legende && <figcaption className="text-sm leading-snug text-gris">{legende}</figcaption>}
+      {legende && <figcaption className={`text-sm leading-snug ${sombre ? "text-lavande-3" : "text-gris"}`}>{legende}</figcaption>}
     </figure>
   );
 }
@@ -71,8 +71,18 @@ function Etape({ numero, titre, children }: { numero: number; titre: string; chi
   );
 }
 
-function Rangee({ children }: { children: React.ReactNode }) {
-  return <div className="-mx-4 flex snap-x gap-6 overflow-x-auto px-4 pb-4 lg:mx-0 lg:grid lg:grid-cols-4 lg:overflow-visible lg:px-0">{children}</div>;
+/** Une rangée de captures qui défile sur mobile : on peut aussi la faire défiler au clavier. */
+function Rangee({ nom, grille = true, children }: { nom: string; grille?: boolean; children: React.ReactNode }) {
+  return (
+    <div
+      role="region"
+      aria-label={nom}
+      tabIndex={0}
+      className={`-mx-4 flex snap-x gap-6 overflow-x-auto px-4 pb-4 focus-visible:outline-3 focus-visible:outline-soleil-appuye lg:mx-0 lg:px-0 ${grille ? "lg:grid lg:grid-cols-4 lg:overflow-visible" : ""}`}
+    >
+      {children}
+    </div>
+  );
 }
 
 const CONSTAT: { chiffre: string; texte: string; source: string }[] = [
@@ -198,7 +208,7 @@ export default function PageDecouvrir() {
                 Le carnet du bébé apparaît chez Awa, avec ses vaccins de naissance ; les visites après l&apos;accouchement lui sont proposées.
               </Etape>
             </ol>
-            <Rangee>
+            <Rangee nom="Les écrans d'Awa">
               <Telephone src="awa-plan" alt="Préparer la naissance : six choses à prévoir, dont trois déjà cochées, avec un pictogramme chacune" legende="Préparer la naissance : 3 sur 6" />
               <Telephone src="awa-probleme" alt="Écran « J'ai un problème » : les signes de danger de la grossesse en pictogrammes, « Le travail a commencé » en premier" legende="Les signes de danger en images" />
               <Telephone src="awa-felicitations" alt="Accueil d'Awa après la naissance : « Bienvenue à Sènami ! » et la visite du 3ᵉ jour à prévoir" legende="Bienvenue à Sènami" />
@@ -221,11 +231,11 @@ export default function PageDecouvrir() {
             <p className="mt-2 text-lg text-gris">58 ans, une tension à surveiller, et les carnets de sa femme et de son petit-fils sur le même téléphone.</p>
           </div>
           <div className="grid items-start gap-10 lg:grid-cols-[auto_1fr]">
-            <div className="-mx-4 flex snap-x gap-6 overflow-x-auto px-4 pb-4 lg:mx-0 lg:px-0">
+            <Rangee nom="Les écrans de Codjo" grille={false}>
               <Telephone src="codjo-accueil" alt="Accueil de Codjo : « Ce soir, 1 comprimé pour la tension », à écouter, avec C'est fait et Plus tard" legende="Une chose à la fois, à écouter" />
               <Telephone src="codjo-rendez-vous" alt="Prendre rendez-vous, étape 3 sur 4 : les séances de vaccination avec les soleils qui comptent les jours et les places restantes" legende="Un rendez-vous en 4 étapes pour Sèna" />
               <Telephone src="codjo-carnet" alt="Carnet de Codjo : sa courbe de tension avec la limite 140/90 en pointillés rouges, et son comprimé du soir" legende="Sa courbe de tension" />
-            </div>
+            </Rangee>
             <div className="flex flex-col gap-6">
               <ol className="grid gap-5">
                 <Etape numero={1} titre="L'accueil dit une chose à la fois">
@@ -262,10 +272,10 @@ export default function PageDecouvrir() {
               legende="Les alertes en haut, avec leur compte à rebours de 15 minutes ; un seul soignant peut la prendre en charge."
             />
             <div className="grid items-center gap-10 lg:grid-cols-[auto_1fr]">
-              <div className="-mx-4 flex snap-x gap-6 overflow-x-auto px-4 pb-4 lg:mx-0 lg:px-0">
+              <Rangee nom="Les écrans du relais" grille={false}>
                 <Telephone src="relais-tournee" alt="Tournée du relais Koffi : les foyers à voir d'abord, avec la raison de passer chez chacun" legende="La tournée par foyer" />
                 <Telephone src="relais-visite" alt="Visite chez Afiavi sans réseau : À orienter vers le centre, note vocale de 3 secondes, tension 15 sur 9" legende="Une visite racontée au micro, sans réseau" />
-              </div>
+              </Rangee>
               <ul className="flex flex-col gap-4 text-lg">
                 <li className="flex gap-3">
                   <Icone nom="hi-community-healthworker" className="size-8 shrink-0 text-marque" />
@@ -313,11 +323,13 @@ export default function PageDecouvrir() {
                 src="pilotage-zone"
                 alt="Pilotage de la zone sanitaire Zogbodomey-Bohicon-Zakpota : 4ᵉ consultation 61 %, naissances au centre 95 %, Penta3 86 %, avec les objectifs"
                 legende="Les agents de la zone sanitaire : les indicateurs en direct, commune par commune."
+                sombre
               />
               <Navigateur
                 src="pilotage-ministere"
                 alt="Vue nationale du ministère : classement des zones sanitaires pour le vaccin Penta3, tendance nationale et zones à appuyer"
                 legende="Le ministère : toutes les zones, la tendance nationale, les zones à appuyer (données fictives)."
+                sombre
               />
             </div>
           </div>

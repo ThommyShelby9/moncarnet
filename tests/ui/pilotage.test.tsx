@@ -16,6 +16,11 @@ describe("CarteIndicateur", () => {
     expect(screen.getByText("+7 points")).toBeTruthy();
   });
 
+  it("écrit « Presque » dans un ambre foncé, lisible sur fond blanc (contraste AA)", () => {
+    render(<CarteIndicateur code="cpn4" comptage={{ numerateur: 50, denominateur: 100 }} />);
+    expect(screen.getByText("50 %").className).toContain("text-soleil-fonce");
+  });
+
   it("masque un chiffre qui porte sur moins de 5 personnes", () => {
     render(<CarteIndicateur code="penta3" comptage={{ numerateur: 2, denominateur: 3 }} />);
     expect(screen.getByText("Masqué")).toBeTruthy();
