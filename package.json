@@ -12,7 +12,8 @@
     "typecheck": "next typegen && tsc --noEmit",
     "db:generate": "drizzle-kit generate",
     "db:seed": "tsx --env-file=.env.local scripts/seed.ts",
-    "icones": "node scripts/construire-sprite.mjs"
+    "icones": "node scripts/construire-sprite.mjs",
+    "carte": "tsx scripts/construire-carte.ts"
   },
   "dependencies": {
     "drizzle-orm": "0.45.3",
