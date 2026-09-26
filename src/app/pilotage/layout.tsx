@@ -18,7 +18,25 @@ export default async function PilotageLayout({ children }: { children: React.Rea
             <small className="block truncate text-xs text-gris">{national ? "Vue nationale" : "Zone sanitaire"}</small>
           </div>
         </div>
-        <MenuLateral liens={[{ href: "/pilotage", libelle: national ? "Vue nationale" : "Ma zone", icone: national ? "ph-bank" : "ph-map-trifold" }]} />
+        <MenuLateral
+          liens={
+            national
+              ? [
+                  { href: "/pilotage", libelle: "Vue nationale", icone: "ph-bank" },
+                  { href: "/pilotage/zones", libelle: "Zones", icone: "ph-map-trifold" },
+                  { href: "/pilotage/indicateurs", libelle: "Indicateurs", icone: "ph-chart-line-up" },
+                  { href: "/pilotage/alertes", libelle: "Alertes", icone: "ph-bell" },
+                  { href: "/pilotage/exports", libelle: "Exports", icone: "ph-download-simple" },
+                ]
+              : [
+                  { href: "/pilotage", libelle: "Ma zone", icone: "ph-map-trifold" },
+                  { href: "/pilotage/indicateurs", libelle: "Indicateurs", icone: "ph-chart-line-up" },
+                  { href: "/pilotage/centres", libelle: "Centres et relais", icone: "hi-ambulatory-clinic" },
+                  { href: "/pilotage/alertes", libelle: "Alertes", icone: "ph-bell" },
+                  { href: "/pilotage/exports", libelle: "Exports", icone: "ph-download-simple" },
+                ]
+          }
+        />
         <div className="flex items-center gap-2.5 rounded-2xl bg-lavande p-2.5 md:mt-auto">
           <span className="grid size-9 shrink-0 place-items-center rounded-xl bg-marque text-white">
             <Icone nom={national ? "ph-bank" : "ph-map-trifold"} className="size-5" />

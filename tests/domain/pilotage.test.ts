@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { agreger, lignesDe, lireIndicateur, moisPrecedents, premierDuMois, versCsv, vide } from "@/domain/pilotage";
+import { activiteVersCsv, agreger, lignesDe, lireIndicateur, moisPrecedents, premierDuMois, versCsv, vide } from "@/domain/pilotage";
 
 describe("lireIndicateur", () => {
   it("masque un taux qui porte sur moins de 5 personnes", () => {
@@ -49,5 +49,30 @@ describe("mois", () => {
     expect(premierDuMois("2026-09-26")).toBe("2026-09-01");
     expect(moisPrecedents("2026-03-01", 3)).toEqual(["2025-12-01", "2026-01-01", "2026-02-01"]);
     expect(moisPrecedents("2026-09-01", 5)).toEqual(["2026-04-01", "2026-05-01", "2026-06-01", "2026-07-01", "2026-08-01"]);
+  });
+});
+
+describe("activiteVersCsv", () => {
+  it("met les centres puis les relais dans un même tableau, les valeurs absentes restant vides", () => {
+    const csv = activiteVersCsv(
+      [{ nom: "Centre ; Bohicon", commune: "Bohicon", consultations: 42, attenteMoyenne: null, alertes: { total: 9, delaiMoyen: 12, partSous15: 78 }, remplissage: { prises: 65, capacite: 144 } }],
+      [{ nom: "Koffi Agbessi", foyers: 10, personnes: 31, visites: 17, foyersVisites: 8, aOrienter: 3 }],
+      "202609",
+    );
+    expect(csv).toBe(
+      [
+        "type;nom;commune;period;consultations_30j;attente_moyenne_min;alertes_30j;alertes_delai_moyen_min;alertes_part_15min;places_prises_7j;places_7j;foyers;personnes;visites_30j;foyers_visites_30j;a_orienter_30j",
+        'centre;"Centre ; Bohicon";Bohicon;202609;42;;9;12;78;65;144;;;;;',
+        "relais;Koffi Agbessi;;202609;;;;;;;;10;31;17;8;3",
+        "",
+      ].join("\n"),
+    );
+  });
+});
+
+describe("grands nombres", () => {
+  it("sépare les milliers à la française", () => {
+    expect(lireIndicateur("visites_relais", { numerateur: 10349, denominateur: 0 }).texte).toBe("10\u202f349");
+    expect(lireIndicateur("penta3", { numerateur: 6051, denominateur: 6294 }).detail).toBe("6\u202f051 sur 6\u202f294");
   });
 });

@@ -4,69 +4,17 @@ import { aujourdhuiAuBenin } from "@/domain/dates";
 import { CODES_INDICATEURS, INDICATEURS, lireIndicateur, type CodeIndicateur } from "@/domain/pilotage";
 import { exigerRole } from "@/server/auth/cookies";
 import { db } from "@/server/db/client";
-import { vueDeZone, vueNationale, type AlertesEnDirect } from "@/server/requetes/pilotage";
+import { vueDeZone, vueNationale } from "@/server/requetes/pilotage";
 import { Icone } from "@/ui/Icone";
 import { CarteIndicateur } from "./CarteIndicateur";
 import { ClassementZones } from "./ClassementZones";
+import { Confidentialite, EnCeMoment, Onglets, TAUX } from "./communs";
 import { CourbeIndicateur } from "./CourbeIndicateur";
 import { TableauCommunes } from "./TableauCommunes";
 
 export const metadata: Metadata = { title: "Pilotage" };
 
-const TAUX = CODES_INDICATEURS.filter((c) => INDICATEURS[c].unite !== "nombre");
 const choisir = (v: string | string[] | undefined): CodeIndicateur => (TAUX.find((c) => c === v) ?? "cpn4") as CodeIndicateur;
-
-function Confidentialite() {
-  return (
-    <p className="flex items-center gap-2 rounded-carte bg-lavande-2 px-4 py-3 text-sm font-bold text-marque">
-      <Icone nom="ph-shield-check" className="size-5 shrink-0" />
-      Aucun nom ne sort de cet écran. Un chiffre qui porte sur moins de 5 personnes est masqué.
-    </p>
-  );
-}
-
-function Onglets({ actif }: { actif: CodeIndicateur }) {
-  return (
-    <nav aria-label="Indicateur" className="flex gap-2 overflow-x-auto pb-1">
-      {TAUX.map((c) => (
-        <Link
-          key={c}
-          href={`/pilotage?indicateur=${c}`}
-          aria-current={c === actif ? "page" : undefined}
-          scroll={false}
-          className={`rounded-bouton px-3 py-2 text-sm font-bold whitespace-nowrap ${c === actif ? "bg-marque text-white" : "bg-white text-marque"}`}
-        >
-          {INDICATEURS[c].court}
-        </Link>
-      ))}
-    </nav>
-  );
-}
-
-/** Les alertes qui attendent dans la zone, en direct : celles en retard remontent ici (spec §14). */
-function EnCeMoment({ alertes }: { alertes: AlertesEnDirect }) {
-  const retard = alertes.enRetard > 0;
-  return (
-    <section
-      aria-labelledby="titre-maintenant"
-      className={`flex items-center gap-3 rounded-carte px-4 py-3 ${retard ? "bg-urgence-pale text-urgence" : "bg-white text-nuit"}`}
-    >
-      <Icone nom="hi-alert-circle" className={`size-7 shrink-0 ${retard ? "text-urgence" : "text-marque"}`} />
-      <div>
-        <h2 id="titre-maintenant" className="text-sm font-bold text-gris">
-          En ce moment
-        </h2>
-        <p className="font-bold">
-          {alertes.enAttente === 0
-            ? "Aucune alerte en attente dans la zone."
-            : `${alertes.enAttente} alerte${alertes.enAttente > 1 ? "s" : ""} en attente${
-                retard ? `, dont ${alertes.enRetard} en retard (la plus ancienne depuis ${alertes.plusAncienneMinutes} min)` : ""
-              }.`}
-        </p>
-      </div>
-    </section>
-  );
-}
 
 function Exporter() {
   return (
@@ -113,7 +61,7 @@ export default async function Pilotage({ searchParams }: PageProps<"/pilotage">)
           <h2 id="titre-tendance" className="text-lg font-bold">
             Sur 6 mois : {INDICATEURS[indicateur].libelle.toLowerCase()}
           </h2>
-          <Onglets actif={indicateur} />
+          <Onglets actif={indicateur} base="/pilotage?indicateur=" />
           <CourbeIndicateur code={indicateur} points={vue.tendance.map((t) => ({ mois: t.mois, comptage: t.valeurs[indicateur] }))} />
         </section>
         <section aria-labelledby="titre-communes" className="flex flex-col gap-3">
@@ -159,9 +107,9 @@ export default async function Pilotage({ searchParams }: PageProps<"/pilotage">)
         <h2 id="titre-zones" className="text-lg font-bold">
           Les zones : {INDICATEURS[indicateur].libelle.toLowerCase()}
         </h2>
-        <Onglets actif={indicateur} />
+        <Onglets actif={indicateur} base="/pilotage?indicateur=" />
         <div className="grid gap-4 xl:grid-cols-[1fr_minmax(0,28rem)]">
-          <ClassementZones code={indicateur} zones={vue.zones} />
+          <ClassementZones code={indicateur} zones={vue.zones} lien={(z) => `/pilotage/zones/${encodeURIComponent(z)}`} />
           <div className="flex flex-col gap-3">
             <h3 className="font-bold">Tendance nationale sur 6 mois</h3>
             <CourbeIndicateur code={indicateur} points={vue.tendance.map((t) => ({ mois: t.mois, comptage: t.valeurs[indicateur] }))} />
@@ -171,7 +119,10 @@ export default async function Pilotage({ searchParams }: PageProps<"/pilotage">)
                 <ul className="mt-2 flex flex-col gap-2 text-sm">
                   {aAppuyer.slice(0, 5).map((z) => (
                     <li key={z.zone}>
-                      <b>{z.zone}</b> : {z.faibles.join(", ")}
+                      <Link href={`/pilotage/zones/${encodeURIComponent(z.zone)}`} className="font-bold underline decoration-lavande-4 underline-offset-2">
+                        {z.zone}
+                      </Link>{" "}
+                      : {z.faibles.join(", ")}
                     </li>
                   ))}
                 </ul>

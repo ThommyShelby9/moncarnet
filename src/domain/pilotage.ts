@@ -67,9 +67,11 @@ export function agreger(liste: Valeurs[]): Valeurs {
   return total;
 }
 
+const nombre = (n: number) => n.toLocaleString("fr-FR");
+
 export function lireIndicateur(code: CodeIndicateur, c: Comptage): Lecture {
   const d = INDICATEURS[code];
-  if (d.unite === "nombre") return { valeur: c.numerateur, texte: String(c.numerateur), detail: d.aide, masque: false, niveau: null };
+  if (d.unite === "nombre") return { valeur: c.numerateur, texte: nombre(c.numerateur), detail: d.aide, masque: false, niveau: null };
   if (c.denominateur === 0) return { valeur: null, texte: "—", detail: "Aucune donnée pour la période", masque: false, niveau: null };
   if (c.denominateur < SEUIL_MASQUE) {
     return { valeur: null, texte: "Masqué", detail: `Moins de ${SEUIL_MASQUE} personnes : chiffre masqué`, masque: true, niveau: null };
@@ -78,11 +80,11 @@ export function lireIndicateur(code: CodeIndicateur, c: Comptage): Lecture {
   if (d.unite === "minutes") {
     const valeur = Math.round(c.numerateur / c.denominateur);
     const niveau: Niveau = valeur <= cible ? "bon" : valeur <= cible * 1.5 ? "moyen" : "faible";
-    return { valeur, texte: `${valeur} min`, detail: `${c.denominateur} alertes`, masque: false, niveau };
+    return { valeur, texte: `${valeur} min`, detail: `${nombre(c.denominateur)} alertes`, masque: false, niveau };
   }
   const valeur = Math.round((c.numerateur / c.denominateur) * 100);
   const niveau: Niveau = valeur >= cible ? "bon" : valeur >= cible - 15 ? "moyen" : "faible";
-  return { valeur, texte: `${valeur} %`, detail: `${c.numerateur} sur ${c.denominateur}`, masque: false, niveau };
+  return { valeur, texte: `${valeur} %`, detail: `${nombre(c.numerateur)} sur ${nombre(c.denominateur)}`, masque: false, niveau };
 }
 
 export interface LigneExport extends Comptage {
@@ -117,4 +119,38 @@ export function versCsv(lignes: LigneExport[]): string {
     return [l.orgUnit, l.periode, l.code, cache ? "" : l.numerateur, cache ? "" : l.denominateur, lecture.valeur ?? ""].map((v) => echapper(String(v))).join(";");
   });
   return ["orgUnit;period;dataElement;numerator;denominator;value", ...corps].join("\n") + "\n";
+}
+
+export interface CentreExport {
+  nom: string;
+  commune: string;
+  consultations: number;
+  attenteMoyenne: number | null;
+  alertes: { total: number; delaiMoyen: number | null; partSous15: number | null };
+  remplissage: { prises: number; capacite: number };
+}
+
+export interface RelaisExport {
+  nom: string;
+  foyers: number;
+  personnes: number;
+  visites: number;
+  foyersVisites: number;
+  aOrienter: number;
+}
+
+/** L'activité des centres et des relais d'une zone, en un seul tableau (des comptes, jamais un nom de patient). */
+export function activiteVersCsv(centres: CentreExport[], relais: RelaisExport[], periode: string): string {
+  const entete =
+    "type;nom;commune;period;consultations_30j;attente_moyenne_min;alertes_30j;alertes_delai_moyen_min;alertes_part_15min;places_prises_7j;places_7j;foyers;personnes;visites_30j;foyers_visites_30j;a_orienter_30j";
+  const ligne = (valeurs: (string | number | null)[]) => valeurs.map((v) => echapper(v === null ? "" : String(v))).join(";");
+  return (
+    [
+      entete,
+      ...centres.map((c) =>
+        ligne(["centre", c.nom, c.commune, periode, c.consultations, c.attenteMoyenne, c.alertes.total, c.alertes.delaiMoyen, c.alertes.partSous15, c.remplissage.prises, c.remplissage.capacite, null, null, null, null, null]),
+      ),
+      ...relais.map((r) => ligne(["relais", r.nom, null, periode, null, null, null, null, null, null, null, r.foyers, r.personnes, r.visites, r.foyersVisites, r.aOrienter])),
+    ].join("\n") + "\n"
+  );
 }
