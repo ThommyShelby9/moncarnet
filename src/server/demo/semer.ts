@@ -291,6 +291,34 @@ export async function semerDemo(db: Db, { aujourdhui }: { aujourdhui: DateISO })
   });
   nbEvenements++;
 
+  // --- Un mois de tournées de Koffi dans ses autres foyers : de quoi remplir l'écran « Relais » du centre (graine à part) ---
+  const hVisites = hasard(20261001);
+  const chezKoffi = (
+    await db
+      .select({ id: t.patients.id })
+      .from(t.patients)
+      .innerJoin(t.foyers, eq(t.patients.foyerId, t.foyers.id))
+      .where(eq(t.foyers.relaisId, relais.id))
+      .orderBy(asc(t.patients.creeLe), asc(t.patients.id))
+  ).filter((p) => p.id !== idsPersonnages.rachida);
+  const aOrienter = [
+    "Fièvre depuis deux jours : je lui ai dit de venir au centre demain matin.",
+    "Tension à 16 sur 10 à la maison : doit venir au contrôle cette semaine.",
+    "L'enfant tousse depuis une semaine : orienté vers le centre.",
+  ];
+  for (let i = 0; i < 16 && chezKoffi.length; i++) {
+    const constat = i % 6 === 2 && i / 6 < aOrienter.length ? "a_orienter" : i === 9 ? "absent" : "tout_va_bien";
+    await db.insert(t.evenements).values({
+      id: randomUUID(),
+      patientId: hVisites.parmi(chezKoffi).id,
+      type: "visite_domicile",
+      auteurId: relais.id,
+      survenuLe: new Date(depuisDateISO(ajouterJours(aujourdhui, -(1 + Math.floor(i * 1.8)))).getTime() + (8 + hVisites.entier(0, 8)) * 3_600_000),
+      donnees: constat === "a_orienter" ? { constat, noteVocale: false, texte: aOrienter[Math.floor(i / 6)]! } : { constat, noteVocale: false },
+    });
+    nbEvenements++;
+  }
+
   // --- Awa prépare la naissance : 3 choses sur 6 ---
   await db.insert(t.evenements).values({
     id: randomUUID(),

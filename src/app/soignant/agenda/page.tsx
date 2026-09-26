@@ -5,6 +5,7 @@ import { LIBELLES_PLAGE } from "@/domain/rendez-vous";
 import { dateLongue, majuscule } from "@/domain/temps";
 import { db } from "@/server/db/client";
 import { agendaDuCentre, CAPACITE_MAX, HORIZON_OUVERTURE, MOTIFS_DE_PLAGE, type PlageAgenda } from "@/server/soignant/agenda";
+import { Chiffre } from "@/ui/Chiffre";
 import { Icone } from "@/ui/Icone";
 import { ICONE_MOTIF } from "@/ui/pictogrammes";
 import { Places } from "@/ui/Places";
@@ -155,16 +156,6 @@ export default async function Agenda({ searchParams }: PageProps<"/soignant/agen
         </form>
       </div>
     </>
-  );
-}
-
-function Chiffre({ valeur, libelle, alerte = false }: { valeur: string; libelle: string; alerte?: boolean }) {
-  return (
-    <div className="rounded-carte bg-white px-4 py-3">
-      <dt className="sr-only">{libelle}</dt>
-      <dd className={`text-2xl font-bold tabular-nums ${alerte ? "text-soleil-fonce" : ""}`}>{valeur}</dd>
-      <dd className="text-sm text-gris">{libelle}</dd>
-    </div>
   );
 }
 

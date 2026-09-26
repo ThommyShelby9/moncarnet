@@ -16,7 +16,7 @@ export function MenuLateral({ liens }: { liens: LienMenu[] }) {
   const chemin = usePathname();
   return (
     <nav aria-label="Menu">
-      <ul className="flex gap-1 overflow-x-auto md:flex-col">
+      <ul className="flex flex-wrap gap-1 md:flex-col">
         {liens.map((l, i) => {
           const actif = chemin === l.href || (i > 0 && chemin.startsWith(`${l.href}/`));
           return (
@@ -24,7 +24,7 @@ export function MenuLateral({ liens }: { liens: LienMenu[] }) {
               <Link
                 href={l.href}
                 aria-current={actif ? "page" : undefined}
-                className={`flex items-center gap-2.5 rounded-2xl px-3 py-2.5 text-sm font-bold whitespace-nowrap ${actif ? "bg-lavande-2 text-marque" : "text-gris"}`}
+                className={`flex items-center gap-2 rounded-2xl px-2.5 py-2 text-sm font-bold whitespace-nowrap md:gap-2.5 md:px-3 md:py-2.5 ${actif ? "bg-lavande-2 text-marque" : "text-gris"}`}
               >
                 <Icone nom={l.icone} className="size-5" />
                 {l.libelle}

@@ -73,7 +73,7 @@ describe("confier au relais", () => {
     expect((await listesDeSuivi(db, firmin.etablissementId, aujourdhui)).grossesses.find((l) => l.patientId === afiavi)?.consigne).toBe("Rappeler la CPN3 de mardi");
 
     const plusTard = new Date(maintenant.getTime() + 3_600_000);
-    await db.insert(evenements).values({ id: randomUUID(), patientId: afiavi, type: "visite_domicile", auteurId: koffi, survenuLe: plusTard, donnees: { constats: ["tout_va_bien"] } });
+    await db.insert(evenements).values({ id: randomUUID(), patientId: afiavi, type: "visite_domicile", auteurId: koffi, survenuLe: plusTard, donnees: { constat: "tout_va_bien" } });
     expect(await raisons(plusTard)).not.toContain("Consigne du centre : Rappeler la CPN3 de mardi");
     expect((await listesDeSuivi(db, firmin.etablissementId, aujourdhui)).grossesses.find((l) => l.patientId === afiavi)?.consigne).toBeNull();
   });

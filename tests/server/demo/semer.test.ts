@@ -90,7 +90,7 @@ describe("semerDemo", () => {
     expect(second).toEqual(premier);
   });
 
-  it("donne à Koffi les foyers de Sèhoun, avec une visite déjà faite chez Rachida", async () => {
+  it("donne à Koffi les foyers de Sèhoun et un mois de visites, dont celle chez Rachida", async () => {
     await semerDemo(db, { aujourdhui });
     const [koffi] = await db.select().from(comptes).where(eq(comptes.identifiant, "koffi.agbessi"));
     const suivis = await db.select().from(foyers).where(eq(foyers.relaisId, koffi!.id));
@@ -98,7 +98,11 @@ describe("semerDemo", () => {
     expect(suivis.map((f) => f.nom)).not.toContain("Houngbo");
     expect(suivis.every((f) => ["Sèhoun", "Kinta", "Adingnigon"].includes(f.village))).toBe(true);
     const visites = await db.select().from(evenements).where(eq(evenements.type, "visite_domicile"));
-    expect(visites).toEqual([expect.objectContaining({ auteurId: koffi!.id, donnees: { constat: "tout_va_bien", noteVocale: false } })]);
+    expect(visites.length).toBeGreaterThanOrEqual(10);
+    expect(visites.every((v) => v.auteurId === koffi!.id && v.survenuLe < new Date(`${aujourdhui}T00:00:00+01:00`))).toBe(true);
+    expect(visites.filter((v) => v.donnees.constat === "a_orienter").length).toBeGreaterThanOrEqual(2);
+    const rachida = (await db.select().from(patients).where(eq(patients.prenom, "Rachida")))[0]!;
+    expect(visites.filter((v) => v.patientId === rachida.id)).toEqual([expect.objectContaining({ donnees: { constat: "tout_va_bien", noteVocale: false } })]);
   });
 
   it("met Awa à 37 semaines, consultations faites et naissance en préparation", async () => {

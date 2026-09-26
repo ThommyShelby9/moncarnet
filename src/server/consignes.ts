@@ -1,6 +1,6 @@
-import { and, asc, eq, inArray } from "drizzle-orm";
+import { and, asc, desc, eq, gte, inArray } from "drizzle-orm";
 import type { Db } from "./db/client";
-import { consignes, evenements, foyers, patients } from "./db/schema";
+import { comptes, consignes, evenements, foyers, patients } from "./db/schema";
 import { patientDuCentre } from "./droits";
 import { echec, reussite, type Resultat } from "./resultat";
 import type { Soignant } from "./soignant/consultation";
@@ -55,4 +55,45 @@ export async function consignesEnCours(db: Db, patientIds: string[]): Promise<Ma
     resultat.set(c.patientId, [...(resultat.get(c.patientId) ?? []), { id: c.id, texte: c.texte, creeLe: c.creeLe }]);
   }
   return resultat;
+}
+
+export interface ConsigneDuCentre {
+  id: string;
+  patientId: string;
+  prenom: string;
+  nom: string;
+  texte: string;
+  auteur: string;
+  creeLe: Date;
+  /** La première visite du relais après la consigne ; null tant qu'elle n'est pas faite. */
+  faiteLe: Date | null;
+}
+
+/** Les consignes données par le centre : celles qui attendent la visite du relais d'abord, puis les plus récentes. */
+export async function consignesDuCentre(db: Db, etablissementId: string, depuis: Date): Promise<ConsigneDuCentre[]> {
+  const lignes = await db
+    .select({
+      id: consignes.id,
+      patientId: consignes.patientId,
+      prenom: patients.prenom,
+      nom: patients.nom,
+      texte: consignes.texte,
+      auteur: comptes.nomAffiche,
+      creeLe: consignes.creeLe,
+    })
+    .from(consignes)
+    .innerJoin(patients, eq(consignes.patientId, patients.id))
+    .innerJoin(comptes, eq(consignes.auteurId, comptes.id))
+    .where(and(eq(patients.etablissementId, etablissementId), gte(consignes.creeLe, depuis)))
+    .orderBy(desc(consignes.creeLe));
+  const ids = [...new Set(lignes.map((l) => l.patientId))];
+  const visites = ids.length
+    ? await db
+        .select({ patientId: evenements.patientId, le: evenements.survenuLe })
+        .from(evenements)
+        .where(and(inArray(evenements.patientId, ids), eq(evenements.type, "visite_domicile")))
+        .orderBy(asc(evenements.survenuLe))
+    : [];
+  const liste = lignes.map((l) => ({ ...l, faiteLe: visites.find((v) => v.patientId === l.patientId && v.le > l.creeLe)?.le ?? null }));
+  return [...liste.filter((c) => !c.faiteLe), ...liste.filter((c) => c.faiteLe)];
 }
