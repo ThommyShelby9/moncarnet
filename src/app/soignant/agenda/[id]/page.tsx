@@ -26,6 +26,7 @@ const REFUS: Record<string, string> = {
   complet: "La plage est complète : ajoutez une place avant de la donner.",
   introuvable: "Cette personne n'est plus en liste d'attente.",
   interdit: "Cette plage n'est pas celle de votre centre.",
+  passee: "Cette plage est passée : elle ne se modifie plus.",
 };
 
 /** Une plage : qui vient, qui attend, et combien de places (spec §4.4). */

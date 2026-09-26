@@ -35,12 +35,12 @@
 - `modifierCapacite(db, { soignant, creneauId, capacite })` : `Resultat<{ capacite }, "interdit" | "trop_bas" | "invalide">` ; jamais sous le nombre de places prises ;
 - `ouvrirPlage(db, { soignant, date, moment, motif, capacite, aujourdhui })` : `Resultat<{ creneauId }, "deja_ouverte" | "invalide">`, dans les 60 jours.
 
-- [ ] **Tests** :
+- [x] **Tests** :
   - l'agenda compte les places prises et la liste d'attente ;
   - le détail d'une plage d'un autre centre est refusé ;
   - la capacité ne descend pas sous les places prises ;
   - on ouvre une plage, mais pas deux fois la même, ni dans le passé.
-- [ ] **Code**, puis écrans :
+- [x] **Code**, puis écrans :
   - l'agenda sur 7 jours, avec semaine précédente et suivante ;
   - pour chaque plage : places prises sur capacité et liste d'attente ;
   - le formulaire « Ouvrir une plage » ;
@@ -63,13 +63,13 @@
 - table `consignes` (`patientId`, `auteurId`, `texte`, `creeLe`, `faiteLe`) et `confierAuRelais(db, { soignant, patientId, texte })`. Le patient doit être du centre et vivre dans un foyer suivi par un relais ;
 - tournée : raison « Consigne du centre : … » (urgence 1), jusqu'à une visite du relais postérieure à la consigne.
 
-- [ ] **Tests** :
+- [x] **Tests** :
   - Afiavi dans les grossesses (CPN2 manquée) ;
   - un enfant dans les vaccins en retard ;
   - Codjo dans la tension ;
   - la consigne apparaît dans la tournée de Koffi et disparaît après sa visite ;
   - refus pour un patient d'un autre centre ou sans relais.
-- [ ] **Écran** :
+- [x] **Écran** :
   - onglets Grossesses, Vaccins, Tension, Perdus de vue (avec le nombre de chaque) ;
   - dans chaque ligne : Appeler, Dossier, « Confier au relais » (texte court).
 
@@ -84,7 +84,7 @@
 - `visitesDuCentre(db, etablissementId, depuis)` : visites des relais (patient, relais, constat, note, texte), celles « À orienter » d'abord, avec les consignes en cours ;
 - `alertesDuCentre(db, etablissementId, depuis, maintenant)` : historique avec statut (en cours, en retard, prise en charge, annulée), délai et qui l'a prise, plus un bilan (délai moyen, part sous 15 minutes).
 
-- [ ] **Tests**, **écrans**, commit.
+- [x] **Tests**, **écrans**, commit.
 
 ## État
 
@@ -98,7 +98,7 @@
 - `vueDUneZone(db, zone, aujourdhui, maintenant)` : pour la zone en direct, c'est `vueDeZone` ; pour une zone fictive, les valeurs et la tendance tirées de `indicateurs_zones`, sans communes ;
 - la page d'un indicateur (`?code=`) montre sa définition, sa cible, la tendance sur 6 mois, puis le détail : par commune (zone) ou le classement des zones (ministère).
 
-- [ ] **Tests** (fiche d'une zone fictive), **écrans**, commit.
+- [x] **Tests** (fiche d'une zone fictive), **écrans**, commit.
 
 ### Tâche 5 : centres et relais, alertes, exports
 
@@ -107,7 +107,7 @@
 - `alertesDeLEtat(...)` : zone, alertes par semaine sur 8 semaines, en cours et en retard ; ministère, par zone ;
 - exports : les indicateurs du mois (existant), l'historique sur 6 mois, et les centres (zone).
 
-- [ ] **Tests**, **écrans**, commit.
+- [x] **Tests**, **écrans**, commit.
 
 ## Pharmacie
 
@@ -121,8 +121,29 @@
 - `delivrancesDe(db, pharmacieId, depuis)` : date, code, médicaments, patient en initiales ;
 - `signalerRupture`, `finirRupture` et `rupturesEnCours(db)` ; le formulaire d'ordonnance montre les ruptures en cours.
 
-- [ ] **Tests**, **écrans**, commit.
+- [x] **Tests**, **écrans**, commit.
 
 ## Fin
 
 ### Tâche 7 : README, présentation, audit, mise en ligne
+
+- [x] README et page Découvrir (bloc « Un vrai poste de travail », section État complétée, captures refaites avec les nouveaux menus).
+- [x] Audit axe en production : 43 écrans, aucune violation (le rouge d'urgence passe à #c4261a pour le contraste).
+- [x] Suite complète, envoi sur main, déploiement Coolify, démo réinitialisée, parcours vérifiés en production.
+
+## Bilan
+
+- Décisions prises en cours de route :
+  - agenda en fenêtre glissante de 7 jours à partir d'aujourd'hui, et non « semaine du lundi » (un samedi, la semaine en cours était vide) ;
+  - « Donner la place » ajouté à la liste d'attente ;
+  - une consigne est « faite » dès qu'une visite du relais la suit (pas de colonne `faiteLe`) ;
+  - `confierAuRelais` vit dans `src/server/consignes.ts`, partagé par la tournée et le poste soignant.
+- Démo enrichie, chaque ajout avec sa propre graine :
+  - une liste d'attente sur les plages complètes ;
+  - un mois de visites de Koffi ;
+  - un mois de délivrances ;
+  - le fer de la grossesse en rupture.
+- Correctif de démo : plus deux places le même jour pour une même personne.
+- Mineurs laissés de côté :
+  - deux pharmaciens qui signalent la même rupture au même instant peuvent créer un doublon ;
+  - il n'y a qu'un centre et qu'un relais dans la zone de démo.

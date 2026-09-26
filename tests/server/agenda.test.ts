@@ -66,8 +66,8 @@ describe("détail d'une plage", () => {
 describe("capacité d'une plage", () => {
   it("ne descend jamais sous le nombre de places prises", async () => {
     const tension = (await agendaDuCentre(db, firmin.etablissementId, aujourdhui, 7)).find((p) => p.motif === "tension" && p.date > aujourdhui)!;
-    expect(await modifierCapacite(db, { soignant: firmin, creneauId: tension.creneauId, capacite: tension.prises - 1 })).toEqual({ ok: false, erreur: "trop_bas" });
-    expect(await modifierCapacite(db, { soignant: firmin, creneauId: tension.creneauId, capacite: tension.prises + 2 })).toEqual({ ok: true, donnees: { capacite: tension.prises + 2 } });
+    expect(await modifierCapacite(db, { aujourdhui, soignant: firmin, creneauId: tension.creneauId, capacite: tension.prises - 1 })).toEqual({ ok: false, erreur: "trop_bas" });
+    expect(await modifierCapacite(db, { aujourdhui, soignant: firmin, creneauId: tension.creneauId, capacite: tension.prises + 2 })).toEqual({ ok: true, donnees: { capacite: tension.prises + 2 } });
     const apres = await detailPlage(db, firmin.etablissementId, tension.creneauId);
     expect(apres?.plage.capacite).toBe(tension.prises + 2);
   });
@@ -75,9 +75,9 @@ describe("capacité d'une plage", () => {
   it("refuse un autre centre et une capacité impossible", async () => {
     const [plage] = await agendaDuCentre(db, firmin.etablissementId, aujourdhui, 7);
     const ailleurs = { id: firmin.id, etablissementId: randomUUID() };
-    expect(await modifierCapacite(db, { soignant: ailleurs, creneauId: plage!.creneauId, capacite: 20 })).toEqual({ ok: false, erreur: "interdit" });
+    expect(await modifierCapacite(db, { aujourdhui, soignant: ailleurs, creneauId: plage!.creneauId, capacite: 20 })).toEqual({ ok: false, erreur: "interdit" });
     for (const capacite of [0, 2.5, 500]) {
-      expect(await modifierCapacite(db, { soignant: firmin, creneauId: plage!.creneauId, capacite })).toEqual({ ok: false, erreur: "invalide" });
+      expect(await modifierCapacite(db, { aujourdhui, soignant: firmin, creneauId: plage!.creneauId, capacite })).toEqual({ ok: false, erreur: "invalide" });
     }
   });
 });
@@ -108,7 +108,7 @@ describe("donner une place à une personne en attente", () => {
     const tension = (await agendaDuCentre(db, firmin.etablissementId, aujourdhui, 7)).find((p) => p.motif === "tension" && p.date > aujourdhui)!;
     expect(tension.prises).toBeLessThan(tension.capacite);
     const [attente] = (await detailPlage(db, firmin.etablissementId, tension.creneauId))!.attente;
-    const e = { soignant: firmin, attenteId: attente!.attenteId, creneauId: tension.creneauId };
+    const e = { aujourdhui, soignant: firmin, attenteId: attente!.attenteId, creneauId: tension.creneauId };
     expect(await donnerPlace(db, e)).toEqual({ ok: true, donnees: { rendezVousId: expect.any(String) } });
     const apres = (await detailPlage(db, firmin.etablissementId, tension.creneauId))!;
     expect(apres.inscrits.map((i) => i.patientId)).toContain(attente!.patientId);
@@ -118,10 +118,20 @@ describe("donner une place à une personne en attente", () => {
 
   it("refuse une plage complète ou d'un autre centre", async () => {
     const tension = (await agendaDuCentre(db, firmin.etablissementId, aujourdhui, 7)).find((p) => p.motif === "tension" && p.date > aujourdhui)!;
-    await modifierCapacite(db, { soignant: firmin, creneauId: tension.creneauId, capacite: tension.prises });
+    await modifierCapacite(db, { aujourdhui, soignant: firmin, creneauId: tension.creneauId, capacite: tension.prises });
     const [attente] = (await detailPlage(db, firmin.etablissementId, tension.creneauId))!.attente;
-    const e = { soignant: firmin, attenteId: attente!.attenteId, creneauId: tension.creneauId };
+    const e = { aujourdhui, soignant: firmin, attenteId: attente!.attenteId, creneauId: tension.creneauId };
     expect(await donnerPlace(db, e)).toEqual({ ok: false, erreur: "complet" });
     expect(await donnerPlace(db, { ...e, soignant: { id: firmin.id, etablissementId: randomUUID() } })).toEqual({ ok: false, erreur: "interdit" });
+  });
+});
+
+describe("plage passée", () => {
+  it("ne change plus : ni places, ni place donnée", async () => {
+    const [plage] = await agendaDuCentre(db, firmin.etablissementId, aujourdhui, 1);
+    const lendemain = ajouterJours(aujourdhui, 1);
+    expect(await modifierCapacite(db, { soignant: firmin, creneauId: plage!.creneauId, capacite: plage!.capacite + 1, aujourdhui: lendemain })).toEqual({ ok: false, erreur: "passee" });
+    const [attente] = await db.insert(listeAttente).values({ patientId: await idPatient(db, "Codjo"), etablissementId: firmin.etablissementId, motif: plage!.motif, dateSouhaitee: plage!.date, moment: plage!.moment }).returning();
+    expect(await donnerPlace(db, { soignant: firmin, attenteId: attente!.id, creneauId: plage!.creneauId, aujourdhui: lendemain })).toEqual({ ok: false, erreur: "passee" });
   });
 });

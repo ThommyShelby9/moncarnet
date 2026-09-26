@@ -1,5 +1,5 @@
 import { and, asc, count, eq, gte, inArray, isNull, lt } from "drizzle-orm";
-import { ajouterJours, depuisDateISO, type DateISO } from "@/domain/dates";
+import { ajouterJours, aujourdhuiAuBenin, depuisDateISO, type DateISO } from "@/domain/dates";
 import { estUuid } from "@/domain/identifiants";
 import { MOTIFS_RDV, type MotifRdv } from "@/domain/programmes/types";
 import { motifDePlage } from "@/domain/rendez-vous";
@@ -120,20 +120,21 @@ export async function detailPlage(
 
 const capaciteValide = (capacite: number) => Number.isInteger(capacite) && capacite >= 1 && capacite <= CAPACITE_MAX;
 
-/** Plus ou moins de places : jamais moins que les personnes déjà inscrites. */
+/** Plus ou moins de places : jamais moins que les personnes déjà inscrites, et plus rien sur une plage passée. */
 export async function modifierCapacite(
   db: Db,
-  e: { soignant: Soignant; creneauId: string; capacite: number },
-): Promise<Resultat<{ capacite: number }, "interdit" | "trop_bas" | "invalide">> {
+  e: { soignant: Soignant; creneauId: string; capacite: number; aujourdhui?: DateISO },
+): Promise<Resultat<{ capacite: number }, "interdit" | "trop_bas" | "invalide" | "passee">> {
   if (!capaciteValide(e.capacite)) return echec("invalide");
   if (!e.soignant.etablissementId || !estUuid(e.creneauId)) return echec("interdit");
   return db.transaction(async (tx) => {
     const [creneau] = await tx
-      .select({ id: creneaux.id })
+      .select({ id: creneaux.id, date: creneaux.date })
       .from(creneaux)
       .where(and(eq(creneaux.id, e.creneauId), eq(creneaux.etablissementId, e.soignant.etablissementId!)))
       .for("update");
     if (!creneau) return echec("interdit");
+    if (creneau.date < (e.aujourdhui ?? aujourdhuiAuBenin())) return echec("passee");
     const [ligne] = await tx.select({ nombre: count() }).from(rendezVous).where(and(eq(rendezVous.creneauId, e.creneauId), isNull(rendezVous.annuleLe)));
     if (Number(ligne?.nombre ?? 0) > e.capacite) return echec("trop_bas");
     await tx.update(creneaux).set({ capacite: e.capacite }).where(eq(creneaux.id, e.creneauId));
@@ -170,8 +171,8 @@ export async function ouvrirPlage(
 /** Une place libre (capacité augmentée, annulation) va à une personne de la liste d'attente de la plage. */
 export async function donnerPlace(
   db: Db,
-  e: { soignant: Soignant; attenteId: string; creneauId: string; maintenant?: Date },
-): Promise<Resultat<{ rendezVousId: string }, "interdit" | "introuvable" | "complet">> {
+  e: { soignant: Soignant; attenteId: string; creneauId: string; maintenant?: Date; aujourdhui?: DateISO },
+): Promise<Resultat<{ rendezVousId: string }, "interdit" | "introuvable" | "complet" | "passee">> {
   if (!e.soignant.etablissementId || !estUuid(e.creneauId) || !estUuid(e.attenteId)) return echec("interdit");
   const maintenant = e.maintenant ?? new Date();
   return db.transaction(async (tx) => {
@@ -182,6 +183,8 @@ export async function donnerPlace(
       .where(and(eq(creneaux.id, e.creneauId), eq(creneaux.etablissementId, e.soignant.etablissementId!)))
       .for("update");
     if (!creneau) return echec("interdit");
+    // Une plage passée ne se remplit plus.
+    if (creneau.date < (e.aujourdhui ?? aujourdhuiAuBenin(maintenant))) return echec("passee");
     const [attente] = await tx
       .select()
       .from(listeAttente)
