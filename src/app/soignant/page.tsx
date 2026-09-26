@@ -7,6 +7,7 @@ import { alertesOuvertes, consultationsDuJour, patientsASurveiller, type GroupeD
 import { Actualisation } from "@/ui/Actualisation";
 import { EtiquetteRisque } from "@/ui/EtiquetteRisque";
 import { Icone } from "@/ui/Icone";
+import { Places } from "@/ui/Places";
 import { ICONE_MOTIF } from "@/ui/pictogrammes";
 import { RetourAction } from "@/ui/RetourAction";
 import { Tampon } from "@/ui/Tampon";
@@ -110,16 +111,6 @@ function SalleAttente({ file }: { file: EnAttente[] }) {
         <p className="mt-2 text-sm text-gris">Personne n&apos;attend pour le moment.</p>
       )}
     </section>
-  );
-}
-
-function Places({ prises, capacite }: { prises: number; capacite: number }) {
-  return (
-    <span aria-hidden="true" className="flex gap-[3px]">
-      {Array.from({ length: Math.min(capacite, 12) }, (_, i) => (
-        <i key={i} className={`size-2.5 rounded-full ${i < prises ? "bg-marque" : "bg-lavande-3"}`} />
-      ))}
-    </span>
   );
 }
 

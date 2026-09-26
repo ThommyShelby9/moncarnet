@@ -30,6 +30,7 @@ export default async function EspaceSoignantLayout({ children }: { children: Rea
         <MenuLateral
           liens={[
             { href: "/soignant", libelle: "Aujourd'hui", icone: "ph-house" },
+            { href: "/soignant/agenda", libelle: "Agenda", icone: "ph-calendar-dots" },
             { href: "/soignant/patients", libelle: "Patients", icone: "ph-users-three" },
           ]}
         />

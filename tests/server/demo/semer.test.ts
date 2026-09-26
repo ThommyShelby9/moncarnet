@@ -2,7 +2,7 @@ import { and, asc, eq, gt, isNotNull, isNull } from "drizzle-orm";
 import { afterEach, beforeEach, describe, expect, it } from "vitest";
 import { verifierIdentifiants } from "@/server/auth/connexion";
 import type { Db } from "@/server/db/client";
-import { comptes, creneaux, evenements, foyers, inscriptions, ordonnances, passages, patients, rendezVous, responsables } from "@/server/db/schema";
+import { comptes, creneaux, evenements, foyers, inscriptions, listeAttente, ordonnances, passages, patients, rendezVous, responsables } from "@/server/db/schema";
 import { COMPTES_DEMO } from "@/server/demo/donnees";
 import { semerDemo } from "@/server/demo/semer";
 import { creerDbDeTest } from "../../aides/base-de-test";
@@ -122,5 +122,13 @@ describe("semerDemo", () => {
     const lesPassages = await db.select().from(passages).where(eq(passages.jour, aujourdhui));
     expect(lesPassages.filter((p) => p.appeleLe === null).length).toBeGreaterThanOrEqual(2);
     expect(lesPassages.filter((p) => p.appeleLe !== null).length).toBeGreaterThanOrEqual(1);
+  });
+
+  it("ne donne jamais deux places le même jour à une personne, et met des personnes en liste d'attente des plages complètes", async () => {
+    await semerDemo(db, { aujourdhui });
+    const places = await db.select({ patientId: rendezVous.patientId, jour: rendezVous.datePrevue }).from(rendezVous).where(and(isNotNull(rendezVous.creneauId), isNull(rendezVous.annuleLe)));
+    const cles = places.map((p) => `${p.patientId}|${p.jour}`);
+    expect(new Set(cles).size).toBe(cles.length);
+    expect((await db.select().from(listeAttente)).length).toBe(5);
   });
 });

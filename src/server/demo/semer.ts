@@ -388,6 +388,8 @@ export async function semerDemo(db: Db, { aujourdhui }: { aujourdhui: DateISO })
   const consultationComplete = premier("consultation", "matin");
   const tensionComplete = premier("tension");
   const seanceVaccin = premier("vaccin");
+  // Une personne n'a qu'une place par jour ; un doublon prend le premier candidat libre, sans tirage de plus (la suite de la démo ne bouge pas).
+  const inscritsDuJour = new Map<string, Set<string>>();
   const reservations = aVenir.flatMap((creneau) => {
     const nombre =
       creneau === consultationComplete || creneau === tensionComplete
@@ -395,8 +397,17 @@ export async function semerDemo(db: Db, { aujourdhui }: { aujourdhui: DateISO })
         : creneau === seanceVaccin
           ? creneau.capacite - 3
           : h.entier(0, Math.floor(creneau.capacite / 2));
+    const candidats = candidatsPour(creneau.motif);
+    const dejaLa = inscritsDuJour.get(creneau.date) ?? new Set<string>();
+    inscritsDuJour.set(creneau.date, dejaLa);
+    const choisir = () => {
+      const tire = h.parmi(candidats);
+      const choisi = dejaLa.has(tire.id) ? (candidats.find((p) => !dejaLa.has(p.id)) ?? patientsPopulation.find((p) => !dejaLa.has(p.id))!) : tire;
+      dejaLa.add(choisi.id);
+      return choisi;
+    };
     return Array.from({ length: nombre }, () => ({
-      patientId: h.parmi(candidatsPour(creneau.motif)).id,
+      patientId: choisir().id,
       motif: creneau.motif,
       datePrevue: creneau.date,
       moment: creneau.moment,
@@ -629,6 +640,26 @@ export async function semerDemo(db: Db, { aujourdhui }: { aujourdhui: DateISO })
   const maintenantDemo = new Date(depuisDateISO(aujourdhui).getTime() + 12 * 3_600_000);
   const zoneEnDirect = agreger([...(await indicateursDesCommunes(db, [bohicon!.id, zogbodomey!.id], aujourdhui, maintenantDemo)).values()]);
   await db.insert(t.indicateursZones).values([...indicateursFictifs(aujourdhui), ...historiqueDeLaZone(zoneEnDirect, aujourdhui)]);
+
+  // --- Liste d'attente des deux plages complètes : l'agenda du centre montre qui attend une place (graine à part) ---
+  const hAttente = hasard(20260930);
+  for (const [creneau, nombre] of [[consultationComplete, 3], [tensionComplete, 2]] as const) {
+    const inscrits = new Set(reservations.filter((r) => r.creneauId === creneau.id).map((r) => r.patientId));
+    const libres = candidatsPour(creneau.motif).filter((p) => !inscrits.has(p.id));
+    const choisis = Array.from({ length: Math.min(nombre, libres.length) }, () => libres.splice(hAttente.entier(0, libres.length - 1), 1)[0]!);
+    if (choisis.length) {
+      await db.insert(t.listeAttente).values(
+        choisis.map((p, i) => ({
+          patientId: p.id,
+          etablissementId: cs!.id,
+          motif: creneau.motif,
+          dateSouhaitee: creneau.date,
+          moment: creneau.moment,
+          creeLe: new Date(depuisDateISO(ajouterJours(aujourdhui, -2)).getTime() + (9 + i) * 3_600_000),
+        })),
+      );
+    }
+  }
 
   // --- Contenus de base (texte français ; l'audio arrive au plan 6) ---
   const contenus = [

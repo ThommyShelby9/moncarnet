@@ -35,10 +35,13 @@ export const NOMS_ICONES = [
   "ph-bell",
   "ph-calendar-check",
   "ph-calendar-dots",
+  "ph-calendar-plus",
+  "ph-caret-left",
   "ph-caret-right",
   "ph-chart-line-up",
   "ph-check-circle",
   "ph-check",
+  "ph-clock-counter-clockwise",
   "ph-cloud-arrow-up",
   "ph-confetti",
   "ph-device-mobile",
@@ -53,9 +56,12 @@ export const NOMS_ICONES = [
   "ph-map-pin",
   "ph-map-trifold",
   "ph-microphone",
+  "ph-minus",
   "ph-money",
   "ph-moon",
   "ph-motorcycle",
+  "ph-package",
+  "ph-paper-plane-tilt",
   "ph-pause",
   "ph-phone",
   "ph-pill",
@@ -68,6 +74,7 @@ export const NOMS_ICONES = [
   "ph-speaker-high",
   "ph-sun-horizon",
   "ph-sun",
+  "ph-timer",
   "ph-trend-down",
   "ph-trend-up",
   "ph-users-three",
@@ -79,4 +86,4 @@ export const NOMS_ICONES = [
 
 export type NomIcone = (typeof NOMS_ICONES)[number];
 
-export const VERSION_SPRITE = "3ef4f1c2";
+export const VERSION_SPRITE = "657a78ad";

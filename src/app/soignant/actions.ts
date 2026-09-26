@@ -2,9 +2,12 @@
 
 import { redirect } from "next/navigation";
 import { lireSaisieConsultation } from "@/domain/consultation";
+import { aujourdhuiAuBenin } from "@/domain/dates";
 import { lireDeclarationNaissance } from "@/domain/naissance";
 import { lireLignes } from "@/domain/ordonnances";
+import type { MotifRdv } from "@/domain/programmes/types";
 import { db } from "@/server/db/client";
+import { donnerPlace, modifierCapacite, ouvrirPlage } from "@/server/soignant/agenda";
 import { prendreEnCharge } from "@/server/soignant/alertes";
 import { enregistrerConsultation } from "@/server/soignant/consultation";
 import { appelerSuivant } from "@/server/salle-attente";
@@ -71,4 +74,36 @@ export async function appelerSuivantAction(): Promise<void> {
   const resultat = await appelerSuivant(db(), { soignant });
   if (resultat.ok) redirect(`/soignant/patients/${resultat.donnees.patientId}?note=appel&numero=${resultat.donnees.numero}`);
   redirect("/soignant?note=salle_vide");
+}
+
+/** « Ouvrir une plage » : on arrive sur la plage créée, ou on revient à l'agenda avec la raison du refus. */
+export async function ouvrirPlageAction(formulaire: FormData): Promise<void> {
+  const soignant = await exigerSoignant();
+  const date = String(formulaire.get("date") ?? "");
+  const resultat = await ouvrirPlage(db(), {
+    soignant,
+    date,
+    moment: formulaire.get("moment") === "apres_midi" ? "apres_midi" : "matin",
+    motif: String(formulaire.get("motif") ?? "") as MotifRdv,
+    capacite: Number(formulaire.get("capacite")),
+    aujourdhui: aujourdhuiAuBenin(),
+  });
+  if (resultat.ok) redirect(`/soignant/agenda/${resultat.donnees.creneauId}?note=ouverte`);
+  redirect(`/soignant/agenda?note=${resultat.erreur}`);
+}
+
+/** Boutons − et + d'une plage. */
+export async function modifierCapaciteAction(formulaire: FormData): Promise<void> {
+  const soignant = await exigerSoignant();
+  const creneauId = String(formulaire.get("creneauId") ?? "");
+  const resultat = await modifierCapacite(db(), { soignant, creneauId, capacite: Number(formulaire.get("capacite")) });
+  redirect(`/soignant/agenda/${encodeURIComponent(creneauId)}?note=${resultat.ok ? "capacite" : resultat.erreur}`);
+}
+
+/** « Donner la place » à une personne de la liste d'attente. */
+export async function donnerPlaceAction(formulaire: FormData): Promise<void> {
+  const soignant = await exigerSoignant();
+  const creneauId = String(formulaire.get("creneauId") ?? "");
+  const resultat = await donnerPlace(db(), { soignant, creneauId, attenteId: String(formulaire.get("attenteId") ?? "") });
+  redirect(`/soignant/agenda/${encodeURIComponent(creneauId)}?note=${resultat.ok ? "place_donnee" : resultat.erreur}`);
 }
