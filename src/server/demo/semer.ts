@@ -2,6 +2,7 @@ import { randomUUID } from "node:crypto";
 import { and, asc, eq, isNotNull, isNull, sql } from "drizzle-orm";
 import { planifier } from "@/domain/calendrier";
 import { ageEnAnnees, ajouterJours, depuisDateISO, joursEntre, type DateISO } from "@/domain/dates";
+import { CONTENUS_DE_BASE } from "@/domain/contenus";
 import { ZONES_SANITAIRES } from "@/domain/geographie";
 import { agreger, CODES_INDICATEURS, INDICATEURS, moisPrecedents, premierDuMois, type CodeIndicateur, type Valeurs } from "@/domain/pilotage";
 import { PROGRAMMES, type CodeProgramme, type MotifRdv } from "@/domain/programmes";
@@ -49,7 +50,7 @@ const ALPHABET_CODE = "ABCDEFGHJKLMNPQRSTUVWXYZ23456789";
 
 const TABLES = [
   "ruptures", "consignes", "rappels", "passages", "indicateurs_zones", "fichiers", "alertes", "liste_attente",
-  "contenus_traductions", "contenus", "ordonnances", "evenements", "rendez_vous", "creneaux", "modeles_plages",
+  "ordonnances", "evenements", "rendez_vous", "creneaux", "modeles_plages",
   "inscriptions", "responsables", "consentements", "contacts", "patients", "foyers", "sessions", "comptes",
   "etablissements", "communes",
 ];
@@ -733,16 +734,15 @@ export async function semerDemo(db: Db, { aujourdhui }: { aujourdhui: DateISO })
     }
   }
 
-  // --- Contenus de base (texte français ; l'audio arrive au plan 6) ---
-  const contenus = [
-    { code: "rappel_rendez_vous", categorie: "rappel", pictogramme: "ph-calendar-dots", texte: "Rappel : vous avez un rendez-vous au centre de santé. Pensez à votre carnet." },
-    { code: "rendez_vous_manque", categorie: "rappel", pictogramme: "ph-calendar-dots", texte: "Vous n'avez pas pu venir à votre rendez-vous. Choisissez un autre jour." },
-    { code: "prise_soir", categorie: "rappel", pictogramme: "ph-moon", texte: "Ce soir : prenez votre comprimé avec un verre d'eau." },
-    { code: "danger_conseil", categorie: "danger", pictogramme: "hi-alert-circle", texte: "Allez au centre de santé maintenant ou appelez-le. N'attendez pas." },
-  ];
-  for (const c of contenus) {
-    const [contenu] = await db.insert(t.contenus).values({ code: c.code, categorie: c.categorie, pictogramme: c.pictogramme }).returning();
-    await db.insert(t.contenusTraductions).values({ contenuId: contenu!.id, langue: "fr", texte: c.texte });
+  // --- Contenus de santé gérés dans l'administration : ce sont des réglages, pas des données de démo.
+  //     La remise à zéro garde les textes modifiés et les voix enregistrées ; elle ajoute seulement ce qui manque. ---
+  for (const c of CONTENUS_DE_BASE) {
+    const [contenu] = await db
+      .insert(t.contenus)
+      .values({ code: c.code, categorie: c.categorie, titre: c.titre, pictogramme: c.pictogramme })
+      .onConflictDoUpdate({ target: t.contenus.code, set: { categorie: c.categorie, titre: c.titre, pictogramme: c.pictogramme } })
+      .returning();
+    await db.insert(t.contenusTraductions).values({ contenuId: contenu!.id, langue: "fr", texte: c.texte }).onConflictDoNothing();
   }
 
   const nbPatients = personnages.length + population.length;

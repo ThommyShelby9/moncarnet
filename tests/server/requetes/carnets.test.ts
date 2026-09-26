@@ -36,6 +36,8 @@ describe("programmes et établissement du carnet", () => {
     const carnets = await carnetsDuCompte(db, codjo!.id, "2026-09-25");
     expect(carnets.map((c) => c.programmes)).toEqual([["hypertension"], ["consultation"], ["vaccination"]]);
     expect(carnets[0]?.codeCourt).toMatch(/^[A-HJ-NP-Z2-9]{6}$/);
+    // La langue du carnet : celle dans laquelle on lui fait entendre les conseils.
+    expect(carnets[0]?.langue).toBe("fon");
     expect(await etablissementDuPatient(db, carnets[0]!.patientId)).toEqual({ nom: "Centre de santé de Bohicon", telephone: "+2290121000000" });
   });
 });

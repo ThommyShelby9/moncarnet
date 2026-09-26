@@ -9,6 +9,8 @@ import { db } from "@/server/db/client";
 import { comptes } from "@/server/db/schema";
 import { semerDemo } from "@/server/demo/semer";
 import { envoyerRappels, relancer } from "@/server/rappels";
+import { modifierTexte } from "@/server/contenus";
+import { estLangue } from "@/domain/langues";
 
 /** Remet toute la démo à zéro, pour rejouer les parcours ; en mode démonstration seulement, et après confirmation. */
 export async function reinitialiserDemoAction(formulaire: FormData): Promise<void> {
@@ -37,4 +39,15 @@ export async function relancerRappelsAction(): Promise<void> {
   await exigerRole("admin");
   const { relances } = await relancer(db(), { maintenant: new Date(), delaiMinutes: 0 });
   redirect(`/admin?note=relances&nombre=${relances}`);
+}
+
+/** Texte d'un contenu de santé, dans une langue. */
+export async function modifierTexteAction(formulaire: FormData): Promise<void> {
+  const compte = await exigerRole("admin");
+  const code = String(formulaire.get("code") ?? "");
+  const langue = String(formulaire.get("langue") ?? "");
+  const resultat = estLangue(langue)
+    ? await modifierTexte(db(), { compte, code, langue, texte: String(formulaire.get("texte") ?? "") })
+    : ({ ok: false, erreur: "invalide" } as const);
+  redirect(`/admin/contenus?note=${resultat.ok ? "texte" : resultat.erreur}#${encodeURIComponent(code)}`);
 }

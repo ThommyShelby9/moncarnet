@@ -2,7 +2,7 @@ import { afterAll, beforeAll, describe, expect, it } from "vitest";
 import type { Db } from "@/server/db/client";
 import { semerDemo } from "@/server/demo/semer";
 import { programmesDuCarnet } from "@/server/requetes/carnet";
-import { texteContenu } from "@/server/requetes/contenus";
+import { contenuPour } from "@/server/contenus";
 import { creerDbDeTest } from "../../aides/base-de-test";
 import { idPatient } from "../../aides/demo";
 
@@ -32,9 +32,9 @@ describe("programmesDuCarnet", () => {
   });
 });
 
-describe("texteContenu", () => {
+describe("contenuPour", () => {
   it("donne le texte d'un contenu en français", async () => {
-    expect(await texteContenu(db, "danger_conseil")).toBe("Allez au centre de santé maintenant ou appelez-le. N'attendez pas.");
-    expect(await texteContenu(db, "inconnu")).toBeNull();
+    expect((await contenuPour(db, "danger_conseil", "fr"))?.texte).toBe("Allez au centre de santé maintenant ou appelez-le. N'attendez pas.");
+    expect(await contenuPour(db, "inconnu", "fr")).toBeNull();
   });
 });

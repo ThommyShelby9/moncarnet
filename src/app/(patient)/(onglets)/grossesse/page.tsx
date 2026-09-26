@@ -2,9 +2,12 @@ import type { Metadata } from "next";
 import Link from "next/link";
 import { redirect } from "next/navigation";
 import { joursEntre } from "@/domain/dates";
+import { codeConseilsGrossesse, lignesDuContenu } from "@/domain/contenus";
 import { suiviDeGrossesse } from "@/domain/grossesse";
+import { LIBELLES_LANGUE } from "@/domain/langues";
 import { formaterTelephone, normaliserTelephone } from "@/domain/telephone";
 import { dateLongue, libelleDansJours, majuscule } from "@/domain/temps";
+import { contenuPour } from "@/server/contenus";
 import { db } from "@/server/db/client";
 import { programmesDuCarnet } from "@/server/requetes/carnet";
 import { etablissementDuPatient } from "@/server/requetes/carnets";
@@ -24,7 +27,7 @@ const nombre = (n: number) => n.toLocaleString("fr-FR", { maximumFractionDigits:
 /** La grossesse semaine par semaine : où on en est, la taille du bébé, la préparation de la naissance. */
 export default async function MaGrossesse({ searchParams }: PageProps<"/grossesse">) {
   const params = await searchParams;
-  const { aujourdhui, carnets, carnet } = await contextePatient(params.pour);
+  const { aujourdhui, carnets, carnet, titulaire } = await contextePatient(params.pour);
   if (!carnet) redirect("/");
   const grossesse = await grossesseDe(db(), carnet.patientId);
   if (!grossesse) redirect(`/carnet?pour=${carnet.patientId}`);
@@ -34,11 +37,18 @@ export default async function MaGrossesse({ searchParams }: PageProps<"/grossess
     etablissementDuPatient(db(), carnet.patientId),
   ]);
   const suivi = suiviDeGrossesse(grossesse.ddr, aujourdhui);
+  // Les conseils gérés dans l'administration : le texte (et la voix du téléphone) en français,
+  // et l'enregistrement dans la langue de la personne qui tient le téléphone.
+  const [conseil, conseilFrancais] = await Promise.all([
+    contenuPour(db(), codeConseilsGrossesse(suivi.trimestre), (titulaire ?? carnet).langue),
+    contenuPour(db(), codeConseilsGrossesse(suivi.trimestre), "fr"),
+  ]);
+  const conseils = conseilFrancais ? lignesDuContenu(conseilFrancais.texte) : suivi.conseils;
   const etapes = programmes.find((p) => p.code === "grossesse")?.etapes ?? [];
   const reperes = etapes.map((e) => ({ code: e.code, libelle: e.libelle, statut: e.statut, semaine: Math.floor(joursEntre(grossesse.ddr, e.datePrevue) / 7) }));
   const telephone = centre?.telephone ? normaliserTelephone(centre.telephone) : null;
   const soi = carnet.lien === "soi";
-  const resume = `${soi ? "Vous êtes" : `${carnet.prenom} est`} à ${suivi.semaines} semaines de grossesse. Le terme est prévu le ${dateLongue(suivi.terme)}. Le bébé mesure environ ${nombre(suivi.taille.cm)} centimètres et pèse environ ${nombre(suivi.taille.grammes / 1000)} kilo, à peu près comme ${suivi.taille.comme}. ${suivi.conseils.join(" ")}`;
+  const resume = `${soi ? "Vous êtes" : `${carnet.prenom} est`} à ${suivi.semaines} semaines de grossesse. Le terme est prévu le ${dateLongue(suivi.terme)}. Le bébé mesure environ ${nombre(suivi.taille.cm)} centimètres et pèse environ ${nombre(suivi.taille.grammes / 1000)} kilo, à peu près comme ${suivi.taille.comme}. ${conseils.join(" ")}`;
 
   return (
     <>
@@ -100,8 +110,11 @@ export default async function MaGrossesse({ searchParams }: PageProps<"/grossess
         <h2 id="titre-conseils" className="text-lg font-bold">
           Cette semaine
         </h2>
+        {conseil?.audio && conseil.langueAudio && (
+          <BoutonEcouter variante="complet" libelle={`Écouter les conseils en ${LIBELLES_LANGUE[conseil.langueAudio].toLowerCase()}`} sousLibelle="Enregistré par le centre de santé" source={conseil.audio} />
+        )}
         <ul className="flex flex-col gap-2.5">
-          {suivi.conseils.map((conseil) => (
+          {conseils.map((conseil) => (
             <li key={conseil} className="flex items-start gap-3">
               <BoutonEcouter variante="pastille" libelle={`Écouter : ${conseil}`} texte={conseil} />
               <span className="pt-1">{conseil}</span>

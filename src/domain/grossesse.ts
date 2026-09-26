@@ -1,3 +1,4 @@
+import { codeConseilsGrossesse, CONTENUS_DE_BASE, lignesDuContenu } from "./contenus";
 import { joursEntre, type DateISO } from "./dates";
 import { termePrevu } from "./programmes/grossesse";
 
@@ -22,23 +23,6 @@ const TAILLES: Taille[] = [
   { semaine: 40, cm: 51, grammes: 3400, comme: "une petite pastèque" },
 ];
 
-const CONSEILS: Record<1 | 2 | 3, string[]> = {
-  1: [
-    "Prenez chaque jour le fer et l'acide folique donnés au centre.",
-    "Dormez sous une moustiquaire imprégnée : le paludisme est dangereux pendant la grossesse.",
-    "Faites votre première consultation avant la 12ᵉ semaine.",
-  ],
-  2: [
-    "À chaque consultation, prenez le traitement contre le paludisme donné au centre.",
-    "Mangez des haricots, des légumes-feuilles et du poisson : ils donnent du fer.",
-    "Le bébé bouge : s'il bouge moins, venez au centre.",
-  ],
-  3: [
-    "Préparez la naissance : où accoucher, comment y aller, qui vous accompagne.",
-    "Si vous perdez de l'eau ou du sang, ou si le bébé bouge moins : venez tout de suite.",
-    "Allez à toutes les consultations, jusqu'au bout.",
-  ],
-};
 
 export interface SuiviDeGrossesse {
   semaines: number;
@@ -63,7 +47,7 @@ export function suiviDeGrossesse(ddr: DateISO, aujourdhui: DateISO): SuiviDeGros
     terme,
     joursAvantTerme: joursEntre(aujourdhui, terme),
     taille: [...TAILLES].reverse().find((t) => t.semaine <= semaines) ?? TAILLES[0]!,
-    conseils: CONSEILS[trimestre],
+    conseils: lignesDuContenu(CONTENUS_DE_BASE.find((c) => c.code === codeConseilsGrossesse(trimestre))!.texte),
   };
 }
 

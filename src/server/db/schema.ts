@@ -15,6 +15,7 @@ import {
   type AnyPgColumn,
 } from "drizzle-orm/pg-core";
 // Imports relatifs uniquement : drizzle-kit ne résout pas l'alias « @/ ».
+import { LANGUES } from "../../domain/langues";
 import { CODES_PROGRAMMES, MOTIFS_RDV } from "../../domain/programmes/types";
 import type { LigneTraitement } from "../../domain/traitements";
 
@@ -23,8 +24,7 @@ export type RoleCompte = (typeof ROLES_COMPTE)[number];
 /** Relation du titulaire du compte avec la personne dont il gère le carnet. */
 export const LIENS_RESPONSABLE = ["soi", "conjoint", "parent", "enfant", "aidant"] as const;
 export type LienResponsable = (typeof LIENS_RESPONSABLE)[number];
-export const LANGUES = ["fr", "fon", "adja", "yo", "bariba", "dendi"] as const;
-export type Langue = (typeof LANGUES)[number];
+export { LANGUES, type Langue } from "../../domain/langues";
 export const CANAUX = ["whatsapp", "sms", "vocal", "relais"] as const;
 export type Canal = (typeof CANAUX)[number];
 
@@ -266,10 +266,18 @@ export const alertes = pgTable("alertes", {
   annuleeLe: horodatage("annulee_le"),
 });
 
+/** Octets bruts (bytea) : les notes vocales et les contenus parlés restent en base, sans volume à monter. */
+const octets = customType<{ data: Uint8Array; driverData: Buffer }>({
+  dataType: () => "bytea",
+  toDriver: (valeur) => Buffer.from(valeur),
+  fromDriver: (valeur) => new Uint8Array(valeur),
+});
+
 export const contenus = pgTable("contenus", {
   id: uuid("id").primaryKey().defaultRandom(),
   code: text("code").notNull().unique(),
   categorie: text("categorie").notNull(),
+  titre: text("titre"),
   pictogramme: text("pictogramme").notNull(),
 });
 
@@ -280,20 +288,16 @@ export const contenusTraductions = pgTable(
       .notNull()
       .references(() => contenus.id, { onDelete: "cascade" }),
     langue: langue("langue").notNull(),
+    /** Vide quand la langue se parle sans s'écrire : seul l'enregistrement compte. */
     texte: text("texte").notNull(),
-    audioMp3: text("audio_mp3"),
-    audioOgg: text("audio_ogg"),
+    /** Version parlée, enregistrée dans l'administration. */
+    audio: octets("audio"),
+    audioType: text("audio_type"),
+    audioLe: horodatage("audio_le"),
     videoSignes: text("video_signes"),
   },
   (t) => [primaryKey({ columns: [t.contenuId, t.langue] })],
 );
-
-/** Octets bruts (bytea) : les notes vocales restent en base, sans volume à monter. */
-const octets = customType<{ data: Uint8Array; driverData: Buffer }>({
-  dataType: () => "bytea",
-  toDriver: (valeur) => Buffer.from(valeur),
-  fromDriver: (valeur) => new Uint8Array(valeur),
-});
 
 /** Note vocale d'une visite du relais : même identifiant que l'événement de la visite. */
 export const fichiers = pgTable("fichiers", {

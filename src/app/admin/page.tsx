@@ -40,6 +40,14 @@ export default async function PageAdmin({ searchParams }: PageProps<"/admin">) {
   return (
     <main className="mx-auto flex max-w-3xl flex-col gap-6 px-4 py-6">
       <EnTete nomAffiche={compte.nomAffiche} sousTitre="Administration" />
+      <nav aria-label="Administration" className="flex gap-2">
+        <Link href="/admin" aria-current="page" className="rounded-bouton bg-marque px-4 py-2 text-sm font-bold text-white">
+          La démo
+        </Link>
+        <Link href="/admin/contenus" className="rounded-bouton bg-white px-4 py-2 text-sm font-bold text-marque">
+          Contenus de santé
+        </Link>
+      </nav>
       <h1 className="text-3xl font-bold">Administration</h1>
       {note && (note.alerte ? <p role="alert" className="rounded-carte bg-urgence-pale px-4 py-3 font-bold text-urgence">{note.texte}</p> : <RetourAction message={note.texte} />)}
       <section aria-labelledby="titre-etat" className="flex flex-col gap-3">

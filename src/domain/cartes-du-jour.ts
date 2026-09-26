@@ -177,7 +177,7 @@ export function detailCarte(carte: CarteDuJour, aujourdhui: DateISO): string {
 
 const phrase = (texte: string) => (/[.!?]$/.test(texte) ? texte : `${texte}.`);
 
-/** Texte lu par le bouton « écouter » (synthèse vocale en français ; audio en langue au plan 6). */
+/** Texte lu par la voix du téléphone (en français) quand aucun message n'est enregistré dans la langue de la personne. */
 export function texteAEcouter(carte: CarteDuJour, contexte: { aujourdhui: DateISO; pour: string | null }): string {
   return [
     contexte.pour ? `Pour ${contexte.pour}.` : null,

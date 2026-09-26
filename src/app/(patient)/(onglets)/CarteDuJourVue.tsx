@@ -10,7 +10,20 @@ import { noterPriseAction } from "../actions";
 const BOUTON_BLANC = "flex items-center justify-center gap-1.5 rounded-bouton bg-white py-3.5 font-bold text-marque";
 
 /** Grande carte indigo : ce qu'il faut faire, à écouter, avec une seule action. */
-export function CarteDuJourVue({ carte, aujourdhui, pour, retour }: { carte: CarteDuJour; aujourdhui: DateISO; pour: string | null; retour: string }) {
+export function CarteDuJourVue({
+  carte,
+  aujourdhui,
+  pour,
+  retour,
+  audio = null,
+}: {
+  carte: CarteDuJour;
+  aujourdhui: DateISO;
+  pour: string | null;
+  retour: string;
+  /** Message enregistré dans la langue de la personne ; sinon la voix du téléphone lit la carte. */
+  audio?: string | null;
+}) {
   const prise = carte.type === "prise";
   return (
     <article className="relative flex h-full flex-col overflow-hidden rounded-grande bg-marque p-4 text-white">
@@ -20,7 +33,7 @@ export function CarteDuJourVue({ carte, aujourdhui, pour, retour }: { carte: Car
           <Icone nom={prise ? ICONE_MOMENT[carte.moment] : ICONE_MOTIF[carte.motif]} className="size-6" />
         </span>
         {surtitre(carte, aujourdhui)}
-        <BoutonEcouter variante="rond" libelle="Écouter" texte={texteAEcouter(carte, { aujourdhui, pour })} className="ml-auto" />
+        <BoutonEcouter variante="rond" libelle="Écouter" {...(audio ? { source: audio } : { texte: texteAEcouter(carte, { aujourdhui, pour }) })} className="ml-auto" />
       </div>
       {pour && <p className="relative mt-3 text-sm font-bold text-lavande-3">Pour {pour}</p>}
       <h2 className="relative mt-2 text-[1.45rem] leading-tight font-bold">{titreCarte(carte)}</h2>

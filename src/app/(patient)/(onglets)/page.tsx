@@ -4,6 +4,7 @@ import { ajouterJours, aujourdhuiAuBenin } from "@/domain/dates";
 import { suiviDeGrossesse } from "@/domain/grossesse";
 import { dateLongue, debutDuJourAuBenin, heureAuBenin, libelleDansJours, salutation } from "@/domain/temps";
 import type { TraitementEnCours } from "@/domain/traitements";
+import { contenuPour } from "@/server/contenus";
 import { db } from "@/server/db/client";
 import { donneesAccueil } from "@/server/requetes/accueil";
 import { grossesseDe, naissancesRecentes, planNaissanceDe } from "@/server/requetes/grossesse";
@@ -45,6 +46,10 @@ export default async function Accueil({ searchParams }: PageProps<"/">) {
   const heure = heureAuBenin();
   const donnees = await donneesAccueil(db(), personnes.map((c) => c.patientId), aujourdhui);
   const { pile, ensuite } = cartesDuJour({ aujourdhui, heure, ...donnees });
+  // Les prises se disent dans la langue de qui tient le téléphone, quand l'administration a enregistré le message.
+  const langueEcoute = (titulaire ?? carnet)?.langue ?? "fr";
+  const moments = [...new Set(pile.flatMap((c) => (c.type === "prise" ? [c.moment] : [])))];
+  const audiosDesPrises = new Map(await Promise.all(moments.map(async (m) => [m, (await contenuPour(db(), `prise_${m}`, langueEcoute))?.audio ?? null] as const)));
   const [grossesses, naissances] = await Promise.all([
     Promise.all(
       personnes
@@ -109,7 +114,14 @@ export default async function Accueil({ searchParams }: PageProps<"/">) {
       {pile.length > 0 ? (
         <PileDeCartes titre="À faire">
           {pile.map((carte) => (
-            <CarteDuJourVue key={carte.cle} carte={carte} aujourdhui={aujourdhui} pour={prenomPour(carte.patientId)} retour={retour} />
+            <CarteDuJourVue
+              key={carte.cle}
+              carte={carte}
+              aujourdhui={aujourdhui}
+              pour={prenomPour(carte.patientId)}
+              retour={retour}
+              audio={carte.type === "prise" ? (audiosDesPrises.get(carte.moment) ?? null) : null}
+            />
           ))}
         </PileDeCartes>
       ) : enCours.length === 0 ? (

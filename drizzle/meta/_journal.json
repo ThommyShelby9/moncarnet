@@ -71,6 +71,20 @@
       "when": 1790414179032,
       "tag": "0009_coordonnees",
       "breakpoints": true
+    },
+    {
+      "idx": 10,
+      "version": "7",
+      "when": 1790415902779,
+      "tag": "0010_contenus_parles",
+      "breakpoints": true
+    },
+    {
+      "idx": 11,
+      "version": "7",
+      "when": 1790415911350,
+      "tag": "0011_sans_liens_audio",
+      "breakpoints": true
     }
   ]
 }

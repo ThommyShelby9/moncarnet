@@ -23,12 +23,14 @@ interface Props {
   signes: { code: CodeSigne; libelle: string }[];
   centre: { nom: string; telephone: string | null };
   conseil: string;
+  /** Le conseil enregistré dans la langue de la personne (administration), joué à la place de la voix du téléphone. */
+  audioConseil?: string | null;
 }
 
 const heureLocale = (iso: string) =>
   new Intl.DateTimeFormat("fr-FR", { hour: "numeric", minute: "2-digit", timeZone: "Africa/Porto-Novo" }).format(new Date(iso)).replace(":", " h ");
 
-export function FormulaireSignalement({ patientId, prenom, signes, centre, conseil }: Props) {
+export function FormulaireSignalement({ patientId, prenom, signes, centre, conseil, audioConseil = null }: Props) {
   const [etat, setEtat] = useState<Etat>({ etape: "choix" });
   const [, demarrer] = useTransition();
   const horsLigne = useOffline();
@@ -82,7 +84,7 @@ export function FormulaireSignalement({ patientId, prenom, signes, centre, conse
           <h1 className="text-xl font-bold text-urgence">L&apos;alerte n&apos;est pas encore partie</h1>
           <p>Il n&apos;y a pas de réseau. Elle partira toute seule dès que le réseau revient. N&apos;attendez pas :</p>
           <p className="font-bold">{conseil}</p>
-          <BoutonEcouter libelle="Écouter le conseil" texte={`L'alerte n'est pas encore partie. ${conseil}`} />
+          <BoutonEcouter libelle="Écouter le conseil" {...(audioConseil ? { source: audioConseil } : { texte: `L'alerte n'est pas encore partie. ${conseil}` })} />
         </section>
         <Appeler centre={centre} />
       </>
@@ -104,7 +106,7 @@ export function FormulaireSignalement({ patientId, prenom, signes, centre, conse
           <h1 className="text-xl font-bold">Alerte reçue à {heureLocale(etat.recueLe)}</h1>
           <p>Le {etat.centre} a reçu l&apos;alerte. Un soignant va s&apos;en occuper.</p>
           <p className="font-bold">{conseil}</p>
-          <BoutonEcouter libelle="Écouter" texte={`Le centre a reçu votre alerte. Un soignant va s'en occuper. ${conseil}`} />
+          <BoutonEcouter libelle="Écouter" {...(audioConseil ? { source: audioConseil } : { texte: `Le centre a reçu votre alerte. Un soignant va s'en occuper. ${conseil}` })} />
         </section>
         <Appeler centre={centre} />
         <form action={annulerAlerteAction}>

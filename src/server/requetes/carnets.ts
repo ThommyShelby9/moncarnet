@@ -1,5 +1,6 @@
 import { and, eq, inArray } from "drizzle-orm";
 import { ageEnAnnees, libelleAge, type DateISO } from "@/domain/dates";
+import type { Langue } from "@/domain/langues";
 import type { CodeProgramme } from "@/domain/programmes";
 import type { Db } from "../db/client";
 import { etablissements, inscriptions, patients, responsables, type LienResponsable } from "../db/schema";
@@ -18,6 +19,8 @@ export interface Carnet {
   codeCourt: string;
   /** Programmes de suivi actifs. */
   programmes: CodeProgramme[];
+  /** Langue dans laquelle la personne entend les conseils. */
+  langue: Langue;
 }
 
 const ORDRE: Record<LienResponsable, number> = { soi: 0, conjoint: 1, parent: 2, enfant: 3, aidant: 4 };
@@ -33,6 +36,7 @@ export async function carnetsDuCompte(db: Db, compteId: string, aujourdhui: Date
       dateNaissance: patients.dateNaissance,
       etablissementId: patients.etablissementId,
       codeCourt: patients.codeCourt,
+      langue: patients.langue,
     })
     .from(responsables)
     .innerJoin(patients, eq(responsables.patientId, patients.id))
