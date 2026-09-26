@@ -1,4 +1,5 @@
 import type { Metadata } from "next";
+import Link from "next/link";
 import { notFound } from "next/navigation";
 import { env } from "@/config/env";
 import type { RoleCompte } from "@/server/db/schema";
@@ -31,6 +32,9 @@ export default async function PageDemo({ searchParams }: { searchParams: Promise
       <header className="flex items-center gap-3">
         <Logo className="size-11" />
         <p className="text-2xl font-bold">{env.NEXT_PUBLIC_APP_NAME}</p>
+        <Link href="/decouvrir" className="ml-auto text-sm font-bold text-marque underline">
+          Découvrir la solution
+        </Link>
       </header>
       <div>
         <h1 className="text-3xl font-bold">Essayez la plateforme</h1>

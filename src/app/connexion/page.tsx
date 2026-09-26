@@ -40,6 +40,9 @@ export default async function PageConnexion({ searchParams }: { searchParams: Pr
           Essayer avec un compte de démonstration
         </Link>
       )}
+      <Link href="/decouvrir" className="text-center text-sm font-bold text-gris underline">
+        Découvrir {env.NEXT_PUBLIC_APP_NAME}
+      </Link>
     </main>
   );
 }
