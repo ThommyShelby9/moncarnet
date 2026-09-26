@@ -14,7 +14,9 @@ import { Icone } from "@/ui/Icone";
 import { Ondes } from "@/ui/Ondes";
 import { ICONE_MOMENT } from "@/ui/pictogrammes";
 import { Posologie } from "@/ui/Posologie";
-import { contextePatient } from "../../contexte";
+import { RetourAction } from "@/ui/RetourAction";
+import { nommerAction } from "../../actions";
+import { contextePatient, texteDe } from "../../contexte";
 import { SectionProgramme } from "./Frise";
 
 export default async function MonCarnet({ searchParams }: PageProps<"/carnet">) {
@@ -54,6 +56,13 @@ export default async function MonCarnet({ searchParams }: PageProps<"/carnet">) 
           <BoutonEcouter variante="rond" libelle="Écouter le carnet" texte={resume} />
         </div>
       </header>
+      {texteDe(params.note) === "prenom" && <RetourAction message="C'est noté : le carnet porte maintenant son prénom." />}
+      {texteDe(params.note) === "prenom_refuse" && (
+        <p role="alert" className="rounded-carte bg-urgence-pale p-3 font-bold text-urgence">
+          Le prénom n'a pas pu être enregistré : écrivez-le puis réessayez.
+        </p>
+      )}
+      {carnet.prenom === "Bébé" && <DonnerPrenom patientId={carnet.patientId} />}
       {suivis.map((p) => (
         <SectionProgramme key={p.code} programme={p} patientId={carnet.patientId} aujourdhui={aujourdhui} />
       ))}
@@ -64,6 +73,23 @@ export default async function MonCarnet({ searchParams }: PageProps<"/carnet">) 
         <p className="rounded-carte bg-white p-4 text-gris">Rien à suivre pour le moment. Les consultations se prennent à la demande.</p>
       )}
     </>
+  );
+}
+
+/** Le prénom est souvent donné quelques jours après la naissance : la famille le donne ici. */
+function DonnerPrenom({ patientId }: { patientId: string }) {
+  return (
+    <form action={nommerAction} className="flex flex-col gap-3 rounded-carte bg-soleil-pale p-4">
+      <input type="hidden" name="patientId" value={patientId} />
+      <label className="flex flex-col gap-1.5 font-bold">
+        Son prénom
+        <input name="prenom" required maxLength={60} autoComplete="off" className="h-12 rounded-bouton bg-white px-3 text-lg font-normal" />
+      </label>
+      <button className="flex h-12 items-center justify-center gap-2 rounded-bouton bg-marque font-bold text-white">
+        <Icone nom="ph-baby" className="size-5" />
+        C'est son prénom
+      </button>
+    </form>
   );
 }
 
