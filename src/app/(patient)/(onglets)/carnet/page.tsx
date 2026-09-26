@@ -59,7 +59,7 @@ export default async function MonCarnet({ searchParams }: PageProps<"/carnet">) 
       {texteDe(params.note) === "prenom" && <RetourAction message="C'est noté : le carnet porte maintenant son prénom." />}
       {texteDe(params.note) === "prenom_refuse" && (
         <p role="alert" className="rounded-carte bg-urgence-pale p-3 font-bold text-urgence">
-          Le prénom n'a pas pu être enregistré : écrivez-le puis réessayez.
+          Le prénom n&apos;a pas pu être enregistré : écrivez-le puis réessayez.
         </p>
       )}
       {carnet.prenom === "Bébé" && <DonnerPrenom patientId={carnet.patientId} />}
@@ -87,7 +87,7 @@ function DonnerPrenom({ patientId }: { patientId: string }) {
       </label>
       <button className="flex h-12 items-center justify-center gap-2 rounded-bouton bg-marque font-bold text-white">
         <Icone nom="ph-baby" className="size-5" />
-        C'est son prénom
+        C&apos;est son prénom
       </button>
     </form>
   );
