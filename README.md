@@ -31,12 +31,13 @@ Ouvrez https://moncarnet.kheios.com/demo : un clic entre dans un compte.
 - **Carnet** : chaque vaccin ou consultation fait porte son tampon « VU », comme sur le carnet papier ; les médicaments en cours sont dessinés par moment de la journée.
 - **Ma grossesse** : semaine par semaine, taille du bébé, frise des consultations, conseils à écouter, « Préparer la naissance » (plan d'accouchement) et « Le jour J ».
 - **Naissance** : félicitations sur l'accueil, carnet du bébé rattaché à la famille, vaccins de naissance tamponnés, visites après l'accouchement proposées à la mère.
+- **Le prénom du bébé, plus tard** : souvent donné lors de la sortie de l'enfant ; la famille le donne depuis le carnet du bébé.
 - **Courbe de tension** : les derniers relevés, avec la limite 140/90.
 - **J'ai un problème** : les signes de danger en images (ceux de la grossesse pour une femme enceinte). L'alerte part au centre avec 15 minutes pour la prendre en charge. Sans réseau, l'écran dit que l'alerte n'est pas encore partie, donne le numéro du centre, et l'envoi repart seul au retour du réseau, sans doublon.
 
 ## Poste soignant et pharmacie
 
-- **Aujourd'hui** : les alertes en haut avec leur compte à rebours de 15 minutes et « Je la prends en charge » (un seul soignant la prend) ; les consultations du jour par plage, avec le risque de chacun et le tampon « VU » pour les personnes déjà vues ; les patients à surveiller. La page se met à jour seule.
+- **Aujourd'hui** : les alertes en haut avec leur compte à rebours de 15 minutes (une alerte en retard est marquée, et remonte à la zone sanitaire) et « Je la prends en charge » (un seul soignant la prend) ; les consultations du jour par plage, avec le risque de chacun et le tampon « VU » pour les personnes déjà vues ; les patients à surveiller. La page se met à jour seule.
 - **Retrouver un patient** par son nom (sans accent), son numéro ou le code écrit dans son carnet. Un soignant ne voit que les patients de son centre.
 - **Dossier** : risque et motifs (règles de la spec, valeurs indicatives), étapes des programmes, relevés, ordonnances avec leur délivrance.
 - **Déclarer la naissance** (sage-femme) : heure, lieu, voie basse ou césarienne, sexe, poids (« 3,2 » ou « 3200 »), vaccins de naissance ; une seule fois par grossesse.
@@ -59,6 +60,11 @@ Ouvrez https://moncarnet.kheios.com/demo : un clic entre dans un compte.
 - **Ministère de la Santé** : la vue nationale. Elle réunit la zone de la démo (en direct) et dix autres zones du pays (**données fictives**, signalées comme telles), le classement des zones par indicateur, la tendance nationale et les zones à appuyer.
 - **Export CSV au format DHIS2** (unité, période, élément, numérateur, dénominateur, valeur).
 - **Aucun nom** ne sort du pilotage. Un chiffre qui porte sur moins de 5 personnes est masqué, à l'écran comme dans l'export : la petite commune de Zogbodomey le montre.
+
+## Accessibilité
+
+- Audit automatique **axe-core (WCAG 2.1 A et AA)** sur 19 écrans (présentation, démo, connexion, patient, relais, soignant, pharmacie, pilotage) : **aucune violation**.
+- Tout s'écoute ; pictogramme et mot ; gros boutons ; lecteur d'écran ; contrastes vérifiés ; tout se fait au clavier.
 
 ## Démarrer en local
 
