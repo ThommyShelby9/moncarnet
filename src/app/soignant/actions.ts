@@ -2,10 +2,12 @@
 
 import { redirect } from "next/navigation";
 import { lireSaisieConsultation } from "@/domain/consultation";
+import { lireDeclarationNaissance } from "@/domain/naissance";
 import { lireLignes } from "@/domain/ordonnances";
 import { db } from "@/server/db/client";
 import { prendreEnCharge } from "@/server/soignant/alertes";
 import { enregistrerConsultation } from "@/server/soignant/consultation";
+import { declarerNaissance } from "@/server/soignant/naissance";
 import { emettreOrdonnance } from "@/server/soignant/ordonnance";
 import { exigerSoignant } from "./contexte";
 
@@ -46,4 +48,18 @@ export async function emettreOrdonnanceAction(_: EtatFormulaire, formulaire: For
     return { message, valeurs };
   }
   redirect(`/soignant/patients/${valeurs.patientId}?note=ordonnance&code=${resultat.donnees.codeRetrait}`);
+}
+
+/** Naissance déclarée par la sage-femme : on arrive sur le carnet du bébé qui vient d'être créé. */
+export async function declarerNaissanceAction(_: EtatFormulaire, formulaire: FormData): Promise<EtatFormulaire> {
+  const soignant = await exigerSoignant();
+  const valeurs = texteDu(formulaire);
+  const lecture = lireDeclarationNaissance(valeurs, new Date());
+  if (!lecture.ok) return { message: lecture.message, valeurs };
+  const resultat = await declarerNaissance(db(), { auteur: soignant, mereId: valeurs.mereId ?? "", saisie: lecture.saisie });
+  if (!resultat.ok) {
+    const message = resultat.erreur === "interdit" ? "Cette patiente n'est pas suivie dans votre centre." : "Aucune grossesse en cours : la naissance est peut-être déjà enregistrée.";
+    return { message, valeurs };
+  }
+  redirect(`/soignant/patients/${resultat.donnees.bebeId}?note=naissance`);
 }

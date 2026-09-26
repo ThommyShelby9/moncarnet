@@ -41,6 +41,7 @@ export default async function DossierPatient({ params, searchParams }: PageProps
       </Link>
       {note === "consultation" && <RetourAction message="Consultation enregistrée. Le risque est à jour." />}
       {note === "alerte" && <RetourAction message={`Alerte prise en charge. Rappelez ${patient.prenom} maintenant.`} />}
+      {note === "naissance" && <RetourAction message={`Naissance enregistrée : le carnet de ${patient.prenom} est créé, avec ses vaccins de naissance.`} />}
       {note === "ordonnance" && code && (
         <div className="flex flex-wrap items-center gap-4">
           <RetourAction message="Ordonnance enregistrée. Donnez ce code au patient pour la pharmacie." />
@@ -62,12 +63,44 @@ export default async function DossierPatient({ params, searchParams }: PageProps
             {patient.malvoyant ? " · malvoyant·e" : ""}
             {patient.malentendant ? " · malentendant·e" : ""}
           </p>
+          {(dossier.mere || dossier.enfants.length > 0) && (
+            <p className="mt-1 flex flex-wrap gap-x-3 gap-y-1 text-sm">
+              {dossier.mere && (
+                <span>
+                  Mère :{" "}
+                  <Link href={`/soignant/patients/${dossier.mere.id}`} className="font-bold text-marque underline">
+                    {dossier.mere.prenom} {dossier.mere.nom}
+                  </Link>
+                </span>
+              )}
+              {dossier.enfants.length > 0 && (
+                <span>
+                  Enfant{dossier.enfants.length > 1 ? "s" : ""} :{" "}
+                  {dossier.enfants.map((e, i) => (
+                    <span key={e.id}>
+                      {i > 0 ? ", " : ""}
+                      <Link href={`/soignant/patients/${e.id}`} className="font-bold text-marque underline">
+                        {e.prenom}
+                      </Link>{" "}
+                      ({e.libelleAge})
+                    </span>
+                  ))}
+                </span>
+              )}
+            </p>
+          )}
         </div>
         {telephone && (
           <a href={`tel:${telephone}`} className="flex items-center gap-2 rounded-bouton bg-lavande px-4 py-2.5 text-sm font-bold">
             <Icone nom="ph-phone" className="size-5" />
             {formaterTelephone(telephone)}
           </a>
+        )}
+        {dossier.programmes.some((p) => p.code === "grossesse") && (
+          <Link href={`/soignant/patients/${patient.id}/naissance`} className="flex items-center gap-2 rounded-bouton bg-soleil px-4 py-2.5 text-sm font-bold text-nuit">
+            <Icone nom="ph-baby" className="size-5" />
+            Déclarer la naissance
+          </Link>
         )}
         <Link href={`/soignant/patients/${patient.id}/consultation`} className="flex items-center gap-2 rounded-bouton bg-marque px-4 py-2.5 text-sm font-bold text-white">
           <Icone nom="hi-stethoscope" className="size-5" />
