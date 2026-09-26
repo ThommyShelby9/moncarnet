@@ -1,4 +1,4 @@
-import { and, eq, inArray, isNull } from "drizzle-orm";
+import { and, asc, eq, inArray, isNull } from "drizzle-orm";
 import { planifier } from "@/domain/calendrier";
 import { aujourdhuiAuBenin, type DateISO } from "@/domain/dates";
 import { PROGRAMMES, type CodeProgramme } from "@/domain/programmes";
@@ -81,4 +81,19 @@ export async function risquesDes(db: Db, lesPatients: PatientPourRisque[], aujou
     resultat.set(p.id, { global: risqueGlobal(programmes.map((x) => x.resultat)), programmes });
   }
   return resultat;
+}
+
+/** Relevés de tension (consultations et relevés), les 8 derniers, du plus ancien au plus récent. */
+export async function tensionsDe(db: Db, patientId: string): Promise<{ date: DateISO; sys: number; dia: number }[]> {
+  const lignes = await db
+    .select({ donnees: evenements.donnees, le: evenements.survenuLe })
+    .from(evenements)
+    .where(and(eq(evenements.patientId, patientId), inArray(evenements.type, ["consultation", "mesure"])))
+    .orderBy(asc(evenements.survenuLe));
+  return lignes
+    .flatMap((l) => {
+      const m = l.donnees.mesures as { tensionSys?: number; tensionDia?: number } | undefined;
+      return m?.tensionSys && m.tensionDia ? [{ date: aujourdhuiAuBenin(l.le), sys: m.tensionSys, dia: m.tensionDia }] : [];
+    })
+    .slice(-8);
 }

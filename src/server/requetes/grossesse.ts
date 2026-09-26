@@ -1,5 +1,5 @@
-import { and, asc, desc, eq, gte, inArray } from "drizzle-orm";
-import { aujourdhuiAuBenin, type DateISO } from "@/domain/dates";
+import { and, desc, eq, gte, inArray } from "drizzle-orm";
+import type { DateISO } from "@/domain/dates";
 import type { CodePlan } from "@/domain/grossesse";
 import type { Db } from "../db/client";
 import { evenements, inscriptions, patients } from "../db/schema";
@@ -40,19 +40,4 @@ export async function naissancesRecentes(
     const bebe = bebes.find((b) => b.id === (l.donnees.enfant as { id: string }).id);
     return bebe ? [{ mereId: l.mereId, bebeId: bebe.id, prenom: bebe.prenom, sexe: bebe.sexe, le: l.le }] : [];
   });
-}
-
-/** Relevés de tension (consultations et relevés), les 8 derniers, du plus ancien au plus récent. */
-export async function tensionsDe(db: Db, patientId: string): Promise<{ date: DateISO; sys: number; dia: number }[]> {
-  const lignes = await db
-    .select({ donnees: evenements.donnees, le: evenements.survenuLe })
-    .from(evenements)
-    .where(and(eq(evenements.patientId, patientId), inArray(evenements.type, ["consultation", "mesure"])))
-    .orderBy(asc(evenements.survenuLe));
-  return lignes
-    .flatMap((l) => {
-      const m = l.donnees.mesures as { tensionSys?: number; tensionDia?: number } | undefined;
-      return m?.tensionSys && m.tensionDia ? [{ date: aujourdhuiAuBenin(l.le), sys: m.tensionSys, dia: m.tensionDia }] : [];
-    })
-    .slice(-8);
 }

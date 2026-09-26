@@ -5,7 +5,8 @@ import { comptes, evenements, inscriptions, patients, responsables } from "@/ser
 import { semerDemo } from "@/server/demo/semer";
 import { enregistrerPlanNaissance } from "@/server/patient/plan-naissance";
 import { carnetsDuCompte } from "@/server/requetes/carnets";
-import { grossesseDe, naissancesRecentes, planNaissanceDe, tensionsDe } from "@/server/requetes/grossesse";
+import { grossesseDe, naissancesRecentes, planNaissanceDe } from "@/server/requetes/grossesse";
+import { tensionsDe } from "@/server/requetes/risques";
 import { dossierPatient } from "@/server/requetes/soignant";
 import { declarerNaissance } from "@/server/soignant/naissance";
 import { creerDbDeTest } from "../aides/base-de-test";

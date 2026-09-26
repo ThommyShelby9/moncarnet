@@ -3,11 +3,13 @@ import type { TraitementEnCours } from "@/domain/traitements";
 import { db } from "@/server/db/client";
 import { traitementsDes } from "@/server/requetes/accueil";
 import { programmesDuCarnet } from "@/server/requetes/carnet";
+import { tensionsDe } from "@/server/requetes/risques";
 import { ordonnancesDe, type OrdonnanceDetaillee } from "@/server/requetes/ordonnances";
 import { iconePourPersonne } from "@/ui/avatar";
 import { AvatarsFamille } from "@/ui/AvatarsFamille";
 import { BoutonEcouter } from "@/ui/BoutonEcouter";
 import { CodeRetrait } from "@/ui/CodeRetrait";
+import { CourbeTension } from "@/ui/CourbeTension";
 import { Icone } from "@/ui/Icone";
 import { Ondes } from "@/ui/Ondes";
 import { ICONE_MOMENT } from "@/ui/pictogrammes";
@@ -19,10 +21,11 @@ export default async function MonCarnet({ searchParams }: PageProps<"/carnet">) 
   const params = await searchParams;
   const { aujourdhui, carnets, carnet } = await contextePatient(params.pour);
   if (!carnet) return <p className="rounded-carte bg-white p-4">Aucun carnet pour ce compte.</p>;
-  const [programmes, traitements, lesOrdonnances] = await Promise.all([
+  const [programmes, traitements, lesOrdonnances, tensions] = await Promise.all([
     programmesDuCarnet(db(), carnet.patientId, aujourdhui),
     traitementsDes(db(), [carnet.patientId], aujourdhui),
     ordonnancesDe(db(), carnet.patientId),
+    carnet.programmes.includes("hypertension") ? tensionsDe(db(), carnet.patientId) : Promise.resolve([]),
   ]);
   const aRetirer = lesOrdonnances.filter((o) => !o.delivrance);
   const suivis = programmes.filter((p) => p.etapes.length > 0);
@@ -54,6 +57,7 @@ export default async function MonCarnet({ searchParams }: PageProps<"/carnet">) 
       {suivis.map((p) => (
         <SectionProgramme key={p.code} programme={p} patientId={carnet.patientId} aujourdhui={aujourdhui} />
       ))}
+      <CourbeTension releves={tensions} />
       {aRetirer.length > 0 && <ARetirer ordonnances={aRetirer} />}
       {traitements.length > 0 && <Medicaments traitements={traitements} soi={carnet.lien === "soi"} />}
       {suivis.length === 0 && traitements.length === 0 && (
