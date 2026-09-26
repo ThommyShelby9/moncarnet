@@ -5,9 +5,10 @@ import { aujourdhuiAuBenin } from "@/domain/dates";
 import { CODES_INDICATEURS, INDICATEURS } from "@/domain/pilotage";
 import { exigerRole } from "@/server/auth/cookies";
 import { db } from "@/server/db/client";
-import { vueDUneZone } from "@/server/requetes/pilotage-etat";
+import { lieuxDeLaZone, vueDUneZone } from "@/server/requetes/pilotage-etat";
 import { Icone } from "@/ui/Icone";
 import { CarteIndicateur } from "../../CarteIndicateur";
+import { CarteZone } from "../../Cartes";
 import { Confidentialite, EnCeMoment, lireCode, Onglets } from "../../communs";
 import { CourbeIndicateur } from "../../CourbeIndicateur";
 import { TableauCommunes } from "../../TableauCommunes";
@@ -26,6 +27,7 @@ export default async function FicheZone({ params, searchParams }: PageProps<"/pi
   const indicateur = lireCode(recherche.indicateur);
   const precedent = fiche.tendance.at(-2)?.valeurs;
   const base = `/pilotage/zones/${encodeURIComponent(zone)}?indicateur=`;
+  const lieux = fiche.direct ? await lieuxDeLaZone(db(), zone) : [];
 
   return (
     <>
@@ -63,10 +65,18 @@ export default async function FicheZone({ params, searchParams }: PageProps<"/pi
       </section>
       <section aria-labelledby="titre-tendance" className="flex flex-col gap-3">
         <h2 id="titre-tendance" className="text-lg font-bold">
-          Sur 6 mois : {INDICATEURS[indicateur].libelle.toLowerCase()}
+          Sur la carte et sur 6 mois : {INDICATEURS[indicateur].libelle.toLowerCase()}
         </h2>
         <Onglets actif={indicateur} base={base} />
-        <CourbeIndicateur code={indicateur} points={fiche.tendance.map((t) => ({ mois: t.mois, comptage: t.valeurs[indicateur] }))} />
+        <div className="grid items-start gap-4 xl:grid-cols-2">
+          <CarteZone
+            zone={fiche.zone}
+            code={indicateur}
+            {...(fiche.direct ? { communes: fiche.communes, lieux } : { valeurZone: fiche.valeurs })}
+            titre={`Carte de la zone ${fiche.zone} : ${INDICATEURS[indicateur].libelle.toLowerCase()}`}
+          />
+          <CourbeIndicateur code={indicateur} points={fiche.tendance.map((t) => ({ mois: t.mois, comptage: t.valeurs[indicateur] }))} />
+        </div>
       </section>
       {fiche.communes.length > 0 && (
         <section aria-labelledby="titre-communes" className="flex flex-col gap-3">

@@ -5,9 +5,10 @@ import { CODES_INDICATEURS, INDICATEURS, lireIndicateur, type CodeIndicateur } f
 import { exigerRole } from "@/server/auth/cookies";
 import { db } from "@/server/db/client";
 import { vueDeZone, vueNationale } from "@/server/requetes/pilotage";
+import { lieuxDeLaZone } from "@/server/requetes/pilotage-etat";
 import { Icone } from "@/ui/Icone";
 import { CarteIndicateur } from "./CarteIndicateur";
-import { ClassementZones } from "./ClassementZones";
+import { CarteNationale, CarteZone } from "./Cartes";
 import { Confidentialite, EnCeMoment, Onglets, TAUX } from "./communs";
 import { CourbeIndicateur } from "./CourbeIndicateur";
 import { TableauCommunes } from "./TableauCommunes";
@@ -35,6 +36,7 @@ export default async function Pilotage({ searchParams }: PageProps<"/pilotage">)
     const vue = await vueDeZone(db(), compte.communeId, aujourdhui, maintenant);
     if (!vue) return <p className="rounded-carte bg-white p-5">Ce compte n&apos;est rattaché à aucune zone sanitaire.</p>;
     const precedent = vue.tendance.at(-2)?.valeurs;
+    const lieux = await lieuxDeLaZone(db(), vue.zone);
     return (
       <>
         <header className="flex flex-wrap items-end justify-between gap-3">
@@ -59,10 +61,22 @@ export default async function Pilotage({ searchParams }: PageProps<"/pilotage">)
         </section>
         <section aria-labelledby="titre-tendance" className="flex flex-col gap-3">
           <h2 id="titre-tendance" className="text-lg font-bold">
-            Sur 6 mois : {INDICATEURS[indicateur].libelle.toLowerCase()}
+            La zone sur la carte : {INDICATEURS[indicateur].libelle.toLowerCase()}
           </h2>
           <Onglets actif={indicateur} base="/pilotage?indicateur=" />
-          <CourbeIndicateur code={indicateur} points={vue.tendance.map((t) => ({ mois: t.mois, comptage: t.valeurs[indicateur] }))} />
+          <div className="grid items-start gap-4 xl:grid-cols-[minmax(0,1fr)_minmax(0,1fr)]">
+            <CarteZone
+              zone={vue.zone}
+              code={indicateur}
+              communes={vue.communes}
+              lieux={lieux}
+              titre={`Carte de la zone ${vue.zone} : ${INDICATEURS[indicateur].libelle.toLowerCase()}, commune par commune`}
+            />
+            <div className="flex flex-col gap-3">
+              <h3 className="font-bold">Sur 6 mois</h3>
+              <CourbeIndicateur code={indicateur} points={vue.tendance.map((t) => ({ mois: t.mois, comptage: t.valeurs[indicateur] }))} />
+            </div>
+          </div>
         </section>
         <section aria-labelledby="titre-communes" className="flex flex-col gap-3">
           <h2 id="titre-communes" className="text-lg font-bold">
@@ -105,11 +119,16 @@ export default async function Pilotage({ searchParams }: PageProps<"/pilotage">)
       </section>
       <section aria-labelledby="titre-zones" className="flex flex-col gap-3">
         <h2 id="titre-zones" className="text-lg font-bold">
-          Les zones : {INDICATEURS[indicateur].libelle.toLowerCase()}
+          La carte : {INDICATEURS[indicateur].libelle.toLowerCase()}
         </h2>
         <Onglets actif={indicateur} base="/pilotage?indicateur=" />
-        <div className="grid gap-4 xl:grid-cols-[1fr_minmax(0,28rem)]">
-          <ClassementZones code={indicateur} zones={vue.zones} lien={(z) => `/pilotage/zones/${encodeURIComponent(z)}`} />
+        <div className="grid items-start gap-4 xl:grid-cols-[minmax(0,1fr)_minmax(0,24rem)]">
+          <CarteNationale
+            code={indicateur}
+            zones={vue.zones}
+            lien={(z) => `/pilotage/zones/${encodeURIComponent(z)}`}
+            titre={`Carte des zones sanitaires : ${INDICATEURS[indicateur].libelle.toLowerCase()}`}
+          />
           <div className="flex flex-col gap-3">
             <h3 className="font-bold">Tendance nationale sur 6 mois</h3>
             <CourbeIndicateur code={indicateur} points={vue.tendance.map((t) => ({ mois: t.mois, comptage: t.valeurs[indicateur] }))} />

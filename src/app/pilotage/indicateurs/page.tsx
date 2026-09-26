@@ -5,7 +5,9 @@ import { CODES_INDICATEURS, INDICATEURS, lireIndicateur, type CodeIndicateur } f
 import { exigerRole } from "@/server/auth/cookies";
 import { db } from "@/server/db/client";
 import { vueDeZone, vueNationale } from "@/server/requetes/pilotage";
+import { lieuxDeLaZone } from "@/server/requetes/pilotage-etat";
 import { CarteIndicateur, STYLE_NIVEAU } from "../CarteIndicateur";
+import { CarteNationale, CarteZone } from "../Cartes";
 import { ClassementZones } from "../ClassementZones";
 import { Confidentialite, lireCode } from "../communs";
 import { CourbeIndicateur } from "../CourbeIndicateur";
@@ -24,6 +26,7 @@ export default async function Indicateurs({ searchParams }: PageProps<"/pilotage
   const zone = compte.communeId ? await vueDeZone(db(), compte.communeId, aujourdhui, maintenant) : null;
   const nationale = compte.communeId ? null : await vueNationale(db(), aujourdhui, maintenant);
   const tendance = zone?.tendance ?? nationale!.tendance;
+  const lieux = zone ? await lieuxDeLaZone(db(), zone.zone) : [];
   const actuel = zone?.total ?? nationale!.national;
 
   return (
@@ -74,6 +77,7 @@ export default async function Indicateurs({ searchParams }: PageProps<"/pilotage
               <h2 id="titre-communes" className="text-lg font-bold">
                 Commune par commune
               </h2>
+              <CarteZone zone={zone.zone} code={code} communes={zone.communes} lieux={lieux} titre={`Carte de la zone : ${d.libelle.toLowerCase()}, commune par commune`} />
               <div className="grid gap-3 sm:grid-cols-2">
                 {zone.communes.map((c) => (
                   <div key={c.nom} className="flex flex-col gap-1">
@@ -89,6 +93,7 @@ export default async function Indicateurs({ searchParams }: PageProps<"/pilotage
               <h2 id="titre-zones" className="text-lg font-bold">
                 Zone par zone
               </h2>
+              <CarteNationale code={code} zones={nationale.zones} lien={(z) => `/pilotage/zones/${encodeURIComponent(z)}?indicateur=${code}`} titre={`Carte des zones sanitaires : ${d.libelle.toLowerCase()}`} />
               <ClassementZones code={code as CodeIndicateur} zones={nationale.zones} lien={(z) => `/pilotage/zones/${encodeURIComponent(z)}`} />
             </section>
           )}

@@ -198,3 +198,18 @@ export async function alertesParSemaine(db: Db, zone: string, aujourdhui: DateIS
     return { debut, total: dela.length, prises: delais.length, sous15: delais.filter((d) => d <= 15).length, delaiMoyen: moyenne(delais) };
   });
 }
+
+/** Les établissements de la zone qui ont une position : des points sur la carte. */
+export async function lieuxDeLaZone(
+  db: Db,
+  zone: string,
+): Promise<{ nom: string; type: "centre_sante" | "pharmacie"; latitude: number; longitude: number }[]> {
+  const ids = (await communesDeLaZone(db, zone)).map((c) => c.id);
+  if (!ids.length) return [];
+  const lignes = await db
+    .select({ nom: etablissements.nom, type: etablissements.type, latitude: etablissements.latitude, longitude: etablissements.longitude })
+    .from(etablissements)
+    .where(and(inArray(etablissements.communeId, ids), isNotNull(etablissements.latitude), isNotNull(etablissements.longitude)))
+    .orderBy(asc(etablissements.type), asc(etablissements.nom));
+  return lignes.map((l) => ({ nom: l.nom, type: l.type, latitude: l.latitude!, longitude: l.longitude! }));
+}

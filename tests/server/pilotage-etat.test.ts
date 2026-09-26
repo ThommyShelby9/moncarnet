@@ -1,7 +1,7 @@
 import { afterAll, beforeAll, describe, expect, it } from "vitest";
 import type { Db } from "@/server/db/client";
 import { semerDemo } from "@/server/demo/semer";
-import { alertesParSemaine, centresDeLaZone, vueDUneZone } from "@/server/requetes/pilotage-etat";
+import { alertesParSemaine, centresDeLaZone, lieuxDeLaZone, vueDUneZone } from "@/server/requetes/pilotage-etat";
 import { vueNationale } from "@/server/requetes/pilotage";
 import { creerDbDeTest } from "../aides/base-de-test";
 
@@ -79,5 +79,15 @@ describe("alertes semaine par semaine", () => {
     expect(semaines.reduce((s, x) => s + x.total, 0)).toBe(9);
     expect(semaines.reduce((s, x) => s + x.sous15, 0)).toBe(7);
     expect(semaines.reduce((s, x) => s + x.prises, 0)).toBe(9);
+  });
+});
+
+describe("lieux de la zone", () => {
+  it("donne les établissements situés de la zone, sans rien d'une autre zone", async () => {
+    expect(await lieuxDeLaZone(db, ZONE)).toEqual([
+      { nom: "Centre de santé de Bohicon", type: "centre_sante", latitude: 7.1782, longitude: 2.0667 },
+      { nom: "Pharmacie Sainte-Rita", type: "pharmacie", latitude: 7.1747, longitude: 2.0712 },
+    ]);
+    expect(await lieuxDeLaZone(db, "Bassila")).toEqual([]);
   });
 });
