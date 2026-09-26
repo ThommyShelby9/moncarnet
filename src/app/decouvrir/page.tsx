@@ -230,40 +230,40 @@ export default function PageDecouvrir() {
             </h2>
             <p className="mt-2 text-lg text-gris">58 ans, une tension à surveiller, et les carnets de sa femme et de son petit-fils sur le même téléphone.</p>
           </div>
-          <div className="grid items-start gap-10 lg:grid-cols-[auto_1fr]">
-            <Rangee nom="Les écrans de Codjo" grille={false}>
-              <Telephone src="codjo-accueil" alt="Accueil de Codjo : « Ce soir, 1 comprimé pour la tension », à écouter, avec C'est fait et Plus tard" legende="Une chose à la fois, à écouter" />
-              <Telephone src="codjo-rendez-vous" alt="Prendre rendez-vous, étape 3 sur 4 : les séances de vaccination avec les soleils qui comptent les jours et les places restantes" legende="Un rendez-vous en 4 étapes pour Sèna" />
-              <Telephone src="codjo-carnet" alt="Carnet de Codjo : sa courbe de tension avec la limite 140/90 en pointillés rouges, et son comprimé du soir" legende="Sa courbe de tension" />
-              <Telephone src="codjo-salle" alt="Salle d'attente sur le téléphone de Codjo : Mariam a le numéro 6, trois personnes avant elle, le téléphone prévient quand c'est son tour" legende="Le numéro de passage de Mariam" />
-            </Rangee>
-            <div className="flex flex-col gap-6">
-              <ol className="grid gap-5">
-                <Etape numero={1} titre="L'accueil dit une chose à la fois">
-                  Le comprimé du soir, à écouter en fon, puis « C&apos;est fait ». Le dernier mot compte : « Annuler » remet la prise à faire.
-                </Etape>
-                <Etape numero={2} titre="Un rendez-vous pour son petit-fils">
-                  Pour qui, pour quoi, quel jour : les soleils disent dans combien de jours, avec les places restantes. Deux personnes pour la dernière place : une
-                  seule l&apos;obtient.
-                </Etape>
-                <Etape numero={3} titre="Des rappels qui finissent par joindre">
-                  À J-2, WhatsApp, puis SMS, puis un appel vocal ; sans réponse, le relais passe prévenir. « 2 : Je ne peux pas » libère la place pour
-                  quelqu&apos;un d&apos;autre.
-                </Etape>
-                <Etape numero={4} titre="Le jour du rendez-vous, sans attendre debout">
-                  « Je suis arrivé au centre » : un numéro de passage. Le téléphone dit combien de personnes restent, puis « C&apos;est bientôt votre tour ». Une
-                  urgence passe toujours devant.
-                </Etape>
-                <Etape numero={5} titre="Chez l'infirmier puis à la pharmacie">
-                  Firmin mesure 180/110 : risque élevé, ordonnance. La pharmacie retrouve l&apos;ordonnance avec un code de 6 caractères, sans voir le dossier.
-                </Etape>
-              </ol>
-              <Navigateur
-                src="pharmacie"
-                alt="Pharmacie : ordonnance retrouvée par le code M4R2TN, posologie dessinée matin, midi et soir, bouton Confirmer la délivrance"
-                legende="La posologie dessinée ; la délivrance fait apparaître les prises dans le carnet."
-              />
-            </div>
+          <ol className="grid gap-5 md:grid-cols-2">
+            <Etape numero={1} titre="L'accueil dit une chose à la fois">
+              Le comprimé du soir, à écouter en fon, puis « C&apos;est fait ». Le dernier mot compte : « Annuler » remet la prise à faire.
+            </Etape>
+            <Etape numero={2} titre="Un rendez-vous pour son petit-fils">
+              Pour qui, pour quoi, quel jour : les soleils disent dans combien de jours, avec les places restantes. Deux personnes pour la dernière place : une
+              seule l&apos;obtient.
+            </Etape>
+            <Etape numero={3} titre="Des rappels qui finissent par joindre">
+              À J-2, WhatsApp, puis SMS, puis un appel vocal ; sans réponse, le relais passe prévenir. « 2 : Je ne peux pas » libère la place pour
+              quelqu&apos;un d&apos;autre.
+            </Etape>
+            <Etape numero={4} titre="Le jour du rendez-vous, sans attendre debout">
+              « Je suis arrivé au centre » : un numéro de passage. Le téléphone dit combien de personnes restent, puis « C&apos;est bientôt votre tour ». Une
+              urgence passe toujours devant.
+            </Etape>
+          </ol>
+          <Rangee nom="Les écrans de Codjo">
+            <Telephone src="codjo-accueil" alt="Accueil de Codjo : « Ce soir, 1 comprimé pour la tension », à écouter, avec C'est fait et Plus tard" legende="Une chose à la fois, à écouter" />
+            <Telephone src="codjo-rendez-vous" alt="Prendre rendez-vous, étape 3 sur 4 : les séances de vaccination avec les soleils qui comptent les jours et les places restantes" legende="Un rendez-vous en 4 étapes pour Sèna" />
+            <Telephone src="codjo-carnet" alt="Carnet de Codjo : sa courbe de tension avec la limite 140/90 en pointillés rouges, et son comprimé du soir" legende="Sa courbe de tension" />
+            <Telephone src="codjo-salle" alt="Salle d'attente sur le téléphone de Codjo : Mariam a le numéro 6, trois personnes avant elle, le téléphone prévient quand c'est son tour" legende="Le numéro de passage de Mariam" />
+          </Rangee>
+          <div className="grid items-center gap-10 lg:grid-cols-[1fr_1.4fr]">
+            <ol start={5} className="grid gap-5">
+              <Etape numero={5} titre="Chez l'infirmier puis à la pharmacie">
+                Firmin mesure 180/110 : risque élevé, ordonnance. La pharmacie retrouve l&apos;ordonnance avec un code de 6 caractères, sans voir le dossier.
+              </Etape>
+            </ol>
+            <Navigateur
+              src="pharmacie"
+              alt="Pharmacie : ordonnance retrouvée par le code M4R2TN, posologie dessinée matin, midi et soir, bouton Confirmer la délivrance"
+              legende="La posologie dessinée ; la délivrance fait apparaître les prises dans le carnet."
+            />
           </div>
         </section>
 
