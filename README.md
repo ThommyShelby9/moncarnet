@@ -9,12 +9,29 @@ La plateforme s'appelle **Mon Carnet** et sera en ligne sur https://moncarnet.kh
 - Maquettes validées : [docs/design/maquettes-validees.html](docs/design/maquettes-validees.html)
 - Déploiement : [docs/deploiement.md](docs/deploiement.md)
 
+## Deux parcours à suivre
+
+Ouvrez https://moncarnet.kheios.com/demo : un clic entre dans un compte.
+
+1. **Awa, enceinte de 37 semaines, jusqu'à la naissance.**
+   - « Ma grossesse » : la semaine, la taille du bébé comparée à ce qu'on trouve au marché, les consultations tamponnées.
+   - « Préparer la naissance » : où accoucher, comment y aller même la nuit, qui accompagne, l'argent, le sac, un donneur de sang.
+   - « J'ai un problème » → « Le travail a commencé » : l'alerte part au centre.
+   - Adjoa, la sage-femme, prend l'alerte en charge et **déclare la naissance**. Le carnet du bébé apparaît chez Awa avec ses vaccins de naissance ; le suivi après l'accouchement commence pour la mère.
+2. **Codjo, patient au quotidien.**
+   - L'accueil dit une chose à la fois (« Ce soir, 1 comprimé »), à écouter.
+   - Il prend rendez-vous en 4 étapes pour son petit-fils et voit sa courbe de tension.
+   - Firmin le reçoit, prescrit, et la pharmacie délivre avec le code.
+
 ## Espace patient
 
 - **Accueil « une chose à la fois »** : une grande carte dit ce qu'il faut faire maintenant (le comprimé du soir, le vaccin de Sèna, le contrôle de jeudi), avec « Écouter », « C'est fait » et « Plus tard ». Le dernier mot compte : « Annuler » remet la prise à faire.
 - **Carnet familial** : un même téléphone suit les carnets de toute la famille ; les avatars changent de carnet d'un geste.
 - **Prendre rendez-vous en 4 étapes** : pour qui, pour quoi, quel jour (les soleils disent dans combien de jours, avec les places restantes), puis confirmation. Un jour complet propose la liste d'attente. Deux personnes qui visent la dernière place : une seule l'obtient.
 - **Carnet** : chaque vaccin ou consultation fait porte son tampon « VU », comme sur le carnet papier ; les médicaments en cours sont dessinés par moment de la journée.
+- **Ma grossesse** : semaine par semaine, taille du bébé, frise des consultations, conseils à écouter, « Préparer la naissance » (plan d'accouchement) et « Le jour J ».
+- **Naissance** : félicitations sur l'accueil, carnet du bébé rattaché à la famille, vaccins de naissance tamponnés, visites après l'accouchement proposées à la mère.
+- **Courbe de tension** : les derniers relevés, avec la limite 140/90.
 - **J'ai un problème** : les signes de danger en images (ceux de la grossesse pour une femme enceinte). L'alerte part au centre avec 15 minutes pour la prendre en charge. Sans réseau, l'écran dit que l'alerte n'est pas encore partie, donne le numéro du centre, et l'envoi repart seul au retour du réseau, sans doublon.
 
 ## Poste soignant et pharmacie
@@ -22,6 +39,7 @@ La plateforme s'appelle **Mon Carnet** et sera en ligne sur https://moncarnet.kh
 - **Aujourd'hui** : les alertes en haut avec leur compte à rebours de 15 minutes et « Je la prends en charge » (un seul soignant la prend) ; les consultations du jour par plage, avec le risque de chacun et le tampon « VU » pour les personnes déjà vues ; les patients à surveiller. La page se met à jour seule.
 - **Retrouver un patient** par son nom (sans accent), son numéro ou le code écrit dans son carnet. Un soignant ne voit que les patients de son centre.
 - **Dossier** : risque et motifs (règles de la spec, valeurs indicatives), étapes des programmes, relevés, ordonnances avec leur délivrance.
+- **Déclarer la naissance** (sage-femme) : heure, lieu, voie basse ou césarienne, sexe, poids (« 3,2 » ou « 3200 »), vaccins de naissance ; une seule fois par grossesse.
 - **Consultation** : tension, glycémie, poids, hémoglobine ; le risque est recalculé tout de suite (180/110 : risque élevé). Un vaccin fait coche l'étape dans le carnet de l'enfant.
 - **Ordonnance** : comprimés matin, midi et soir, durée, en mots simples ; un code de 6 caractères à donner au patient, qui le retrouve aussi dans son carnet.
 - **Pharmacie** : le code suffit ; la pharmacie voit l'ordonnance, jamais le dossier. Posologie dessinée, écoute de la posologie, délivrance une seule fois : le tampon apparaît chez le soignant et les prises dans le carnet du patient. Code de démonstration : `M4R2TN`.
