@@ -21,6 +21,8 @@ interface Cible {
   motif: MotifRdv;
   centre: string;
   canalPrefere: CanalRappel;
+  /** Jamais d'appel vocal : un message écrit, puis le relais. */
+  malentendant: boolean;
   telephone: string | null;
   proprietaire: "soi" | "proche" | "relais" | null;
   consentements: string[];
@@ -36,6 +38,7 @@ async function cibles(db: Db, condition: SQL | undefined): Promise<Cible[]> {
       motif: rendezVous.motif,
       prenom: patients.prenom,
       canalPrefere: patients.canalPrefere,
+      malentendant: patients.malentendant,
       centre: etablissements.nom,
     })
     .from(rendezVous)
@@ -85,7 +88,7 @@ export async function envoyerRappels(db: Db, e: { maintenant: Date; aujourdhui: 
   const liste = await cibles(db, and(eq(rendezVous.datePrevue, ajouterJours(e.aujourdhui, 2)), isNotNull(rendezVous.creneauId), isNull(rendezVous.annuleLe)));
   let envoyes = 0;
   for (const c of liste) {
-    const canal = premierCanal({ canalPrefere: c.canalPrefere, telephone: c.telephone, consentements: c.consentements });
+    const canal = premierCanal({ canalPrefere: c.canalPrefere, telephone: c.telephone, consentements: c.consentements, malentendant: c.malentendant });
     const insere = await db.insert(rappels).values(versCanal(c, canal, e.maintenant)).onConflictDoNothing().returning({ id: rappels.id });
     envoyes += insere.length;
   }
@@ -109,7 +112,7 @@ export async function relancer(db: Db, e: { maintenant: Date; delaiMinutes?: num
       .where(and(eq(rappels.id, r.id), eq(rappels.statut, "envoye")))
       .returning({ id: rappels.id });
     const cible = liste.find((c) => c.rendezVousId === r.rendezVousId);
-    const suivant = canalSuivant(r.canal);
+    const suivant = canalSuivant(r.canal, { malentendant: cible?.malentendant });
     if (!passe.length || !cible || !suivant) continue;
     // Sans téléphone, on ne peut ni écrire ni appeler : le relais directement.
     const canal: CanalRappel = suivant !== "relais" && !cible.telephone ? "relais" : suivant;

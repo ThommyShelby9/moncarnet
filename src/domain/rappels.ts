@@ -12,16 +12,21 @@ export const LIBELLES_CANAL: Record<CanalRappel, string> = {
   relais: "Relais",
 };
 
-/** Premier canal : celui que la personne préfère, s'il est possible ; sans téléphone, c'est le relais qui passe. */
-export function premierCanal(p: { canalPrefere: CanalRappel; telephone: string | null; consentements: string[] }): CanalRappel {
+/**
+ * Premier canal : celui que la personne préfère, s'il est possible ; sans téléphone, c'est le relais qui passe.
+ * Une personne malentendante n'est jamais appelée : un message écrit.
+ */
+export function premierCanal(p: { canalPrefere: CanalRappel; telephone: string | null; consentements: string[]; malentendant?: boolean }): CanalRappel {
   if (!p.telephone || p.canalPrefere === "relais") return "relais";
-  if (p.canalPrefere === "vocal") return "vocal";
+  if (p.canalPrefere === "vocal" && !p.malentendant) return "vocal";
   if (p.canalPrefere === "whatsapp" && p.consentements.includes("whatsapp")) return "whatsapp";
   return "sms";
 }
 
-export function canalSuivant(canal: CanalRappel): CanalRappel | null {
-  return CANAUX_RAPPEL[CANAUX_RAPPEL.indexOf(canal) + 1] ?? null;
+/** Canal suivant de la cascade ; pour une personne malentendante, l'appel vocal est sauté. */
+export function canalSuivant(canal: CanalRappel, p: { malentendant?: boolean } = {}): CanalRappel | null {
+  const suivant = CANAUX_RAPPEL[CANAUX_RAPPEL.indexOf(canal) + 1] ?? null;
+  return suivant === "vocal" && p.malentendant ? canalSuivant(suivant, p) : suivant;
 }
 
 /**

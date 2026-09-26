@@ -8,7 +8,7 @@ import { Logo } from "@/ui/Logo";
 import { Ondes } from "@/ui/Ondes";
 
 const DESCRIPTION =
-  "Le carnet de santé familial qui parle : la grossesse jusqu'à la naissance, les vaccins des enfants, la tension des parents. En fon et en français, sans réseau, avec le relais, la sage-femme, la pharmacie et l'État.";
+  "Le carnet de santé familial qui parle : la grossesse jusqu'à la naissance, les vaccins des enfants, la tension des parents. En français, et en fon avec les messages enregistrés par le centre ; sans réseau, avec le relais, la sage-femme, la pharmacie et l'État.";
 
 export const metadata: Metadata = {
   title: "Découvrir",
@@ -147,8 +147,8 @@ export default function PageDecouvrir() {
               <p className="w-fit rounded-full bg-white/10 px-3 py-1 text-sm font-bold text-soleil-pale">Challenge e-Santé Bénin 2026</p>
               <h1 className="text-4xl leading-[1.05] font-bold sm:text-5xl lg:text-6xl">Le carnet de santé familial qui parle.</h1>
               <p className="max-w-xl text-lg text-lavande-3">
-                {nom} suit chaque personne de la famille : la grossesse jusqu&apos;à la naissance, les vaccins des enfants, la tension des parents. Il parle fon
-                et français, marche sans réseau, et relie la famille au relais du village, à la sage-femme, à la pharmacie et à l&apos;État.
+                {nom} suit chaque personne de la famille : la grossesse jusqu&apos;à la naissance, les vaccins des enfants, la tension des parents. Il parle
+                français, et fon avec les messages que le centre enregistre ; il marche sans réseau, et relie la famille au relais du village, à la sage-femme, à la pharmacie et à l&apos;État.
               </p>
               <div className="flex flex-wrap gap-3">
                 <Link href="/demo" className="flex items-center gap-2 rounded-bouton bg-soleil px-5 py-3.5 text-lg font-bold text-nuit">
@@ -239,7 +239,7 @@ export default function PageDecouvrir() {
           </div>
           <ol className="grid gap-5 md:grid-cols-2">
             <Etape numero={1} titre="L'accueil dit une chose à la fois">
-              Le comprimé du soir, à écouter en fon, puis « C&apos;est fait ». Le dernier mot compte : « Annuler » remet la prise à faire.
+              Le comprimé du soir, à écouter : en fon quand le centre a enregistré le message, sinon lu en français. Puis « C&apos;est fait ». Le dernier mot compte : « Annuler » remet la prise à faire.
             </Etape>
             <Etape numero={2} titre="Un rendez-vous pour son petit-fils">
               Pour qui, pour quoi, quel jour : les soleils disent dans combien de jours, avec les places restantes. Deux personnes pour la dernière place : une

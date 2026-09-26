@@ -16,6 +16,15 @@ describe("premierCanal", () => {
   });
 });
 
+describe("personne malentendante", () => {
+  const tel = "+2290197000003";
+  it("ne l'appelle jamais : un message écrit, puis le relais", () => {
+    expect(premierCanal({ canalPrefere: "vocal", telephone: tel, consentements: ["sms"], malentendant: true })).toBe("sms");
+    expect(canalSuivant("sms", { malentendant: true })).toBe("relais");
+    expect(canalSuivant("whatsapp", { malentendant: true })).toBe("sms");
+  });
+});
+
 describe("canalSuivant", () => {
   it("descend la cascade jusqu'au relais", () => {
     expect(canalSuivant("whatsapp")).toBe("sms");
