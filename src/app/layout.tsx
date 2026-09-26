@@ -14,6 +14,8 @@ const fira = localFont({
 });
 
 export const metadata: Metadata = {
+  // Adresse publique : les images de partage (Open Graph) pointent vers le vrai site.
+  metadataBase: new URL(env.APP_URL),
   title: { default: env.NEXT_PUBLIC_APP_NAME, template: `%s | ${env.NEXT_PUBLIC_APP_NAME}` },
   description: "Le carnet de santé familial qui parle",
   applicationName: env.NEXT_PUBLIC_APP_NAME,
