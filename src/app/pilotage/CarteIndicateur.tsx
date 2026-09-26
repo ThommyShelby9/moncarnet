@@ -28,7 +28,9 @@ export function CarteIndicateur({ code, comptage, precedent }: { code: CodeIndic
           Masqué
         </p>
       ) : (
-        <p className={`text-3xl font-bold ${style?.texte ?? "text-nuit"}`}>{lecture.texte}</p>
+        <p className={`origin-left animate-surgir text-3xl font-bold ${style?.texte ?? "text-nuit"}`} style={{ animationDelay: "150ms" }}>
+          {lecture.texte}
+        </p>
       )}
       {d.unite === "pourcent" && lecture.valeur !== null && (
         <div className="relative h-2 rounded-full bg-lavande-2">

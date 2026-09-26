@@ -82,7 +82,7 @@ export default async function Agenda({ searchParams }: PageProps<"/soignant/agen
       </dl>
 
       <div className="grid items-start gap-5 lg:grid-cols-[1fr_300px]">
-        <ol className="flex flex-col gap-3">
+        <ol className="cascade flex flex-col gap-3">
           {jours.map((jour) => {
             const duJour = plages.filter((p) => p.date === jour);
             const passe = jour < aujourdhui;

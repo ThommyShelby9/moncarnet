@@ -57,7 +57,9 @@ export function CarteSalleAttente({ patientId, prenom, place }: { patientId: str
       <div className={`grid size-20 shrink-0 place-items-center rounded-2xl ${bientot ? "animate-battement bg-white/60" : "bg-lavande-2 text-marque"}`}>
         <span className="text-center">
           <small className="block text-xs font-bold">N°</small>
-          <b className="block text-3xl leading-none tabular-nums">{place.numero}</b>
+          <b className="block animate-surgir text-3xl leading-none tabular-nums" style={{ animationDelay: "300ms" }}>
+            {place.numero}
+          </b>
         </span>
       </div>
       <div className="min-w-0 flex-1">

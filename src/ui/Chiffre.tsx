@@ -3,7 +3,7 @@ export function Chiffre({ valeur, libelle, alerte = false }: { valeur: string; l
   return (
     <div className="rounded-carte bg-white px-4 py-3">
       <dt className="sr-only">{libelle}</dt>
-      <dd className={`text-2xl font-bold tabular-nums ${alerte ? "text-soleil-fonce" : ""}`}>{valeur}</dd>
+      <dd className={`origin-left animate-surgir text-2xl font-bold tabular-nums ${alerte ? "text-soleil-fonce" : ""}`}>{valeur}</dd>
       <dd aria-hidden="true" className="text-sm text-gris">
         {libelle}
       </dd>

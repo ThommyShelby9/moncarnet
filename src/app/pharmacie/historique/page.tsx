@@ -36,7 +36,7 @@ export default async function Historique() {
             Délivrances
           </h2>
           {liste.length ? (
-            <ul className="mt-3 flex flex-col gap-2">
+            <ul className="cascade mt-3 flex flex-col gap-2">
               {liste.map((d) => (
                 <li key={d.id} className="flex flex-wrap items-center gap-3 rounded-2xl bg-lavande px-3 py-2.5 text-sm">
                   <Link

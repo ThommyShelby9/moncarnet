@@ -158,8 +158,8 @@ function VueNationale(p: {
             href={g.membres.length > 1 ? "/pilotage/zones" : p.lien(g.zone)}
             aria-label={decrire(nom, lecture)}
             tabIndex={p.agrandie ? -1 : undefined}
-            className="group animate-fondu outline-none"
-            style={{ animationDelay: `${rang * 22}ms` }}
+            className="group animate-surgir outline-none [transform-box:fill-box] origin-center"
+            style={{ animationDelay: `${120 + rang * 45}ms` }}
           >
             <title>{decrire(nom, lecture)}</title>
             {g.communes.map((c) => (
@@ -317,8 +317,8 @@ export function CarteZone({
           return (
             <path
               key={c.nom}
-              className="animate-fondu"
-              style={{ animationDelay: `${150 + rang * 120}ms` }}
+              className="animate-surgir [transform-box:fill-box] origin-center"
+              style={{ animationDelay: `${150 + rang * 220}ms` }}
               d={c.d}
               fill={code ? remplissage(lecture, motif) : "var(--color-lavande-3)"}
               stroke="#fff"

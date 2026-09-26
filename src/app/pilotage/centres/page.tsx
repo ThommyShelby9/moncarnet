@@ -57,7 +57,7 @@ function Mesure({ valeur, libelle, alerte = false }: { valeur: string; libelle: 
   return (
     <div className="rounded-2xl bg-lavande px-3 py-2.5">
       <dt className="sr-only">{libelle}</dt>
-      <dd className={`text-xl font-bold tabular-nums ${alerte ? "text-urgence" : ""}`}>{valeur}</dd>
+      <dd className={`origin-left animate-surgir text-xl font-bold tabular-nums ${alerte ? "text-urgence" : ""}`}>{valeur}</dd>
       <dd aria-hidden="true" className="text-xs text-gris">
         {libelle}
       </dd>

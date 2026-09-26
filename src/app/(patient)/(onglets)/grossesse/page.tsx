@@ -113,7 +113,7 @@ export default async function MaGrossesse({ searchParams }: PageProps<"/grossess
         {conseil?.audio && conseil.langueAudio && (
           <BoutonEcouter variante="complet" libelle={`Écouter les conseils en ${LIBELLES_LANGUE[conseil.langueAudio].toLowerCase()}`} sousLibelle="Enregistré par le centre de santé" source={conseil.audio} />
         )}
-        <ul className="flex flex-col gap-2.5">
+        <ul className="cascade flex flex-col gap-2.5">
           {conseils.map((conseil) => (
             <li key={conseil} className="flex items-start gap-3">
               <BoutonEcouter variante="pastille" libelle={`Écouter : ${conseil}`} texte={conseil} />

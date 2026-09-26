@@ -47,7 +47,7 @@ export default async function Alertes() {
           Historique
         </h2>
         {alertes.length ? (
-          <ul className="mt-3 flex flex-col gap-2">
+          <ul className="cascade mt-3 flex flex-col gap-2">
             {alertes.map((a) => (
               <Ligne key={a.id} alerte={a} />
             ))}

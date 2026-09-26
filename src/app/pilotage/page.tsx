@@ -53,7 +53,7 @@ export default async function Pilotage({ searchParams }: PageProps<"/pilotage">)
           <h2 id="titre-indicateurs" className="text-lg font-bold">
             Ce mois-ci
           </h2>
-          <div className="grid gap-3 sm:grid-cols-2 xl:grid-cols-3">
+          <div className="cascade grid gap-3 sm:grid-cols-2 xl:grid-cols-3">
             {CODES_INDICATEURS.map((c) => (
               <CarteIndicateur key={c} code={c} comptage={vue.total[c]} precedent={precedent?.[c]} />
             ))}
@@ -111,7 +111,7 @@ export default async function Pilotage({ searchParams }: PageProps<"/pilotage">)
         <h2 id="titre-national" className="text-lg font-bold">
           Le pays ce mois-ci
         </h2>
-        <div className="grid gap-3 sm:grid-cols-2 xl:grid-cols-3">
+        <div className="cascade grid gap-3 sm:grid-cols-2 xl:grid-cols-3">
           {TAUX.map((c) => (
             <CarteIndicateur key={c} code={c} comptage={vue.national[c]} precedent={precedent?.[c]} />
           ))}

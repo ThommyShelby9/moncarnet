@@ -59,7 +59,7 @@ export default async function FicheZone({ params, searchParams }: PageProps<"/pi
         <h2 id="titre-mois" className="text-lg font-bold">
           Ce mois-ci
         </h2>
-        <div className="grid gap-3 sm:grid-cols-2 xl:grid-cols-3">
+        <div className="cascade grid gap-3 sm:grid-cols-2 xl:grid-cols-3">
           {CODES_INDICATEURS.map((c) => (
             <CarteIndicateur key={c} code={c} comptage={fiche.valeurs[c]} precedent={precedent?.[c]} />
           ))}

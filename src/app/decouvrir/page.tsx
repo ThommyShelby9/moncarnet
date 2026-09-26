@@ -182,7 +182,7 @@ export default function PageDecouvrir() {
           <ul className="mt-8 grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
             {CONSTAT.map((c) => (
               <li key={c.chiffre} className="revele flex flex-col gap-2 rounded-carte bg-white p-5">
-                <b className="text-4xl text-marque">{c.chiffre}</b>
+                <b className="origin-left animate-surgir text-4xl text-marque">{c.chiffre}</b>
                 <p>{c.texte}</p>
                 <p className="mt-auto text-xs text-gris">Source : {c.source}</p>
               </li>

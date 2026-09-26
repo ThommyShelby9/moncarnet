@@ -96,7 +96,7 @@ export default async function Suivis({ searchParams }: PageProps<"/soignant/suiv
         </h2>
         <p className="text-sm text-gris">{liste.aide}</p>
         {listes[cle].length ? (
-          <ul className="mt-4 flex flex-col gap-2">
+          <ul className="cascade mt-4 flex flex-col gap-2">
             {listes[cle].map((l) => (
               <Ligne key={l.patientId} ligne={l} liste={cle} consigne={liste.consigne} />
             ))}

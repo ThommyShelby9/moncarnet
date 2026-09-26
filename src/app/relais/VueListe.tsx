@@ -121,7 +121,7 @@ export function VueListe(p: Props) {
                 />
               </span>
             </div>
-            <ul className="flex flex-col gap-3">
+            <ul className="cascade flex flex-col gap-3">
               {foyersAVoir.map((foyer) => (
                 <CarteFoyer
                   key={foyer.id}
