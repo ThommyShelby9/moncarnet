@@ -32,7 +32,10 @@ export default async function PageDemo({ searchParams }: { searchParams: Promise
       <header className="flex items-center gap-3">
         <Logo className="size-11" />
         <p className="text-2xl font-bold">{env.NEXT_PUBLIC_APP_NAME}</p>
-        <Link href="/decouvrir" className="ml-auto text-sm font-bold text-marque underline">
+        <Link href="/demo/telephone" className="ml-auto text-sm font-bold text-marque underline">
+          Le faux téléphone
+        </Link>
+        <Link href="/decouvrir" className="text-sm font-bold text-marque underline">
           Découvrir la solution
         </Link>
       </header>

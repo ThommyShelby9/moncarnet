@@ -298,10 +298,14 @@ function ListePersonnes({
                 )}
               </b>
               <small className="block text-xs leading-snug text-gris">
-                {personne.raisons[0]?.texte ??
-                  (personne.vueAujourdhui
+                {personne.raisons.length
+                  ? personne.raisons
+                      .slice(0, 2)
+                      .map((r) => r.texte)
+                      .join(" · ")
+                  : personne.vueAujourdhui
                     ? "Visite notée aujourd'hui"
-                    : "Rien de particulier")}
+                    : "Rien de particulier"}
               </small>
             </span>
             <Icone

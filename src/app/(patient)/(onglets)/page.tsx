@@ -7,6 +7,7 @@ import type { TraitementEnCours } from "@/domain/traitements";
 import { db } from "@/server/db/client";
 import { donneesAccueil } from "@/server/requetes/accueil";
 import { grossesseDe, naissancesRecentes, planNaissanceDe } from "@/server/requetes/grossesse";
+import { rappelEnAttente } from "@/server/rappels";
 import { peuventArriver, placesDuJour } from "@/server/salle-attente";
 import { Actualisation } from "@/ui/Actualisation";
 import { AvatarsFamille } from "@/ui/AvatarsFamille";
@@ -18,6 +19,7 @@ import { RetourAction } from "@/ui/RetourAction";
 import { noterPriseAction } from "../actions";
 import { contextePatient, texteDe } from "../contexte";
 import { CarteDuJourVue } from "./CarteDuJourVue";
+import { CarteRappel } from "./CarteRappel";
 import { CarteSalleAttente } from "./CarteSalleAttente";
 import { Ensuite } from "./Ensuite";
 
@@ -28,6 +30,8 @@ const MESSAGES: Record<string, string> = {
   alerte_annulee: "L'alerte est annulée.",
   alerte_deja_prise: "Un soignant s'occupe déjà de votre alerte.",
   arrive: "C'est noté : votre numéro de passage est là. Le téléphone vous dira quand c'est votre tour.",
+  rappel_viendra: "Merci, c'est confirmé : on vous attend.",
+  rappel_empeche: "C'est noté : la place est libérée pour quelqu'un d'autre.",
 };
 
 export default async function Accueil({ searchParams }: PageProps<"/">) {
@@ -56,7 +60,11 @@ export default async function Accueil({ searchParams }: PageProps<"/">) {
   const enCours = grossesses.filter((g) => g !== null);
   // Salle d'attente : la place de chacun aujourd'hui, ou « Je suis arrivé » pour qui a rendez-vous ou une alerte du jour.
   const idsAffiches = personnes.map((c) => c.patientId);
-  const [places, arrivees] = await Promise.all([placesDuJour(db(), idsAffiches, aujourdhui), peuventArriver(db(), idsAffiches, aujourdhui)]);
+  const [places, arrivees, rappel] = await Promise.all([
+    placesDuJour(db(), idsAffiches, aujourdhui),
+    peuventArriver(db(), idsAffiches, aujourdhui),
+    rappelEnAttente(db(), idsAffiches),
+  ]);
   const auCentre = personnes.filter((c) => places.has(c.patientId) || arrivees.has(c.patientId));
   const prenomPour = (patientId: string) =>
     patientId === titulaire.patientId ? null : (carnets.find((c) => c.patientId === patientId)?.prenom ?? null);
@@ -79,6 +87,22 @@ export default async function Accueil({ searchParams }: PageProps<"/">) {
         <Felicitations key={n.bebeId} naissance={n} />
       ))}
       {places.size > 0 && <Actualisation secondes={15} />}
+      {texteDe(params.note) === "rappel_empeche" && texteDe(params.autre) && (
+        <Link href={`/prendre-rendez-vous?pour=${texteDe(params.autre)}`} className="flex h-12 items-center justify-center gap-2 rounded-bouton bg-marque font-bold text-white">
+          <Icone nom="ph-calendar-dots" className="size-5" />
+          Choisir un autre jour
+        </Link>
+      )}
+      {rappel && (
+        <CarteRappel
+          rappelId={rappel.rappelId}
+          pour={prenomPour(rappel.patientId)}
+          vaccin={rappel.motif === "vaccin"}
+          date={rappel.datePrevue}
+          moment={rappel.moment}
+          canal={rappel.canal}
+        />
+      )}
       {auCentre.map((c) => (
         <CarteSalleAttente key={c.patientId} patientId={c.patientId} prenom={prenomPour(c.patientId)} place={places.get(c.patientId) ?? null} />
       ))}

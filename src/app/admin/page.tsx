@@ -9,7 +9,7 @@ import { EnTete } from "@/ui/EnTete";
 import { Icone } from "@/ui/Icone";
 import type { NomIcone } from "@/ui/icones";
 import { RetourAction } from "@/ui/RetourAction";
-import { reinitialiserDemoAction } from "./actions";
+import { envoyerRappelsAction, reinitialiserDemoAction, relancerRappelsAction } from "./actions";
 
 export const metadata: Metadata = { title: "Administration" };
 
@@ -21,7 +21,14 @@ const NOTES: Record<string, { texte: string; alerte?: boolean }> = {
 
 export default async function PageAdmin({ searchParams }: PageProps<"/admin">) {
   const compte = await exigerRole("admin");
-  const note = NOTES[String((await searchParams).note ?? "")];
+  const params = await searchParams;
+  const nombre = Number(params.nombre ?? 0);
+  const note =
+    params.note === "rappels"
+      ? { texte: `${nombre} rappel${nombre > 1 ? "s" : ""} envoyé${nombre > 1 ? "s" : ""} pour les places de dans 2 jours.` }
+      : params.note === "relances"
+        ? { texte: `${nombre} relance${nombre > 1 ? "s" : ""} sur le canal suivant.` }
+        : NOTES[String(params.note ?? "")];
   const etat = await etatDeLaDemo(db(), aujourdhuiAuBenin());
   const chiffres: { icone: NomIcone; valeur: number; libelle: string }[] = [
     { icone: "ph-users-three", valeur: etat.comptes, libelle: "comptes" },
@@ -70,6 +77,34 @@ export default async function PageAdmin({ searchParams }: PageProps<"/admin">) {
               Réinitialiser la démo
             </button>
           </form>
+        </section>
+      )}
+      {env.DEMO_MODE && (
+        <section aria-labelledby="titre-rappels" className="flex flex-col gap-3 rounded-carte bg-white p-5">
+          <h2 id="titre-rappels" className="text-lg font-bold">
+            Rappels en cascade <span className="text-sm font-normal text-gris">(canaux simulés)</span>
+          </h2>
+          <p className="text-gris">
+            À J-2, un rappel part sur le premier canal de la personne ; sans réponse, il passe au suivant : WhatsApp, SMS, appel vocal, puis le relais du village.
+          </p>
+          <div className="flex flex-wrap gap-2">
+            <form action={envoyerRappelsAction}>
+              <button className="flex items-center gap-2 rounded-bouton bg-marque px-4 py-2.5 font-bold text-white">
+                <Icone nom="ph-bell" className="size-5" />
+                Envoyer les rappels de J-2
+              </button>
+            </form>
+            <form action={relancerRappelsAction}>
+              <button className="flex items-center gap-2 rounded-bouton bg-lavande-2 px-4 py-2.5 font-bold text-marque">
+                <Icone nom="ph-arrow-counter-clockwise" className="size-5" />
+                Relancer ceux sans réponse
+              </button>
+            </form>
+            <Link href="/demo/telephone" className="flex items-center gap-2 rounded-bouton bg-lavande px-4 py-2.5 font-bold text-marque">
+              <Icone nom="ph-device-mobile" className="size-5" />
+              Le faux téléphone
+            </Link>
+          </div>
         </section>
       )}
       <p className="text-sm text-gris">

@@ -2,12 +2,14 @@ import Link from "next/link";
 import { notFound } from "next/navigation";
 import { aujourdhuiAuBenin } from "@/domain/dates";
 import { LIBELLES_CONSTAT } from "@/domain/evenements";
+import { LIBELLES_CANAL } from "@/domain/rappels";
 import { dateCourte, dateLongue, heureMinute } from "@/domain/temps";
 import { formaterTelephone, normaliserTelephone } from "@/domain/telephone";
 import { db } from "@/server/db/client";
 import type { EtapeDuCarnet } from "@/server/requetes/carnet";
 import type { OrdonnanceDetaillee } from "@/server/requetes/ordonnances";
 import type { MesureDatee } from "@/server/requetes/risques";
+import { rappelsDe, type RappelVu } from "@/server/rappels";
 import { dossierPatient, type VisiteRelais } from "@/server/requetes/soignant";
 import { iconePourPersonne } from "@/ui/avatar";
 import { BoutonEcouter } from "@/ui/BoutonEcouter";
@@ -162,6 +164,7 @@ export default async function DossierPatient({ params, searchParams }: PageProps
         </section>
         <Releves mesures={dossier.mesures} />
         <Visites visites={dossier.visites} />
+        <Rappels rappels={await rappelsDe(db(), patient.id)} />
       </div>
       <Ordonnances ordonnances={dossier.ordonnances} />
     </>
@@ -225,6 +228,32 @@ function Releves({ mesures }: { mesures: MesureDatee[] }) {
           </tbody>
         </table>
       )}
+    </section>
+  );
+}
+
+const STATUT_RAPPEL = (r: RappelVu) =>
+  r.reponse === "viendra" ? "Répondu : vient" : r.reponse === "empeche" ? "Répondu : ne peut pas" : r.statut === "sans_reponse" ? "Sans réponse" : r.canal === "relais" ? "Au relais de passer" : "Envoyé";
+
+/** Les rappels du rendez-vous, canal par canal : ce que la personne a reçu et ce qu'elle a répondu (canaux simulés). */
+function Rappels({ rappels }: { rappels: RappelVu[] }) {
+  if (rappels.length === 0) return null;
+  return (
+    <section aria-labelledby="titre-rappels" className="flex flex-col gap-3 rounded-carte bg-white p-5">
+      <h2 id="titre-rappels" className="text-lg font-bold">
+        Rappels <span className="text-sm font-normal text-gris">(canaux simulés)</span>
+      </h2>
+      <ul className="flex flex-col gap-2 text-sm">
+        {rappels.map((r) => (
+          <li key={r.id} className="flex flex-wrap items-baseline gap-x-2">
+            <b>{LIBELLES_CANAL[r.canal]}</b>
+            <span className="text-gris">
+              {dateCourte(aujourdhuiAuBenin(r.envoyeLe))}, {heureMinute(r.envoyeLe)}
+            </span>
+            <span className={r.reponse === "empeche" || r.statut === "sans_reponse" ? "font-bold text-urgence" : "font-bold text-marque"}>{STATUT_RAPPEL(r)}</span>
+          </li>
+        ))}
+      </ul>
     </section>
   );
 }

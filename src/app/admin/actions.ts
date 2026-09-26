@@ -8,6 +8,7 @@ import { exigerRole, ouvrirSession } from "@/server/auth/cookies";
 import { db } from "@/server/db/client";
 import { comptes } from "@/server/db/schema";
 import { semerDemo } from "@/server/demo/semer";
+import { envoyerRappels, relancer } from "@/server/rappels";
 
 /** Remet toute la démo à zéro, pour rejouer les parcours ; en mode démonstration seulement, et après confirmation. */
 export async function reinitialiserDemoAction(formulaire: FormData): Promise<void> {
@@ -21,4 +22,19 @@ export async function reinitialiserDemoAction(formulaire: FormData): Promise<voi
   if (!nouveau) redirect("/connexion");
   await ouvrirSession(nouveau.id);
   redirect("/admin?note=reinitialisee");
+}
+
+/** Démo : envoie les rappels des places réservées dans 2 jours (canaux simulés). */
+export async function envoyerRappelsAction(): Promise<void> {
+  await exigerRole("admin");
+  const maintenant = new Date();
+  const { envoyes } = await envoyerRappels(db(), { maintenant, aujourdhui: aujourdhuiAuBenin(maintenant) });
+  redirect(`/admin?note=rappels&nombre=${envoyes}`);
+}
+
+/** Démo : relance tout de suite les rappels restés sans réponse sur le canal suivant (en vrai, après 2 heures). */
+export async function relancerRappelsAction(): Promise<void> {
+  await exigerRole("admin");
+  const { relances } = await relancer(db(), { maintenant: new Date(), delaiMinutes: 0 });
+  redirect(`/admin?note=relances&nombre=${relances}`);
 }
