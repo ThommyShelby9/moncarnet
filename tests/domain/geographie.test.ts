@@ -1,6 +1,6 @@
 import { describe, expect, it } from "vitest";
 import { CARTE, projeter } from "@/domain/carte-benin";
-import { COMMUNES, sansAccents, ZONES_SANITAIRES, zonesDeLaCommune } from "@/domain/geographie";
+import { COMMUNES, sansAccents, slugZone, ZONES_SANITAIRES, zoneDuSlug, zonesDeLaCommune } from "@/domain/geographie";
 
 describe("zones sanitaires du Bénin", () => {
   it("compte 34 zones et 77 communes ; hors Cotonou, chaque commune est dans une seule zone", () => {
@@ -47,5 +47,21 @@ describe("fond de carte", () => {
 
   it("reste léger", () => {
     expect(JSON.stringify(CARTE).length).toBeLessThan(90_000);
+  });
+});
+
+describe("adresse d'une zone", () => {
+  it("n'a ni barre oblique, ni accent, ni espace : le proxy refuse les %2F", () => {
+    expect(slugZone("Kandi / Gogounou / Ségbana")).toBe("kandi-gogounou-segbana");
+    expect(slugZone("Parakou / N'Dali")).toBe("parakou-n-dali");
+    expect(ZONES_SANITAIRES.every((z) => /^[a-z0-9-]+$/.test(slugZone(z.zone)))).toBe(true);
+  });
+
+  it("est unique et retrouve sa zone", () => {
+    const slugs = ZONES_SANITAIRES.map((z) => slugZone(z.zone));
+    expect(new Set(slugs).size).toBe(34);
+    for (const z of ZONES_SANITAIRES) expect(zoneDuSlug(slugZone(z.zone))?.zone).toBe(z.zone);
+    expect(zoneDuSlug("cotonou-2-3")?.zone).toBe("Cotonou 2-3");
+    expect(zoneDuSlug("inconnue")).toBeUndefined();
   });
 });

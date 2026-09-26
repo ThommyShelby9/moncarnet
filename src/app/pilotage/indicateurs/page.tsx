@@ -9,7 +9,7 @@ import { lieuxDeLaZone } from "@/server/requetes/pilotage-etat";
 import { CarteIndicateur, STYLE_NIVEAU } from "../CarteIndicateur";
 import { CarteNationale, CarteZone } from "../Cartes";
 import { ClassementZones } from "../ClassementZones";
-import { Confidentialite, lireCode } from "../communs";
+import { Confidentialite, lienZone, lireCode } from "../communs";
 import { CourbeIndicateur } from "../CourbeIndicateur";
 
 export const metadata: Metadata = { title: "Indicateurs" };
@@ -93,8 +93,8 @@ export default async function Indicateurs({ searchParams }: PageProps<"/pilotage
               <h2 id="titre-zones" className="text-lg font-bold">
                 Zone par zone
               </h2>
-              <CarteNationale code={code} zones={nationale.zones} lien={(z) => `/pilotage/zones/${encodeURIComponent(z)}?indicateur=${code}`} titre={`Carte des zones sanitaires : ${d.libelle.toLowerCase()}`} />
-              <ClassementZones code={code as CodeIndicateur} zones={nationale.zones} lien={(z) => `/pilotage/zones/${encodeURIComponent(z)}`} />
+              <CarteNationale code={code} zones={nationale.zones} lien={(z) => lienZone(z, code)} titre={`Carte des zones sanitaires : ${d.libelle.toLowerCase()}`} />
+              <ClassementZones code={code as CodeIndicateur} zones={nationale.zones} lien={(z) => lienZone(z, code)} />
             </section>
           )}
         </div>

@@ -2,6 +2,7 @@ import type { Metadata } from "next";
 import Link from "next/link";
 import { notFound, redirect } from "next/navigation";
 import { aujourdhuiAuBenin } from "@/domain/dates";
+import { slugZone, zoneDuSlug } from "@/domain/geographie";
 import { CODES_INDICATEURS, INDICATEURS } from "@/domain/pilotage";
 import { exigerRole } from "@/server/auth/cookies";
 import { db } from "@/server/db/client";
@@ -20,13 +21,14 @@ export default async function FicheZone({ params, searchParams }: PageProps<"/pi
   const compte = await exigerRole("pilotage");
   if (compte.communeId) redirect("/pilotage");
   const [{ zone: brut }, recherche] = await Promise.all([params, searchParams]);
-  const zone = decodeURIComponent(brut);
+  // L'adresse porte un nom sans barre oblique (« kandi-gogounou-segbana ») ; les anciens liens portaient le nom encodé.
+  const zone = zoneDuSlug(brut)?.zone ?? decodeURIComponent(brut);
   const maintenant = new Date();
   const fiche = await vueDUneZone(db(), zone, aujourdhuiAuBenin(maintenant), maintenant);
   if (!fiche) notFound();
   const indicateur = lireCode(recherche.indicateur);
   const precedent = fiche.tendance.at(-2)?.valeurs;
-  const base = `/pilotage/zones/${encodeURIComponent(zone)}?indicateur=`;
+  const base = `/pilotage/zones/${slugZone(zone)}?indicateur=`;
   const lieux = fiche.direct ? await lieuxDeLaZone(db(), zone) : [];
 
   return (

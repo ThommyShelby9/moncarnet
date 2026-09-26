@@ -9,7 +9,7 @@ import { lieuxDeLaZone } from "@/server/requetes/pilotage-etat";
 import { Icone } from "@/ui/Icone";
 import { CarteIndicateur } from "./CarteIndicateur";
 import { CarteNationale, CarteZone } from "./Cartes";
-import { Confidentialite, EnCeMoment, Onglets, TAUX } from "./communs";
+import { Confidentialite, EnCeMoment, lienZone, Onglets, TAUX } from "./communs";
 import { CourbeIndicateur } from "./CourbeIndicateur";
 import { TableauCommunes } from "./TableauCommunes";
 
@@ -126,7 +126,7 @@ export default async function Pilotage({ searchParams }: PageProps<"/pilotage">)
           <CarteNationale
             code={indicateur}
             zones={vue.zones}
-            lien={(z) => `/pilotage/zones/${encodeURIComponent(z)}`}
+            lien={(z) => lienZone(z, indicateur)}
             titre={`Carte des zones sanitaires : ${INDICATEURS[indicateur].libelle.toLowerCase()}`}
           />
           <div className="flex flex-col gap-3">
@@ -138,7 +138,7 @@ export default async function Pilotage({ searchParams }: PageProps<"/pilotage">)
                 <ul className="mt-2 flex flex-col gap-2 text-sm">
                   {aAppuyer.slice(0, 5).map((z) => (
                     <li key={z.zone}>
-                      <Link href={`/pilotage/zones/${encodeURIComponent(z.zone)}`} className="font-bold underline decoration-lavande-4 underline-offset-2">
+                      <Link href={lienZone(z.zone)} className="font-bold underline decoration-lavande-4 underline-offset-2">
                         {z.zone}
                       </Link>{" "}
                       : {z.faibles.join(", ")}

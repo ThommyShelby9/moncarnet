@@ -8,7 +8,7 @@ import { alertesParSemaine, centresDeLaZone, type SemaineAlertes } from "@/serve
 import { Actualisation } from "@/ui/Actualisation";
 import { CarteIndicateur } from "../CarteIndicateur";
 import { ClassementZones } from "../ClassementZones";
-import { Confidentialite, EnCeMoment } from "../communs";
+import { Confidentialite, EnCeMoment, lienZone } from "../communs";
 import { CourbeIndicateur } from "../CourbeIndicateur";
 
 export const metadata: Metadata = { title: "Alertes" };
@@ -79,7 +79,7 @@ export default async function AlertesEtat() {
   }
 
   const vue = await vueNationale(db(), aujourdhui, maintenant);
-  const lien = (z: string) => `/pilotage/zones/${encodeURIComponent(z)}?indicateur=alertes_15min`;
+  const lien = (z: string) => lienZone(z, "alertes_15min");
   return (
     <>
       <header>

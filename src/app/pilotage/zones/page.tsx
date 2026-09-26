@@ -4,7 +4,7 @@ import { aujourdhuiAuBenin } from "@/domain/dates";
 import { exigerRole } from "@/server/auth/cookies";
 import { db } from "@/server/db/client";
 import { vueNationale } from "@/server/requetes/pilotage";
-import { Confidentialite } from "../communs";
+import { Confidentialite, lienZone } from "../communs";
 import { TableauCommunes } from "../TableauCommunes";
 
 export const metadata: Metadata = { title: "Zones sanitaires" };
@@ -28,7 +28,7 @@ export default async function Zones() {
       <Confidentialite />
       <TableauCommunes
         entete="Zone sanitaire"
-        lien={(z) => `/pilotage/zones/${encodeURIComponent(z)}`}
+        lien={(z) => lienZone(z)}
         lignes={[
           ...parDepartement.map((z) => ({ nom: z.zone, valeurs: z.valeurs, note: z.direct ? `${z.departement} · en direct` : z.departement })),
           { nom: "Tout le pays", valeurs: vue.national, total: true },

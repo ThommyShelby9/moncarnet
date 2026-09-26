@@ -69,3 +69,17 @@ export function zonesDeLaCommune(nom: string): ZoneSanitaire[] {
   const cle = sansAccents(nom);
   return ZONES_SANITAIRES.filter((z) => z.communes.some((x) => sansAccents(x.nom) === cle || x.source === cle));
 }
+
+/**
+ * Adresse d'une zone : « Kandi / Gogounou / Ségbana » → « kandi-gogounou-segbana ».
+ * Jamais de barre oblique encodée (%2F) : le proxy de production refuse ces adresses (erreur 400).
+ */
+export function slugZone(zone: string): string {
+  return sansAccents(zone)
+    .replace(/[^a-z0-9]+/g, "-")
+    .replace(/^-+|-+$/g, "");
+}
+
+export function zoneDuSlug(slug: string): ZoneSanitaire | undefined {
+  return ZONES_SANITAIRES.find((z) => slugZone(z.zone) === slug);
+}

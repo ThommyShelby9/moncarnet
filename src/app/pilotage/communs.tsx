@@ -1,10 +1,14 @@
 import Link from "next/link";
+import { slugZone } from "@/domain/geographie";
 import { CODES_INDICATEURS, INDICATEURS, type CodeIndicateur } from "@/domain/pilotage";
 import type { AlertesEnDirect } from "@/server/requetes/pilotage";
 import { Icone } from "@/ui/Icone";
 
 /** Les indicateurs qui se lisent en taux ou en délai (les nombres bruts n'ont pas d'objectif). */
 export const TAUX = CODES_INDICATEURS.filter((c) => INDICATEURS[c].unite !== "nombre");
+
+/** Adresse de la fiche d'une zone : un nom lisible sans barre oblique (le proxy refuse les %2F). */
+export const lienZone = (zone: string, indicateur?: CodeIndicateur) => `/pilotage/zones/${slugZone(zone)}${indicateur ? `?indicateur=${indicateur}` : ""}`;
 
 export const lireCode = (v: unknown, codes: readonly CodeIndicateur[] = TAUX, parDefaut: CodeIndicateur = "cpn4"): CodeIndicateur =>
   codes.find((c) => c === v) ?? parDefaut;
