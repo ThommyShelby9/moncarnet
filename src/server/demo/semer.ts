@@ -2,6 +2,7 @@ import { randomUUID } from "node:crypto";
 import { asc, eq, sql } from "drizzle-orm";
 import { planifier } from "@/domain/calendrier";
 import { ageEnAnnees, ajouterJours, depuisDateISO, joursEntre, type DateISO } from "@/domain/dates";
+import { CODES_INDICATEURS, moisPrecedents, premierDuMois, type CodeIndicateur } from "@/domain/pilotage";
 import { PROGRAMMES, type CodeProgramme, type MotifRdv } from "@/domain/programmes";
 import { hacher } from "../auth/mots-de-passe";
 import type { Db } from "../db/client";
@@ -44,7 +45,7 @@ const VILLAGES_SEHOUN = ["Sèhoun", "Kinta", "Adingnigon"] as const;
 const ALPHABET_CODE = "ABCDEFGHJKLMNPQRSTUVWXYZ23456789";
 
 const TABLES = [
-  "fichiers", "alertes", "liste_attente",
+  "indicateurs_zones", "fichiers", "alertes", "liste_attente",
   "contenus_traductions", "contenus", "ordonnances", "evenements", "rendez_vous", "creneaux", "modeles_plages",
   "inscriptions", "responsables", "consentements", "contacts", "patients", "foyers", "sessions", "comptes",
   "etablissements", "communes",
@@ -85,8 +86,8 @@ export async function semerDemo(db: Db, { aujourdhui }: { aujourdhui: DateISO })
   const [bohicon, zogbodomey] = await db
     .insert(t.communes)
     .values([
-      { nom: "Bohicon", departement: "Zou" },
-      { nom: "Zogbodomey", departement: "Zou" },
+      { nom: "Bohicon", departement: "Zou", zoneSanitaire: "Zogbodomey-Bohicon-Zakpota" },
+      { nom: "Zogbodomey", departement: "Zou", zoneSanitaire: "Zogbodomey-Bohicon-Zakpota" },
     ])
     .returning();
   const [cs, pharmacie] = await db
@@ -105,7 +106,7 @@ export async function semerDemo(db: Db, { aujourdhui }: { aujourdhui: DateISO })
       nomAffiche: c.nomAffiche,
       empreinteSecret: await hacher(c.secret),
       etablissementId: c.role === "soignant" ? cs!.id : c.role === "pharmacie" ? pharmacie!.id : null,
-      communeId: c.role === "pilotage" || c.role === "relais" ? bohicon!.id : null,
+      communeId: c.role === "relais" || (c.role === "pilotage" && c.portee !== "national") ? bohicon!.id : null,
     })),
   );
   const listeComptes = await db.insert(t.comptes).values(lignesComptes).returning();
@@ -191,7 +192,7 @@ export async function semerDemo(db: Db, { aujourdhui }: { aujourdhui: DateISO })
 
   // --- Patients, contacts, consentements, inscriptions, rendez-vous, historique ---
   const idsPersonnages: Record<string, string> = {};
-  const patientsPopulation: { id: string; programme: CodeProgramme | null; age: number }[] = [];
+  const patientsPopulation: { id: string; programme: CodeProgramme | null; age: number; sexe: "F" | "M"; foyerId: string; naissance: DateISO }[] = [];
   let nbRendezVous = 0;
   let nbEvenements = 0;
 
@@ -213,7 +214,15 @@ export async function semerDemo(db: Db, { aujourdhui }: { aujourdhui: DateISO })
       })
       .returning();
     if (personne.cle) idsPersonnages[personne.cle] = patient!.id;
-    else patientsPopulation.push({ id: patient!.id, programme: personne.programmes[0]?.code ?? null, age: ageEnAnnees(personne.dateNaissance, aujourdhui) });
+    else
+      patientsPopulation.push({
+        id: patient!.id,
+        programme: personne.programmes[0]?.code ?? null,
+        age: ageEnAnnees(personne.dateNaissance, aujourdhui),
+        sexe: personne.sexe,
+        foyerId: personne.foyerId,
+        naissance: personne.dateNaissance,
+      });
 
     if (personne.telephone) {
       await db.insert(t.contacts).values({ patientId: patient!.id, telephone: personne.telephone, role: "principal", proprietaire: personne.proprietaireTelephone ?? "soi" });
@@ -454,6 +463,55 @@ export async function semerDemo(db: Db, { aujourdhui }: { aujourdhui: DateISO })
     nbEvenements++;
   }
 
+  // --- Alertes des 30 derniers jours, toutes prises en charge : délais réalistes pour le pilotage ---
+  const delais = [4, 6, 7, 9, 11, 12, 14, 18, 26];
+  for (const [i, minutes] of delais.entries()) {
+    const personne = h.parmi(patientsPopulation.filter((p) => p.age >= 1));
+    const creeeLe = new Date(depuisDateISO(ajouterJours(aujourdhui, -(3 + i * 3))).getTime() + (8 + i) * 3_600_000);
+    const evenementId = randomUUID();
+    await db.insert(t.evenements).values({
+      id: evenementId,
+      patientId: personne.id,
+      type: "signalement_danger",
+      survenuLe: creeeLe,
+      donnees: { signes: [h.parmi(["fievre", "douleur", "respiration"] as const)], source: "proche" },
+    });
+    await db.insert(t.alertes).values({
+      patientId: personne.id,
+      evenementId,
+      etablissementId: cs!.id,
+      creeeLe,
+      echeance: new Date(creeeLe.getTime() + 15 * 60_000),
+      priseEnChargePar: i % 2 ? firmin.id : adjoa.id,
+      priseEnChargeLe: new Date(creeeLe.getTime() + minutes * 60_000),
+    });
+    nbEvenements++;
+  }
+
+  // --- Naissances de l'année : chaque bébé de moins d'un an né d'une femme de son foyer ---
+  for (const bebe of patientsPopulation.filter((p) => p.programme === "vaccination" && p.age === 0)) {
+    const mere = patientsPopulation.find((p) => p.foyerId === bebe.foyerId && p.sexe === "F" && p.age >= 17 && p.age <= 45);
+    if (!mere) continue;
+    const le = new Date(depuisDateISO(bebe.naissance).getTime() + 7 * 3_600_000);
+    await db.insert(t.evenements).values({
+      id: randomUUID(),
+      patientId: mere.id,
+      type: "accouchement",
+      auteurId: adjoa.id,
+      survenuLe: le,
+      donnees: {
+        le: le.toISOString(),
+        lieu: h.chance(0.8) ? "centre" : "domicile",
+        mode: h.chance(0.9) ? "voie_basse" : "cesarienne",
+        enfant: { id: bebe.id, sexe: bebe.sexe, poidsGrammes: h.entier(2600, 3900) },
+      },
+    });
+    nbEvenements++;
+  }
+
+  // --- Historique des 5 derniers mois et autres zones du pays (données fictives, générées à part) ---
+  await db.insert(t.indicateursZones).values(indicateursFictifs(aujourdhui));
+
   // --- Contenus de base (texte français ; l'audio arrive au plan 6) ---
   const contenus = [
     { code: "rappel_rendez_vous", categorie: "rappel", pictogramme: "ph-calendar-dots", texte: "Rappel : vous avez un rendez-vous au centre de santé. Pensez à votre carnet." },
@@ -488,4 +546,61 @@ function mesuresPour(programme: CodeProgramme, h: Hasard, cle: string | null): R
   if (programme === "diabete") return { glycemieGL: Math.round((1 + h.nombre() * 1.2) * 100) / 100 };
   if (programme === "grossesse") return { tensionSys: h.entier(100, 135), tensionDia: h.entier(60, 88), poidsKg: h.entier(55, 85) };
   return {};
+}
+
+const ZONES_FICTIVES: [string, string][] = [
+  ["Abomey-Calavi / Sô-Ava", "Atlantique"],
+  ["Cotonou 1-4", "Littoral"],
+  ["Covè / Ouinhi / Zangnanado", "Zou"],
+  ["Dassa-Zoumè / Glazoué", "Collines"],
+  ["Djougou / Copargo / Ouaké", "Donga"],
+  ["Kandi / Gogounou / Ségbana", "Alibori"],
+  ["Lokossa / Athiémé", "Mono"],
+  ["Natitingou / Boukoumbé / Toucountouna", "Atacora"],
+  ["Parakou / N'Dali", "Borgou"],
+  ["Porto-Novo / Aguégués / Sèmè-Podji", "Ouémé"],
+];
+
+/** Taux de départ (bas, haut) et effectifs (petit, grand) par indicateur : valeurs fictives mais plausibles. */
+const PROFILS: Record<CodeIndicateur, { taux?: [number, number]; effectif: [number, number]; minutes?: [number, number] }> = {
+  cpn4: { taux: [0.38, 0.7], effectif: [120, 600] },
+  naissances_centre: { taux: [0.7, 0.95], effectif: [150, 700] },
+  penta3: { taux: [0.7, 0.95], effectif: [150, 700] },
+  rr1: { taux: [0.62, 0.9], effectif: [140, 650] },
+  hta_controles: { taux: [0.24, 0.55], effectif: [200, 900] },
+  alertes_15min: { taux: [0.55, 0.95], effectif: [20, 90] },
+  alertes_delai: { effectif: [20, 90], minutes: [8, 28] },
+  visites_relais: { effectif: [300, 1500] },
+  etapes_manquees: { effectif: [40, 300] },
+};
+
+/**
+ * Indicateurs mensuels fictifs : les 10 autres zones (6 mois, dont le mois en cours), et l'historique de la zone de la démo
+ * (5 mois passés, à l'échelle de ses carnets). Graine à part : le reste de la démo ne change pas.
+ */
+function indicateursFictifs(aujourdhui: DateISO) {
+  const h = hasard(20260926);
+  const mois = premierDuMois(aujourdhui);
+  const lignes: (typeof t.indicateursZones.$inferInsert)[] = [];
+  const zones: [string, string, number, boolean][] = [...ZONES_FICTIVES.map(([z, d]) => [z, d, 1, false] as [string, string, number, boolean]), ["Zogbodomey-Bohicon-Zakpota", "Zou", 0.03, true]];
+  for (const [zone, departement, echelle, demo] of zones) {
+    const base = Object.fromEntries(CODES_INDICATEURS.map((c) => [c, h.nombre()])) as Record<CodeIndicateur, number>;
+    const lesMois = [...moisPrecedents(mois, 5), ...(demo ? [] : [mois])];
+    for (const [rang, m] of lesMois.entries()) {
+      for (const code of CODES_INDICATEURS) {
+        const p = PROFILS[code];
+        const effectif = Math.max(demo ? 5 : 1, Math.round((p.effectif[0] + base[code] * (p.effectif[1] - p.effectif[0])) * echelle * (0.9 + h.nombre() * 0.2)));
+        if (p.taux) {
+          const taux = Math.min(0.99, p.taux[0] + base[code] * (p.taux[1] - p.taux[0]) + rang * 0.01 + (h.nombre() - 0.5) * 0.04);
+          lignes.push({ zone, departement, mois: m, code, numerateur: Math.round(effectif * taux), denominateur: effectif });
+        } else if (p.minutes) {
+          const minutes = p.minutes[0] + base[code] * (p.minutes[1] - p.minutes[0]) - rang * 0.4;
+          lignes.push({ zone, departement, mois: m, code, numerateur: Math.round(effectif * minutes), denominateur: effectif });
+        } else {
+          lignes.push({ zone, departement, mois: m, code, numerateur: effectif, denominateur: 0 });
+        }
+      }
+    }
+  }
+  return lignes;
 }

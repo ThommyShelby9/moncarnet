@@ -48,6 +48,8 @@ export const communes = pgTable("communes", {
   id: uuid("id").primaryKey().defaultRandom(),
   nom: text("nom").notNull(),
   departement: text("departement").notNull(),
+  /** Zone sanitaire qui regroupe la commune avec ses voisines (pilotage). */
+  zoneSanitaire: text("zone_sanitaire"),
 });
 
 export const etablissements = pgTable("etablissements", {
@@ -299,3 +301,18 @@ export const fichiers = pgTable("fichiers", {
   donnees: octets("donnees").notNull(),
   recuLe: horodatage("recu_le").defaultNow().notNull(),
 });
+
+/** Indicateurs mensuels déjà agrégés par zone sanitaire : historique, et zones du pays sans carnets dans la démo (données fictives). */
+export const indicateursZones = pgTable(
+  "indicateurs_zones",
+  {
+    id: uuid("id").primaryKey().defaultRandom(),
+    zone: text("zone").notNull(),
+    departement: text("departement").notNull(),
+    mois: date("mois", { mode: "string" }).notNull(),
+    code: text("code").notNull(),
+    numerateur: integer("numerateur").notNull(),
+    denominateur: integer("denominateur").notNull(),
+  },
+  (t) => [uniqueIndex("indicateurs_zones_unique").on(t.zone, t.mois, t.code)],
+);
