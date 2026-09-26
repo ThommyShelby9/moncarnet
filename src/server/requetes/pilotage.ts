@@ -116,9 +116,34 @@ async function historique(db: Db, zones?: string[]): Promise<{ mois: DateISO; va
   return [...parMois.entries()].map(([mois, valeurs]) => ({ mois, valeurs }));
 }
 
+export interface AlertesEnDirect {
+  enAttente: number;
+  enRetard: number;
+  /** Âge de la plus ancienne alerte qui attend, en minutes. */
+  plusAncienneMinutes: number | null;
+}
+
+/** Les alertes de la zone que personne n'a encore prises en charge : un décompte, jamais un nom. Celles en retard « remontent » ici. */
+export async function alertesDeLaZone(db: Db, communeIds: string[], maintenant: Date): Promise<AlertesEnDirect> {
+  if (communeIds.length === 0) return { enAttente: 0, enRetard: 0, plusAncienneMinutes: null };
+  const ouvertes = await db
+    .select({ creeeLe: alertes.creeeLe, echeance: alertes.echeance })
+    .from(alertes)
+    .innerJoin(patients, eq(alertes.patientId, patients.id))
+    .innerJoin(foyers, eq(patients.foyerId, foyers.id))
+    .where(and(inArray(foyers.communeId, communeIds), isNull(alertes.priseEnChargeLe), isNull(alertes.annuleeLe)));
+  const plusAncienne = ouvertes.reduce<Date | null>((min, a) => (!min || a.creeeLe < min ? a.creeeLe : min), null);
+  return {
+    enAttente: ouvertes.length,
+    enRetard: ouvertes.filter((a) => a.echeance.getTime() < maintenant.getTime()).length,
+    plusAncienneMinutes: plusAncienne ? Math.round((maintenant.getTime() - plusAncienne.getTime()) / 60_000) : null,
+  };
+}
+
 export interface VueZone {
   zone: string;
   departement: string;
+  alertes: AlertesEnDirect;
   communes: { nom: string; valeurs: Valeurs }[];
   total: Valeurs;
   tendance: { mois: DateISO; valeurs: Valeurs }[];
@@ -129,13 +154,17 @@ export async function vueDeZone(db: Db, communeId: string, aujourdhui: DateISO, 
   const [commune] = await db.select().from(communes).where(eq(communes.id, communeId));
   if (!commune?.zoneSanitaire) return null;
   const lesCommunes = await db.select().from(communes).where(eq(communes.zoneSanitaire, commune.zoneSanitaire)).orderBy(asc(communes.nom));
-  const parCommune = await indicateursDesCommunes(db, lesCommunes.map((c) => c.id), aujourdhui, maintenant);
+  const [parCommune, alertesEnDirect] = await Promise.all([
+    indicateursDesCommunes(db, lesCommunes.map((c) => c.id), aujourdhui, maintenant),
+    alertesDeLaZone(db, lesCommunes.map((c) => c.id), maintenant),
+  ]);
   const total = agreger([...parCommune.values()]);
   const mois = premierDuMois(aujourdhui);
   const passe = (await historique(db, [commune.zoneSanitaire])).filter((h) => h.mois < mois);
   return {
     zone: commune.zoneSanitaire,
     departement: commune.departement,
+    alertes: alertesEnDirect,
     communes: lesCommunes.map((c) => ({ nom: c.nom, valeurs: parCommune.get(c.id)! })),
     total,
     tendance: [...passe, { mois, valeurs: total }].slice(-6),

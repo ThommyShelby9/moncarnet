@@ -1,11 +1,14 @@
+import { randomUUID } from "node:crypto";
 import { eq } from "drizzle-orm";
 import { afterAll, beforeAll, describe, expect, it } from "vitest";
 import { lireIndicateur } from "@/domain/pilotage";
 import type { Db } from "@/server/db/client";
 import { comptes } from "@/server/db/schema";
 import { semerDemo } from "@/server/demo/semer";
+import { signalerDanger } from "@/server/patient/signalement";
 import { vueDeZone, vueNationale } from "@/server/requetes/pilotage";
 import { creerDbDeTest } from "../aides/base-de-test";
+import { COMPTE, idCompte, idPatient } from "../aides/demo";
 
 const aujourdhui = "2026-09-26";
 const maintenant = new Date("2026-09-26T10:00:00Z");
@@ -47,5 +50,15 @@ describe("vueNationale", () => {
     expect(vue.zones.filter((z) => z.direct).map((z) => z.zone)).toEqual(["Zogbodomey-Bohicon-Zakpota"]);
     expect(vue.national.cpn4.denominateur).toBe(vue.zones.reduce((s, z) => s + z.valeurs.cpn4.denominateur, 0));
     expect(vue.tendance.map((t) => t.mois)).toEqual(["2026-04-01", "2026-05-01", "2026-06-01", "2026-07-01", "2026-08-01", "2026-09-01"]);
+  });
+});
+
+describe("alertes en direct", () => {
+  it("compte les alertes qui attendent et celles en retard, sans aucun nom", async () => {
+    const [zone] = await db.select().from(comptes).where(eq(comptes.identifiant, "zone.bohicon"));
+    const rachida = await idPatient(db, "Rachida");
+    await signalerDanger(db, { compteId: await idCompte(db, COMPTE.aicha), patientId: rachida, evenementId: randomUUID(), signes: ["fievre"], maintenant: new Date("2026-09-26T09:30:00Z") });
+    const vue = await vueDeZone(db, zone!.communeId!, aujourdhui, maintenant);
+    expect(vue!.alertes).toEqual({ enAttente: 1, enRetard: 1, plusAncienneMinutes: 30 });
   });
 });

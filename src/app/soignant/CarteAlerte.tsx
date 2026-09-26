@@ -1,3 +1,4 @@
+import { minutesRestantes, statutAlerte } from "@/domain/alertes";
 import { LIBELLES_SIGNES } from "@/domain/signes-danger";
 import { heureMinute } from "@/domain/temps";
 import type { AlerteOuverte } from "@/server/requetes/soignant";
@@ -8,8 +9,11 @@ import { prendreEnChargeAction } from "./actions";
 /** Une alerte à prendre en charge : compte à rebours, signes, appeler, « Je la prends en charge ». */
 export function CarteAlerte({ alerte, maintenant }: { alerte: AlerteOuverte; maintenant: Date }) {
   const qui = alerte.semainesGrossesse ? `enceinte de ${alerte.semainesGrossesse} semaines` : alerte.libelleAge;
+  const enRetard = statutAlerte({ echeance: alerte.echeance, priseEnChargeLe: null, annuleeLe: null }, maintenant) === "en_retard";
   return (
-    <article className="flex flex-wrap items-center gap-4 rounded-carte bg-white px-4 py-3.5 shadow-[inset_4px_0_0_var(--color-urgence)]">
+    <article
+      className={`flex flex-wrap items-center gap-4 rounded-carte px-4 py-3.5 shadow-[inset_4px_0_0_var(--color-urgence)] ${enRetard ? "bg-urgence-pale" : "bg-white"}`}
+    >
       <CompteARebours echeance={alerte.echeance.toISOString()} maintenant={maintenant.toISOString()} />
       <div className="min-w-[220px] flex-1">
         <b className="block">
@@ -22,6 +26,11 @@ export function CarteAlerte({ alerte, maintenant }: { alerte: AlerteOuverte; mai
           </span>
           , signalé à {heureMinute(alerte.creeeLe)}. À rappeler avant {heureMinute(alerte.echeance)}.
         </p>
+        {enRetard && (
+          <p className="mt-1 text-sm font-bold text-urgence">
+            En retard de {-minutesRestantes(alerte.echeance, maintenant)} min : signalée à la zone sanitaire.
+          </p>
+        )}
       </div>
       {alerte.telephone && (
         <a

@@ -4,7 +4,7 @@ import { aujourdhuiAuBenin } from "@/domain/dates";
 import { CODES_INDICATEURS, INDICATEURS, lireIndicateur, type CodeIndicateur } from "@/domain/pilotage";
 import { exigerRole } from "@/server/auth/cookies";
 import { db } from "@/server/db/client";
-import { vueDeZone, vueNationale } from "@/server/requetes/pilotage";
+import { vueDeZone, vueNationale, type AlertesEnDirect } from "@/server/requetes/pilotage";
 import { Icone } from "@/ui/Icone";
 import { CarteIndicateur } from "./CarteIndicateur";
 import { ClassementZones } from "./ClassementZones";
@@ -43,6 +43,31 @@ function Onglets({ actif }: { actif: CodeIndicateur }) {
   );
 }
 
+/** Les alertes qui attendent dans la zone, en direct : celles en retard remontent ici (spec §14). */
+function EnCeMoment({ alertes }: { alertes: AlertesEnDirect }) {
+  const retard = alertes.enRetard > 0;
+  return (
+    <section
+      aria-labelledby="titre-maintenant"
+      className={`flex items-center gap-3 rounded-carte px-4 py-3 ${retard ? "bg-urgence-pale text-urgence" : "bg-white text-nuit"}`}
+    >
+      <Icone nom="hi-alert-circle" className={`size-7 shrink-0 ${retard ? "text-urgence" : "text-marque"}`} />
+      <div>
+        <h2 id="titre-maintenant" className="text-sm font-bold text-gris">
+          En ce moment
+        </h2>
+        <p className="font-bold">
+          {alertes.enAttente === 0
+            ? "Aucune alerte en attente dans la zone."
+            : `${alertes.enAttente} alerte${alertes.enAttente > 1 ? "s" : ""} en attente${
+                retard ? `, dont ${alertes.enRetard} en retard (la plus ancienne depuis ${alertes.plusAncienneMinutes} min)` : ""
+              }.`}
+        </p>
+      </div>
+    </section>
+  );
+}
+
 function Exporter() {
   return (
     <a href="/api/pilotage/export" className="flex items-center gap-2 rounded-bouton bg-white px-4 py-2.5 text-sm font-bold text-marque">
@@ -73,6 +98,7 @@ export default async function Pilotage({ searchParams }: PageProps<"/pilotage">)
           <Exporter />
         </header>
         <Confidentialite />
+        <EnCeMoment alertes={vue.alertes} />
         <section aria-labelledby="titre-indicateurs" className="flex flex-col gap-3">
           <h2 id="titre-indicateurs" className="text-lg font-bold">
             Ce mois-ci
