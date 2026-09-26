@@ -469,7 +469,33 @@ export async function semerDemo(db: Db, { aujourdhui }: { aujourdhui: DateISO })
 
   // --- Salle d'attente du matin : chaque venue a son numéro ; les personnes déjà vues ont été appelées (graine à part) ---
   const hSalle = hasard(20260929);
-  const venuesDuMatin = venues.filter((v) => v.moment === "matin");
+  let consultationDuMatin = plagesDuJour.find((c) => c.motif === "consultation" && c.moment === "matin");
+  let venuesDuMatin: { patientId: string }[] = venues.filter((v) => v.moment === "matin");
+  if (!consultationDuMatin) {
+    // Pas de plage ce jour (week-end) : la démo ouvre une matinée de consultation, pour que la salle d'attente vive tous les jours.
+    [consultationDuMatin] = await db
+      .insert(t.creneaux)
+      .values({ etablissementId: cs!.id, motif: "consultation", date: aujourdhui, moment: "matin", capacite: 8 })
+      .returning();
+    const libres = [...patientsPopulation.filter((x) => x.age >= 1)];
+    const choisis = Array.from({ length: 5 }, () => libres.splice(hSalle.entier(0, libres.length - 1), 1)[0]!);
+    await db.insert(t.rendezVous).values(
+      choisis.map((c) => ({
+        patientId: c.id,
+        motif: "consultation" as const,
+        datePrevue: aujourdhui,
+        moment: "matin" as const,
+        creneauId: consultationDuMatin!.id,
+        etablissementId: cs!.id,
+        source: "patient" as const,
+        reserveLe: depuisDateISO(ajouterJours(aujourdhui, -hSalle.entier(1, 6))),
+      })),
+    );
+    nbRendezVous += choisis.length;
+    venuesDuMatin = choisis.map((c) => ({ patientId: c.id }));
+    // Les deux premières personnes ont déjà été reçues.
+    for (const [i, c] of choisis.slice(0, 2).entries()) vusLe.set(c.id, new Date(depuisDateISO(aujourdhui).getTime() + (7 * 60 + i * 15) * 60_000));
+  }
   if (venuesDuMatin.length) {
     await db.insert(t.passages).values(
       venuesDuMatin.map((v, i) => {
@@ -482,7 +508,6 @@ export async function semerDemo(db: Db, { aujourdhui }: { aujourdhui: DateISO })
   }
 
   // --- Mariam a une place ce matin : Codjo dira qu'ils sont arrivés, et suivra son tour ---
-  const consultationDuMatin = plagesDuJour.find((c) => c.motif === "consultation" && c.moment === "matin");
   if (consultationDuMatin) {
     await db.insert(t.rendezVous).values({
       patientId: idsPersonnages.mariam!,

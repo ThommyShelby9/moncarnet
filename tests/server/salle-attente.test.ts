@@ -5,7 +5,7 @@ import type { Db } from "@/server/db/client";
 import { comptes } from "@/server/db/schema";
 import { semerDemo } from "@/server/demo/semer";
 import { signalerDanger } from "@/server/patient/signalement";
-import { appelerSuivant, arriverAuCentre, placesDuJour, salleAttente } from "@/server/salle-attente";
+import { appelerSuivant, arriverAuCentre, peuventArriver, placesDuJour, salleAttente } from "@/server/salle-attente";
 import { creerDbDeTest } from "../aides/base-de-test";
 import { COMPTE, idCompte, idPatient } from "../aides/demo";
 
@@ -24,6 +24,13 @@ beforeAll(async () => {
 afterAll(async () => fermer());
 
 describe("salle d'attente", () => {
+  it("propose « Je suis arrivé » à qui a rendez-vous aujourd'hui ou une alerte du jour", async () => {
+    const mariam = await idPatient(db, "Mariam");
+    const codjo = await idPatient(db, "Codjo");
+    const possibles = await peuventArriver(db, [mariam, codjo], aujourdhui);
+    expect([...possibles]).toEqual([mariam]);
+  });
+
   it("donne un numéro à qui arrive, le même s'il touche deux fois", async () => {
     const codjo = await idCompte(db, COMPTE.codjo);
     const mariam = await idPatient(db, "Mariam");

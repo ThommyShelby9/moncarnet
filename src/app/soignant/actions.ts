@@ -7,6 +7,7 @@ import { lireLignes } from "@/domain/ordonnances";
 import { db } from "@/server/db/client";
 import { prendreEnCharge } from "@/server/soignant/alertes";
 import { enregistrerConsultation } from "@/server/soignant/consultation";
+import { appelerSuivant } from "@/server/salle-attente";
 import { declarerNaissance } from "@/server/soignant/naissance";
 import { emettreOrdonnance } from "@/server/soignant/ordonnance";
 import { exigerSoignant } from "./contexte";
@@ -62,4 +63,12 @@ export async function declarerNaissanceAction(_: EtatFormulaire, formulaire: For
     return { message, valeurs };
   }
   redirect(`/soignant/patients/${resultat.donnees.bebeId}?note=naissance`);
+}
+
+/** « Appeler le suivant » : la personne suivante de la salle d'attente (l'urgence d'abord), et son dossier s'ouvre. */
+export async function appelerSuivantAction(): Promise<void> {
+  const soignant = await exigerSoignant();
+  const resultat = await appelerSuivant(db(), { soignant });
+  if (resultat.ok) redirect(`/soignant/patients/${resultat.donnees.patientId}?note=appel&numero=${resultat.donnees.numero}`);
+  redirect("/soignant?note=salle_vide");
 }

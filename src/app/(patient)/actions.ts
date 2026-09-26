@@ -11,6 +11,7 @@ import { exigerRole } from "@/server/auth/cookies";
 import { db } from "@/server/db/client";
 import { enregistrerPlanNaissance } from "@/server/patient/plan-naissance";
 import { nommerEnfant } from "@/server/patient/prenom";
+import { arriverAuCentre } from "@/server/salle-attente";
 import { noterPrise } from "@/server/patient/prises";
 import { inscrireListeAttente, reserver } from "@/server/patient/reservation";
 import { annulerAlerte, signalerDanger } from "@/server/patient/signalement";
@@ -106,4 +107,12 @@ export async function nommerAction(formulaire: FormData): Promise<void> {
   const patientId = String(formulaire.get("patientId") ?? "");
   const resultat = await nommerEnfant(db(), { compteId: compte.id, patientId, prenom: String(formulaire.get("prenom") ?? "") });
   redirect(`/carnet?pour=${encodeURIComponent(patientId)}&note=${resultat.ok ? "prenom" : "prenom_refuse"}`);
+}
+
+/** « Je suis arrivé au centre » : un numéro de passage ; l'accueil suit ensuite le tour. */
+export async function arriverAction(formulaire: FormData): Promise<void> {
+  const compte = await exigerRole("patient");
+  const patientId = String(formulaire.get("patientId") ?? "");
+  const resultat = await arriverAuCentre(db(), { compteId: compte.id, patientId });
+  redirect(resultat.ok ? "/?note=arrive" : "/");
 }

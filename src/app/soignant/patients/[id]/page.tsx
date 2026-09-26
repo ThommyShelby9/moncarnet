@@ -41,6 +41,7 @@ export default async function DossierPatient({ params, searchParams }: PageProps
       </Link>
       {note === "consultation" && <RetourAction message="Consultation enregistrée. Le risque est à jour." />}
       {note === "alerte" && <RetourAction message={`Alerte prise en charge. Rappelez ${patient.prenom} maintenant.`} />}
+      {note === "appel" && <RetourAction message={`N° ${texteDe(recherche.numero) ?? ""} appelé : ${patient.prenom} entre en consultation.`} />}
       {note === "naissance" && <RetourAction message={`Naissance enregistrée : le carnet de ${patient.prenom} est créé, avec ses vaccins de naissance.`} />}
       {note === "ordonnance" && code && (
         <div className="flex flex-wrap items-center gap-4">

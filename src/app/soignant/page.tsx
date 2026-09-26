@@ -1,7 +1,8 @@
 import Link from "next/link";
 import { aujourdhuiAuBenin } from "@/domain/dates";
-import { dateLongue, majuscule } from "@/domain/temps";
+import { dateLongue, heureMinute, majuscule } from "@/domain/temps";
 import { db } from "@/server/db/client";
+import { salleAttente, type EnAttente } from "@/server/salle-attente";
 import { alertesOuvertes, consultationsDuJour, patientsASurveiller, type GroupeDuJour, type PatientASurveiller } from "@/server/requetes/soignant";
 import { Actualisation } from "@/ui/Actualisation";
 import { EtiquetteRisque } from "@/ui/EtiquetteRisque";
@@ -9,6 +10,7 @@ import { Icone } from "@/ui/Icone";
 import { ICONE_MOTIF } from "@/ui/pictogrammes";
 import { RetourAction } from "@/ui/RetourAction";
 import { Tampon } from "@/ui/Tampon";
+import { appelerSuivantAction } from "./actions";
 import { CarteAlerte } from "./CarteAlerte";
 import { exigerSoignant } from "./contexte";
 import { RechercheRapide } from "./RechercheRapide";
@@ -17,6 +19,7 @@ const MESSAGES: Record<string, string> = {
   deja_prise: "Un collègue a déjà pris cette alerte en charge.",
   annulee: "La famille a annulé cette alerte.",
   introuvable: "Cette alerte n'existe plus.",
+  salle_vide: "Personne n'attend dans la salle d'attente.",
 };
 
 export default async function Aujourdhui({ searchParams }: PageProps<"/soignant">) {
@@ -24,10 +27,11 @@ export default async function Aujourdhui({ searchParams }: PageProps<"/soignant"
   const params = await searchParams;
   const aujourdhui = aujourdhuiAuBenin();
   const maintenant = new Date();
-  const [alertes, groupes, aSurveiller] = await Promise.all([
+  const [alertes, groupes, aSurveiller, salle] = await Promise.all([
     alertesOuvertes(db(), soignant.etablissementId, aujourdhui),
     consultationsDuJour(db(), soignant.etablissementId, aujourdhui),
     patientsASurveiller(db(), soignant.etablissementId, aujourdhui),
+    salleAttente(db(), soignant.etablissementId, aujourdhui),
   ]);
   const lignes = groupes.flatMap((g) => g.lignes);
   const vus = lignes.filter((l) => l.vu).length;
@@ -58,9 +62,54 @@ export default async function Aujourdhui({ searchParams }: PageProps<"/soignant"
       )}
       <div className="grid items-start gap-5 lg:grid-cols-[1fr_320px]">
         <ConsultationsDuJour groupes={groupes} />
-        <ASurveiller patients={aSurveiller} />
+        <div className="flex flex-col gap-5">
+          <SalleAttente file={salle} />
+          <ASurveiller patients={aSurveiller} />
+        </div>
       </div>
     </>
+  );
+}
+
+/** La salle d'attente du jour : l'urgence d'abord, puis l'ordre d'arrivée ; « Appeler le suivant » ouvre son dossier. */
+function SalleAttente({ file }: { file: EnAttente[] }) {
+  return (
+    <section aria-labelledby="titre-salle" className="rounded-carte bg-white p-5">
+      <div className="flex items-baseline justify-between gap-3">
+        <h2 id="titre-salle" className="text-lg font-bold">
+          Salle d&apos;attente
+        </h2>
+        <span className="text-sm text-gris">
+          {file.length} personne{file.length > 1 ? "s" : ""}
+        </span>
+      </div>
+      {file.length > 0 ? (
+        <>
+          <form action={appelerSuivantAction} className="mt-3">
+            <button className="flex w-full items-center justify-center gap-2 rounded-bouton bg-marque py-2.5 font-bold text-white">
+              <Icone nom="ph-bell" className="size-5" />
+              Appeler le suivant : n° {file[0]!.numero}
+            </button>
+          </form>
+          <ol className="mt-3 flex flex-col gap-2">
+            {file.map((p) => (
+              <li key={p.passageId} className="flex items-center gap-3">
+                <span className="grid size-9 shrink-0 place-items-center rounded-xl bg-lavande-2 font-bold text-marque tabular-nums">{p.numero}</span>
+                <span className="min-w-0 flex-1">
+                  <b className="block truncate text-sm">
+                    {p.prenom} {p.nom}
+                  </b>
+                  <small className="text-xs text-gris">arrivée à {heureMinute(p.arriveLe)}</small>
+                </span>
+                {p.urgent && <span className="rounded-lg bg-urgence px-2 py-0.5 text-xs font-bold text-white">Urgence</span>}
+              </li>
+            ))}
+          </ol>
+        </>
+      ) : (
+        <p className="mt-2 text-sm text-gris">Personne n&apos;attend pour le moment.</p>
+      )}
+    </section>
   );
 }
 

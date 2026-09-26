@@ -1,8 +1,9 @@
-import { and, eq, inArray, isNull, sql } from "drizzle-orm";
+import { and, eq, gte, inArray, isNotNull, isNull, sql } from "drizzle-orm";
 import { aujourdhuiAuBenin, type DateISO } from "@/domain/dates";
 import { fileDAttente, placeDe, type Place } from "@/domain/salle-attente";
+import { debutDuJourAuBenin } from "@/domain/temps";
 import type { Db } from "./db/client";
-import { alertes, passages, patients } from "./db/schema";
+import { alertes, passages, patients, rendezVous } from "./db/schema";
 import { lienAvecPatient } from "./droits";
 import { echec, reussite, type Resultat } from "./resultat";
 import type { Soignant } from "./soignant/consultation";
@@ -115,4 +116,20 @@ export async function placesDuJour(db: Db, patientIds: string[], jour: DateISO):
     if (place) resultat.set(m.patientId, place);
   }
   return resultat;
+}
+
+/** Qui peut dire « Je suis arrivé » aujourd'hui : une place réservée ce jour, ou une alerte du jour (elle passera devant). */
+export async function peuventArriver(db: Db, patientIds: string[], jour: DateISO): Promise<Set<string>> {
+  if (patientIds.length === 0) return new Set();
+  const [rdvs, signalees] = await Promise.all([
+    db
+      .select({ patientId: rendezVous.patientId })
+      .from(rendezVous)
+      .where(and(inArray(rendezVous.patientId, patientIds), eq(rendezVous.datePrevue, jour), isNotNull(rendezVous.creneauId), isNull(rendezVous.annuleLe))),
+    db
+      .select({ patientId: alertes.patientId })
+      .from(alertes)
+      .where(and(inArray(alertes.patientId, patientIds), gte(alertes.creeeLe, debutDuJourAuBenin(jour)), isNull(alertes.annuleeLe))),
+  ]);
+  return new Set([...rdvs, ...signalees].map((x) => x.patientId));
 }
