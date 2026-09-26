@@ -1,5 +1,5 @@
 import { randomUUID } from "node:crypto";
-import { and, eq, sql } from "drizzle-orm";
+import { and, desc, eq, gte, inArray, sql } from "drizzle-orm";
 import { estUuid } from "@/domain/identifiants";
 import type { LigneTraitement } from "@/domain/traitements";
 import type { Db } from "../db/client";
@@ -79,5 +79,36 @@ export async function delivrer(
       donnees: { ordonnanceId: o.id },
     });
     return reussite({ delivreeLe: maintenant });
+  });
+}
+
+export interface DelivranceFaite {
+  id: string;
+  le: Date;
+  code: string;
+  medicaments: string[];
+  /** Initiales seulement : l'historique n'a pas besoin du nom (spec §12). */
+  patient: string;
+  par: string;
+}
+
+const initiales = (prenom: string, nom: string) => `${prenom.charAt(0).toLocaleUpperCase("fr")}. ${nom.charAt(0).toLocaleUpperCase("fr")}.`;
+
+/** Les délivrances faites par les comptes de cette pharmacie, la plus récente d'abord. */
+export async function delivrancesDe(db: Db, pharmacieId: string, depuis: Date): Promise<DelivranceFaite[]> {
+  const lignes = await db
+    .select({ id: evenements.id, le: evenements.survenuLe, donnees: evenements.donnees, prenom: patients.prenom, nom: patients.nom, par: comptes.nomAffiche })
+    .from(evenements)
+    .innerJoin(comptes, eq(evenements.auteurId, comptes.id))
+    .innerJoin(patients, eq(evenements.patientId, patients.id))
+    .where(and(eq(evenements.type, "delivrance"), eq(comptes.etablissementId, pharmacieId), gte(evenements.survenuLe, depuis)))
+    .orderBy(desc(evenements.survenuLe));
+  const ids = lignes.map((l) => String(l.donnees.ordonnanceId)).filter(estUuid);
+  const lesOrdonnances = ids.length
+    ? await db.select({ id: ordonnances.id, code: ordonnances.codeRetrait, lignes: ordonnances.lignes }).from(ordonnances).where(inArray(ordonnances.id, ids))
+    : [];
+  return lignes.map((l) => {
+    const o = lesOrdonnances.find((x) => x.id === l.donnees.ordonnanceId);
+    return { id: l.id, le: l.le, code: o?.code ?? "", medicaments: o?.lignes.map((x) => x.medicament) ?? [], patient: initiales(l.prenom, l.nom), par: l.par };
   });
 }

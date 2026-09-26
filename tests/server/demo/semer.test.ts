@@ -54,7 +54,8 @@ describe("semerDemo", () => {
 
   it("prépare l'espace patient : traitements délivrés, places prises et réservations", async () => {
     await semerDemo(db, { aujourdhui });
-    expect(await db.select().from(evenements).where(eq(evenements.type, "delivrance"))).toHaveLength(2);
+    // Les traitements de Codjo et Rachida, puis un mois d'historique de la pharmacie.
+    expect(await db.select().from(evenements).where(eq(evenements.type, "delivrance"))).toHaveLength(11);
 
     const aVenir = await db.select().from(creneaux).where(gt(creneaux.date, aujourdhui)).orderBy(asc(creneaux.date), asc(creneaux.moment));
     const reserves = async (id: string) =>

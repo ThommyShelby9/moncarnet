@@ -5,7 +5,6 @@ import { exigerRole } from "@/server/auth/cookies";
 import { db } from "@/server/db/client";
 import { ordonnanceParCode, type OrdonnancePourPharmacie } from "@/server/pharmacie/delivrance";
 import { BoutonEcouter } from "@/ui/BoutonEcouter";
-import { EnTete } from "@/ui/EnTete";
 import { Icone } from "@/ui/Icone";
 import { Posologie } from "@/ui/Posologie";
 import { RetourAction } from "@/ui/RetourAction";
@@ -13,14 +12,13 @@ import { Tampon } from "@/ui/Tampon";
 import { delivrerAction } from "./actions";
 
 export default async function Pharmacie({ searchParams }: PageProps<"/pharmacie">) {
-  const compte = await exigerRole("pharmacie");
+  await exigerRole("pharmacie");
   const params = await searchParams;
   const saisie = typeof params.code === "string" ? params.code : "";
   const code = saisie ? normaliserCode(saisie) : null;
   const ordonnance = code ? await ordonnanceParCode(db(), code) : null;
   return (
-    <main className="mx-auto flex max-w-3xl flex-col gap-6 px-4 py-6">
-      <EnTete nomAffiche={compte.nomAffiche} />
+    <div className="flex max-w-3xl flex-col gap-6">
       <h1 className="text-3xl font-bold">Retrouver une ordonnance</h1>
       <form action="/pharmacie" role="search" className="flex flex-wrap items-end gap-3">
         <label className="flex flex-1 flex-col gap-2 font-bold">
@@ -53,7 +51,7 @@ export default async function Pharmacie({ searchParams }: PageProps<"/pharmacie"
       )}
       {ordonnance && params.note === "delivree" && <RetourAction message="Délivrance confirmée : les prises apparaissent dans le carnet du patient." />}
       {ordonnance && <FicheOrdonnance ordonnance={ordonnance} />}
-    </main>
+    </div>
   );
 }
 

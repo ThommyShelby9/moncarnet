@@ -371,3 +371,17 @@ export const consignes = pgTable("consignes", {
   texte: text("texte").notNull(),
   creeLe: creeLe(),
 });
+
+/** Médicament en rupture dans une pharmacie : les soignants le voient avant de prescrire. */
+export const ruptures = pgTable("ruptures", {
+  id: uuid("id").primaryKey().defaultRandom(),
+  pharmacieId: uuid("pharmacie_id")
+    .notNull()
+    .references(() => etablissements.id),
+  medicament: text("medicament").notNull(),
+  auteurId: uuid("auteur_id")
+    .notNull()
+    .references(() => comptes.id),
+  signaleeLe: horodatage("signalee_le").defaultNow().notNull(),
+  finieLe: horodatage("finie_le"),
+});

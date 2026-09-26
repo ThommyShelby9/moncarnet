@@ -47,7 +47,7 @@ const VILLAGES_SEHOUN = ["Sèhoun", "Kinta", "Adingnigon"] as const;
 const ALPHABET_CODE = "ABCDEFGHJKLMNPQRSTUVWXYZ23456789";
 
 const TABLES = [
-  "consignes", "rappels", "passages", "indicateurs_zones", "fichiers", "alertes", "liste_attente",
+  "ruptures", "consignes", "rappels", "passages", "indicateurs_zones", "fichiers", "alertes", "liste_attente",
   "contenus_traductions", "contenus", "ordonnances", "evenements", "rendez_vous", "creneaux", "modeles_plages",
   "inscriptions", "responsables", "consentements", "contacts", "patients", "foyers", "sessions", "comptes",
   "etablissements", "communes",
@@ -379,6 +379,49 @@ export async function semerDemo(db: Db, { aujourdhui }: { aujourdhui: DateISO })
     codeRetrait: "M4R2TN",
     lignes: [{ medicament: "Paracétamol 500 mg", matin: 1, midi: 1, soir: 1, dureeJours: 5, indication: "la fièvre", conseil: "après le repas" }],
   });
+
+  // --- Un mois de délivrances à la pharmacie, pour son historique (graine à part) ---
+  const hPharmacie = hasard(20261002);
+  const TRAITEMENT_DU_PROGRAMME: Partial<Record<CodeProgramme, t.LigneOrdonnance>> = {
+    grossesse: { medicament: "Fer + acide folique", matin: 1, midi: 0, soir: 0, dureeJours: 30, indication: "la grossesse", conseil: "avec un verre d'eau" },
+    hypertension: { medicament: "Amlodipine 5 mg", matin: 0, midi: 0, soir: 1, dureeJours: 30, indication: "la tension", conseil: "avec un verre d'eau" },
+    diabete: { medicament: "Metformine 500 mg", matin: 1, midi: 0, soir: 1, dureeJours: 30, indication: "le diabète", conseil: "pendant le repas" },
+    vaccination: { medicament: "Zinc 20 mg", matin: 1, midi: 0, soir: 0, dureeJours: 10, indication: "la diarrhée", conseil: "dans un peu d'eau" },
+  };
+  const courants: t.LigneOrdonnance[] = [
+    { medicament: "Paracétamol 500 mg", matin: 1, midi: 1, soir: 1, dureeJours: 3, indication: "la fièvre", conseil: "après le repas" },
+    { medicament: "Amoxicilline 500 mg", matin: 1, midi: 0, soir: 1, dureeJours: 7, indication: "l'infection", conseil: "jusqu'au bout du traitement" },
+  ];
+  for (let i = 0; i < 9; i++) {
+    const personne = hPharmacie.parmi(patientsPopulation.filter((p) => p.age >= 1 || p.programme === "vaccination"));
+    const ligne = (personne.programme && TRAITEMENT_DU_PROGRAMME[personne.programme]) || hPharmacie.parmi(courants);
+    const emiseLe = new Date(depuisDateISO(ajouterJours(aujourdhui, -(2 + i * 3))).getTime() + (8 + hPharmacie.entier(0, 3)) * 3_600_000);
+    const [ordonnance] = await db
+      .insert(t.ordonnances)
+      .values({ patientId: personne.id, prescripteurId: i % 3 === 0 ? adjoa.id : firmin.id, lignes: [ligne], codeRetrait: codeUnique(), emiseLe })
+      .returning();
+    await db.insert(t.evenements).values({
+      id: randomUUID(),
+      patientId: personne.id,
+      type: "delivrance",
+      auteurId: pharmacien.id,
+      survenuLe: new Date(emiseLe.getTime() + hPharmacie.entier(1, 6) * 3_600_000),
+      donnees: { ordonnanceId: ordonnance!.id },
+    });
+    nbEvenements++;
+  }
+
+  // --- Ruptures de stock : le fer de la grossesse manque depuis deux jours ; l'amoxicilline est revenue ---
+  await db.insert(t.ruptures).values([
+    { pharmacieId: pharmacie!.id, medicament: "Fer + acide folique", auteurId: pharmacien.id, signaleeLe: new Date(depuisDateISO(ajouterJours(aujourdhui, -2)).getTime() + 9 * 3_600_000) },
+    {
+      pharmacieId: pharmacie!.id,
+      medicament: "Amoxicilline 250 mg",
+      auteurId: pharmacien.id,
+      signaleeLe: new Date(depuisDateISO(ajouterJours(aujourdhui, -12)).getTime() + 9 * 3_600_000),
+      finieLe: new Date(depuisDateISO(ajouterJours(aujourdhui, -5)).getTime() + 15 * 3_600_000),
+    },
+  ]);
 
   // --- Plages de rendez-vous et places des 3 prochaines semaines ---
   const modeles: { motif: MotifRdv; jours: number[]; moment: "matin" | "apres_midi"; capacite: number }[] = [
