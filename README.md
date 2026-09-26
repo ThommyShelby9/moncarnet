@@ -83,7 +83,7 @@ Ouvrez https://moncarnet.kheios.com/demo : un clic entre dans un compte.
 
 ## Accessibilité
 
-- Audit automatique **axe-core (WCAG 2.1 A et AA)** sur 19 écrans (présentation, démo, connexion, patient, relais, soignant, pharmacie, pilotage) : **aucune violation**.
+- Audit automatique **axe-core (WCAG 2.1 A et AA)** en production sur 27 écrans (présentation, démo, faux téléphone, connexion, patient, relais, soignant, pharmacie, pilotage, administration) : **aucune violation**.
 - Tout s'écoute ; pictogramme et mot ; gros boutons ; lecteur d'écran ; contrastes vérifiés ; tout se fait au clavier.
 
 ## Démarrer en local
