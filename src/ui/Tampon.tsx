@@ -22,8 +22,14 @@ export function Tampon({ rang = 0, libelle = "Fait", className = "size-9" }: { r
       viewBox="0 0 100 100"
       role="img"
       aria-label={libelle}
-      className={`text-marque ${className}`}
-      style={{ transform: `rotate(${INCLINAISONS[rang % INCLINAISONS.length]}deg)` }}
+      className={`animate-tampon text-marque ${className}`}
+      style={
+        {
+          "--inclinaison": `${INCLINAISONS[rang % INCLINAISONS.length]}deg`,
+          transform: "rotate(var(--inclinaison))",
+          animationDelay: `${200 + (rang % 8) * 90}ms`,
+        } as React.CSSProperties
+      }
     >
       <g filter="url(#encre)">
         <circle cx="50" cy="50" r="45" fill="none" stroke="currentColor" strokeWidth="5" />

@@ -45,7 +45,7 @@ export default async function PilotageLayout({ children }: { children: React.Rea
           <BoutonDeconnexion compact className="grid size-9 place-items-center rounded-xl text-marque" />
         </div>
       </aside>
-      <main className="flex min-w-0 flex-col gap-6 p-4 md:p-7">{children}</main>
+      <main className="cascade flex min-w-0 flex-col gap-6 p-4 md:p-7">{children}</main>
     </div>
   );
 }

@@ -12,7 +12,7 @@ export function CarteAlerte({ alerte, maintenant }: { alerte: AlerteOuverte; mai
   const enRetard = statutAlerte({ echeance: alerte.echeance, priseEnChargeLe: null, annuleeLe: null }, maintenant) === "en_retard";
   return (
     <article
-      className={`flex flex-wrap items-center gap-4 rounded-carte px-4 py-3.5 shadow-[inset_4px_0_0_var(--color-urgence)] ${enRetard ? "bg-urgence-pale" : "bg-white"}`}
+      className={`flex animate-arrivee flex-wrap items-center gap-4 rounded-carte px-4 py-3.5 shadow-[inset_4px_0_0_var(--color-urgence)] ${enRetard ? "bg-urgence-pale" : "bg-white"}`}
     >
       <CompteARebours echeance={alerte.echeance.toISOString()} maintenant={maintenant.toISOString()} />
       <div className="min-w-[220px] flex-1">

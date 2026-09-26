@@ -25,11 +25,11 @@ export function CompteARebours({ echeance, maintenant: maintenantServeur }: { ec
     <div
       role="timer"
       aria-label={enRetard ? `Délai dépassé de ${-restantes} minutes` : `Reste ${restantes} minutes`}
-      className="relative size-[58px] shrink-0 text-urgence"
+      className={`relative size-[58px] shrink-0 text-urgence ${restantes <= 5 ? "animate-battement" : ""}`}
     >
       <svg viewBox="0 0 58 58" className="size-[58px] -rotate-90" aria-hidden="true">
         <circle cx="29" cy="29" r={RAYON} fill="none" stroke="currentColor" strokeOpacity="0.2" strokeWidth="5" />
-        <circle cx="29" cy="29" r={RAYON} fill="none" stroke="currentColor" strokeWidth="5" strokeLinecap="round" strokeDasharray={`${part * TOUR} ${TOUR}`} />
+        <circle cx="29" cy="29" r={RAYON} fill="none" stroke="currentColor" strokeWidth="5" strokeLinecap="round" strokeDasharray={`${part * TOUR} ${TOUR}`} className="transition-[stroke-dasharray] duration-700" />
       </svg>
       <span aria-hidden="true" className="absolute inset-0 flex flex-col items-center justify-center leading-none font-bold">
         {enRetard ? <small className="text-[0.55rem]">retard</small> : null}

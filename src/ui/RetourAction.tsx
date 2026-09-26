@@ -29,7 +29,7 @@ export function RetourAction({ message, children }: { message: string; children?
     bip();
   }, [message]);
   return (
-    <div role="status" className="flex items-center gap-3 rounded-carte bg-nuit px-4 py-3 text-white">
+    <div role="status" className="flex animate-arrivee items-center gap-3 rounded-carte bg-nuit px-4 py-3 text-white">
       <Icone nom="ph-check-circle" className="size-6 shrink-0 text-lavande-3" />
       <p className="flex-1 font-bold">{message}</p>
       {children}

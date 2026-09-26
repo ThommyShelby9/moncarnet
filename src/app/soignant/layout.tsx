@@ -43,7 +43,7 @@ export default async function EspaceSoignantLayout({ children }: { children: Rea
           <BoutonDeconnexion compact className="grid size-9 place-items-center rounded-xl text-marque" />
         </div>
       </aside>
-      <main className="flex min-w-0 flex-col gap-5 p-4 md:p-7">{children}</main>
+      <main className="cascade flex min-w-0 flex-col gap-5 p-4 md:p-7">{children}</main>
     </div>
   );
 }

@@ -22,7 +22,7 @@ import { TuileChoix } from "@/ui/TuileChoix";
 import { listeAttenteAction, reserverAction } from "../actions";
 import { contextePatient, texteDe } from "../contexte";
 
-const PAGE = "flex flex-1 flex-col gap-5 px-4 pt-5 pb-6";
+const PAGE = "cascade flex flex-1 flex-col gap-5 px-4 pt-5 pb-6";
 const BOUTON = "flex h-14 w-full items-center justify-center gap-2 rounded-bouton bg-marque text-lg font-bold text-white disabled:opacity-60";
 const HORS_LIGNE = "Pas de réseau pour le moment. Pour réserver, il faut le réseau. Vous pouvez aussi demander à votre relais.";
 const ERREURS: Record<string, string> = {

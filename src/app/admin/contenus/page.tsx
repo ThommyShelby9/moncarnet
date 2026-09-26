@@ -34,7 +34,7 @@ export default async function Contenus({ searchParams }: PageProps<"/admin/conte
   const categories = Object.keys(CATEGORIES_CONTENU) as CategorieContenu[];
 
   return (
-    <main className="mx-auto flex max-w-4xl flex-col gap-6 px-4 py-6">
+    <main className="cascade mx-auto flex max-w-4xl flex-col gap-6 px-4 py-6">
       <EnTete nomAffiche={compte.nomAffiche} sousTitre="Administration" />
       <nav aria-label="Administration" className="flex gap-2">
         <Link href="/admin" className="rounded-bouton bg-white px-4 py-2 text-sm font-bold text-marque">

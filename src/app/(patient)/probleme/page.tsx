@@ -20,7 +20,7 @@ export default async function Probleme({ searchParams }: PageProps<"/probleme">)
   const signes = signesProposes({ enceinte: carnet.programmes.includes("grossesse"), age: carnet.age });
 
   return (
-    <main className="flex flex-1 flex-col gap-4 px-4 pt-5 pb-6">
+    <main className="cascade flex flex-1 flex-col gap-4 px-4 pt-5 pb-6">
       <div className="flex items-start gap-3">
         <AvatarsFamille personnes={carnets} actif={carnet.patientId} lien={(id) => `/probleme?pour=${id}`} />
         <Link href="/" aria-label="Fermer" className="ml-auto grid size-10 shrink-0 place-items-center rounded-full bg-white">

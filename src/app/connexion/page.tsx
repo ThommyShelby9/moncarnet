@@ -18,7 +18,7 @@ export default async function PageConnexion({ searchParams }: { searchParams: Pr
     `rounded-xl px-3 py-3 text-center font-bold ${actif ? "bg-marque text-white" : "text-marque"}`;
 
   return (
-    <main className="mx-auto flex min-h-dvh max-w-md flex-col gap-6 px-4 py-8">
+    <main className="cascade mx-auto flex min-h-dvh max-w-md flex-col gap-6 px-4 py-8">
       <header className="flex items-center gap-3">
         <Logo className="size-11" />
         <p className="text-2xl font-bold">{env.NEXT_PUBLIC_APP_NAME}</p>

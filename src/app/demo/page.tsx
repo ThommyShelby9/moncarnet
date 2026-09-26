@@ -28,7 +28,7 @@ export default async function PageDemo({ searchParams }: { searchParams: Promise
   const { erreur } = await searchParams;
   const groupes = groupesDemo(COMPTES_DEMO);
   return (
-    <main className="mx-auto flex max-w-4xl flex-col gap-8 px-4 py-8">
+    <main className="cascade mx-auto flex max-w-4xl flex-col gap-8 px-4 py-8">
       <header className="flex items-center gap-3">
         <Logo className="size-11" />
         <p className="text-2xl font-bold">{env.NEXT_PUBLIC_APP_NAME}</p>

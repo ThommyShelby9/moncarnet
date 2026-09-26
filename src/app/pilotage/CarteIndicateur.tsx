@@ -32,7 +32,7 @@ export function CarteIndicateur({ code, comptage, precedent }: { code: CodeIndic
       )}
       {d.unite === "pourcent" && lecture.valeur !== null && (
         <div className="relative h-2 rounded-full bg-lavande-2">
-          <div className={`h-2 rounded-full ${style?.barre ?? "bg-marque"}`} style={{ width: `${Math.min(100, lecture.valeur)}%` }} />
+          <div className={`h-2 origin-left animate-remplir rounded-full ${style?.barre ?? "bg-marque"}`} style={{ width: `${Math.min(100, lecture.valeur)}%`, animationDelay: "250ms" }} />
           <span className="absolute -top-1 h-4 w-0.5 bg-nuit" style={{ left: `${d.cible}%` }} title={`Objectif ${d.cible} %`} />
         </div>
       )}

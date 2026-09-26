@@ -22,10 +22,10 @@ export const metadata: Metadata = {
   },
 };
 
-function Telephone({ src, alt, legende, prioritaire = false }: { src: string; alt: string; legende?: string; prioritaire?: boolean }) {
+function Telephone({ src, alt, legende, prioritaire = false, rang = 0 }: { src: string; alt: string; legende?: string; prioritaire?: boolean; rang?: number }) {
   return (
-    <figure className="flex shrink-0 snap-center flex-col items-center gap-3">
-      <div className="rounded-[2.6rem] bg-nuit p-2 shadow-[0_30px_60px_-24px_rgb(22_21_74_/_0.55)]">
+    <figure className="revele flex shrink-0 snap-center flex-col items-center gap-3">
+      <div className="animate-flotte rounded-[2.6rem] bg-nuit p-2 shadow-[0_30px_60px_-24px_rgb(22_21_74_/_0.55)]" style={{ animationDelay: `${-rang * 1.3}s` }}>
         <Image
           src={`/decouvrir/${src}.webp`}
           alt={alt}
@@ -44,7 +44,7 @@ function Telephone({ src, alt, legende, prioritaire = false }: { src: string; al
 
 function Navigateur({ src, alt, legende, sombre = false }: { src: string; alt: string; legende?: string; sombre?: boolean }) {
   return (
-    <figure className="flex min-w-0 flex-col gap-3">
+    <figure className="revele flex min-w-0 flex-col gap-3">
       <div className="overflow-hidden rounded-2xl bg-white shadow-[0_30px_60px_-30px_rgb(22_21_74_/_0.45)] ring-1 ring-lavande-3">
         <div className="flex items-center gap-1.5 border-b border-lavande-2 px-3 py-2">
           <span className="size-2.5 rounded-full bg-lavande-3" />
@@ -61,7 +61,7 @@ function Navigateur({ src, alt, legende, sombre = false }: { src: string; alt: s
 
 function Etape({ numero, titre, children }: { numero: number; titre: string; children: React.ReactNode }) {
   return (
-    <li className="flex gap-3">
+    <li className="revele flex gap-3">
       <span className="grid size-8 shrink-0 place-items-center rounded-full bg-soleil font-bold text-nuit">{numero}</span>
       <div>
         <b className="block text-lg leading-snug">{titre}</b>
@@ -165,10 +165,10 @@ export default function PageDecouvrir() {
             </div>
             <div className="flex justify-center gap-5">
               <div className="mt-10">
-                <Telephone src="awa-grossesse" alt="Écran « Ma grossesse » d'Awa : semaine 37, terme prévu le 15 octobre, le bébé comparé à une igname" prioritaire />
+                <Telephone rang={0} src="awa-grossesse" alt="Écran « Ma grossesse » d'Awa : semaine 37, terme prévu le 15 octobre, le bébé comparé à une igname" prioritaire />
               </div>
               <div className="hidden sm:block">
-                <Telephone src="codjo-accueil" alt="Accueil de Codjo : la carte « Ce soir, 1 comprimé pour la tension », avec les boutons C'est fait et Plus tard" prioritaire />
+                <Telephone rang={0} src="codjo-accueil" alt="Accueil de Codjo : la carte « Ce soir, 1 comprimé pour la tension », avec les boutons C'est fait et Plus tard" prioritaire />
               </div>
             </div>
           </div>
@@ -181,7 +181,7 @@ export default function PageDecouvrir() {
           <p className="mt-2 max-w-2xl text-lg text-gris">Au Bénin, les rendez-vous se perdent entre la première visite et la dernière ; l&apos;écrit et le réseau ne suffisent pas.</p>
           <ul className="mt-8 grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
             {CONSTAT.map((c) => (
-              <li key={c.chiffre} className="flex flex-col gap-2 rounded-carte bg-white p-5">
+              <li key={c.chiffre} className="revele flex flex-col gap-2 rounded-carte bg-white p-5">
                 <b className="text-4xl text-marque">{c.chiffre}</b>
                 <p>{c.texte}</p>
                 <p className="mt-auto text-xs text-gris">Source : {c.source}</p>
@@ -196,7 +196,7 @@ export default function PageDecouvrir() {
 
         <section id="parcours" aria-labelledby="parcours-awa" className="scroll-mt-16 bg-white">
           <div className="mx-auto grid max-w-6xl gap-10 px-4 py-16">
-            <div className="max-w-3xl">
+            <div className="revele max-w-3xl">
               <p className="font-bold text-marque">Parcours 1</p>
               <h2 id="parcours-awa" className="text-3xl font-bold sm:text-4xl">
                 Awa, de la grossesse à la naissance
@@ -218,10 +218,10 @@ export default function PageDecouvrir() {
               </Etape>
             </ol>
             <Rangee nom="Les écrans d'Awa">
-              <Telephone src="awa-plan" alt="Préparer la naissance : six choses à prévoir, dont trois déjà cochées, avec un pictogramme chacune" legende="Préparer la naissance : 3 sur 6" />
-              <Telephone src="awa-probleme" alt="Écran « J'ai un problème » : les signes de danger de la grossesse en pictogrammes, « Le travail a commencé » en premier" legende="Les signes de danger en images" />
-              <Telephone src="awa-felicitations" alt="Accueil d'Awa après la naissance : « Bienvenue à Sènami ! » et la visite du 3ᵉ jour à prévoir" legende="Bienvenue à Sènami" />
-              <Telephone src="bebe-carnet" alt="Carnet du bébé : les vaccins de la naissance tamponnés VU, puis les vaccins des 6 semaines à venir" legende="Le carnet du bébé et ses vaccins" />
+              <Telephone rang={0} src="awa-plan" alt="Préparer la naissance : six choses à prévoir, dont trois déjà cochées, avec un pictogramme chacune" legende="Préparer la naissance : 3 sur 6" />
+              <Telephone rang={1} src="awa-probleme" alt="Écran « J'ai un problème » : les signes de danger de la grossesse en pictogrammes, « Le travail a commencé » en premier" legende="Les signes de danger en images" />
+              <Telephone rang={2} src="awa-felicitations" alt="Accueil d'Awa après la naissance : « Bienvenue à Sènami ! » et la visite du 3ᵉ jour à prévoir" legende="Bienvenue à Sènami" />
+              <Telephone rang={3} src="bebe-carnet" alt="Carnet du bébé : les vaccins de la naissance tamponnés VU, puis les vaccins des 6 semaines à venir" legende="Le carnet du bébé et ses vaccins" />
             </Rangee>
             <Navigateur
               src="adjoa-naissance"
@@ -232,7 +232,7 @@ export default function PageDecouvrir() {
         </section>
 
         <section aria-labelledby="parcours-codjo" className="mx-auto grid max-w-6xl gap-10 px-4 py-16">
-          <div className="max-w-3xl">
+          <div className="revele max-w-3xl">
             <p className="font-bold text-marque">Parcours 2</p>
             <h2 id="parcours-codjo" className="text-3xl font-bold sm:text-4xl">
               Codjo, un patient au quotidien
@@ -257,10 +257,10 @@ export default function PageDecouvrir() {
             </Etape>
           </ol>
           <Rangee nom="Les écrans de Codjo">
-            <Telephone src="codjo-accueil" alt="Accueil de Codjo : « Ce soir, 1 comprimé pour la tension », à écouter, avec C'est fait et Plus tard" legende="Une chose à la fois, à écouter" />
-            <Telephone src="codjo-rendez-vous" alt="Prendre rendez-vous, étape 3 sur 4 : les séances de vaccination avec les soleils qui comptent les jours et les places restantes" legende="Un rendez-vous en 4 étapes pour Sèna" />
-            <Telephone src="codjo-carnet" alt="Carnet de Codjo : sa courbe de tension avec la limite 140/90 en pointillés rouges, et son comprimé du soir" legende="Sa courbe de tension" />
-            <Telephone src="codjo-salle" alt="Salle d'attente sur le téléphone de Codjo : Mariam a le numéro 6, trois personnes avant elle, le téléphone prévient quand c'est son tour" legende="Le numéro de passage de Mariam" />
+            <Telephone rang={0} src="codjo-accueil" alt="Accueil de Codjo : « Ce soir, 1 comprimé pour la tension », à écouter, avec C'est fait et Plus tard" legende="Une chose à la fois, à écouter" />
+            <Telephone rang={1} src="codjo-rendez-vous" alt="Prendre rendez-vous, étape 3 sur 4 : les séances de vaccination avec les soleils qui comptent les jours et les places restantes" legende="Un rendez-vous en 4 étapes pour Sèna" />
+            <Telephone rang={2} src="codjo-carnet" alt="Carnet de Codjo : sa courbe de tension avec la limite 140/90 en pointillés rouges, et son comprimé du soir" legende="Sa courbe de tension" />
+            <Telephone rang={3} src="codjo-salle" alt="Salle d'attente sur le téléphone de Codjo : Mariam a le numéro 6, trois personnes avant elle, le téléphone prévient quand c'est son tour" legende="Le numéro de passage de Mariam" />
           </Rangee>
           <div className="grid items-center gap-10 lg:grid-cols-[1fr_1.4fr]">
             <ol start={5} className="grid gap-5">
@@ -278,7 +278,7 @@ export default function PageDecouvrir() {
 
         <section id="accompagnent" aria-labelledby="accompagnent-titre" className="scroll-mt-16 bg-white">
           <div className="mx-auto grid max-w-6xl gap-10 px-4 py-16">
-            <div className="max-w-3xl">
+            <div className="revele max-w-3xl">
               <h2 id="accompagnent-titre" className="text-3xl font-bold sm:text-4xl">
                 Ceux qui accompagnent
               </h2>
@@ -291,8 +291,8 @@ export default function PageDecouvrir() {
             />
             <div className="grid items-center gap-10 lg:grid-cols-[auto_1fr]">
               <Rangee nom="Les écrans du relais" grille={false}>
-                <Telephone src="relais-tournee" alt="Tournée du relais Koffi : les foyers à voir d'abord, avec la raison de passer chez chacun" legende="La tournée par foyer" />
-                <Telephone src="relais-visite" alt="Visite chez Afiavi sans réseau : À orienter vers le centre, note vocale de 3 secondes, tension 15 sur 9" legende="Une visite racontée au micro, sans réseau" />
+                <Telephone rang={0} src="relais-tournee" alt="Tournée du relais Koffi : les foyers à voir d'abord, avec la raison de passer chez chacun" legende="La tournée par foyer" />
+                <Telephone rang={1} src="relais-visite" alt="Visite chez Afiavi sans réseau : À orienter vers le centre, note vocale de 3 secondes, tension 15 sur 9" legende="Une visite racontée au micro, sans réseau" />
               </Rangee>
               <ul className="flex flex-col gap-4 text-lg">
                 <li className="flex gap-3">
@@ -312,13 +312,13 @@ export default function PageDecouvrir() {
               </ul>
             </div>
             <div className="grid gap-6">
-              <div className="max-w-3xl">
+              <div className="revele max-w-3xl">
                 <h3 className="text-2xl font-bold">Un vrai poste de travail</h3>
                 <p className="mt-1 text-gris">Au centre et à la pharmacie, chaque menu répond à une question de tous les jours.</p>
               </div>
               <ul className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
                 {POSTE.map((p) => (
-                  <li key={p.titre} className="flex flex-col gap-2 rounded-carte bg-lavande p-4">
+                  <li key={p.titre} className="revele flex flex-col gap-2 rounded-carte bg-lavande p-4">
                     <Icone nom={p.icone} className="size-7 text-marque" />
                     <b>{p.titre}</b>
                     <p className="text-sm text-gris">{p.texte}</p>
@@ -344,7 +344,7 @@ export default function PageDecouvrir() {
         <section id="etat" aria-labelledby="etat-titre" className="relative scroll-mt-16 overflow-hidden bg-nuit text-white">
           <Ondes className="-top-40 -left-40 size-[36rem] text-white opacity-5" />
           <div className="relative mx-auto grid max-w-6xl gap-10 px-4 py-16">
-            <div className="max-w-3xl">
+            <div className="revele max-w-3xl">
               <h2 id="etat-titre" className="text-3xl font-bold sm:text-4xl">
                 Pour l&apos;État : piloter sans aucun nom
               </h2>
@@ -359,7 +359,7 @@ export default function PageDecouvrir() {
                 { icone: "ph-map-trifold" as NomIcone, texte: "Pour le ministère, une fiche par zone sanitaire, et les alertes prises à temps zone par zone." },
                 { icone: "ph-download-simple" as NomIcone, texte: "Exports au format DHIS2 (mois, 6 mois, centres), pour rejoindre le système national d'information sanitaire." },
               ].map((p) => (
-                <li key={p.texte} className="flex flex-col gap-2 rounded-carte bg-white/5 p-4">
+                <li key={p.texte} className="revele flex flex-col gap-2 rounded-carte bg-white/5 p-4">
                   <Icone nom={p.icone} className="size-7 text-soleil" />
                   <p>{p.texte}</p>
                 </li>
@@ -394,7 +394,7 @@ export default function PageDecouvrir() {
           </h2>
           <ul className="mt-8 grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
             {PRINCIPES.map((p) => (
-              <li key={p.titre} className="flex gap-4 rounded-carte bg-white p-5">
+              <li key={p.titre} className="revele flex gap-4 rounded-carte bg-white p-5">
                 <span className="grid size-12 shrink-0 place-items-center rounded-2xl bg-lavande-2 text-marque">
                   <Icone nom={p.icone} className="size-7" />
                 </span>
@@ -414,7 +414,7 @@ export default function PageDecouvrir() {
             </h2>
             <ul className="mt-8 grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
               {CAPOT.map((c) => (
-                <li key={c.texte} className="flex gap-3 rounded-carte bg-lavande p-5">
+                <li key={c.texte} className="revele flex gap-3 rounded-carte bg-lavande p-5">
                   <Icone nom={c.icone} className="size-7 shrink-0 text-marque" />
                   <p>{c.texte}</p>
                 </li>

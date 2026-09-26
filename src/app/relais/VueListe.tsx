@@ -78,7 +78,7 @@ export function VueListe(p: Props) {
         )}
       </header>
 
-      <div className="flex flex-1 flex-col gap-3 px-4 py-4">
+      <div className="cascade flex flex-1 flex-col gap-3 px-4 py-4">
         {p.retour && <RetourAction message={p.retour} />}
         {p.message && (
           <p
@@ -116,7 +116,7 @@ export function VueListe(p: Props) {
                 className="h-2 flex-1 overflow-hidden rounded bg-lavande-3"
               >
                 <span
-                  className="block h-full rounded bg-marque"
+                  className="block h-full origin-left animate-remplir rounded bg-marque"
                   style={{ width: aVoir ? `${(faits / aVoir) * 100}%` : "0%" }}
                 />
               </span>

@@ -73,7 +73,7 @@ function Barre({ part, libelle }: { part: number; libelle: string }) {
         <b className="text-nuit">{part} %</b>
       </div>
       <div className="h-2 rounded-full bg-lavande-2">
-        <div className="h-2 rounded-full bg-marque" style={{ width: `${Math.min(100, part)}%` }} />
+        <div className="h-2 origin-left animate-remplir rounded-full bg-marque" style={{ width: `${Math.min(100, part)}%`, animationDelay: "300ms" }} />
       </div>
     </div>
   );

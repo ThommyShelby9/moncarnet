@@ -28,10 +28,10 @@ export function CourbeIndicateur({ code, points }: { code: CodeIndicateur; point
           </text>
         </g>
       )}
-      <polyline points={trace} fill="none" className="stroke-marque" strokeWidth="3" strokeLinejoin="round" />
+      <polyline points={trace} fill="none" className="animate-tracer stroke-marque" strokeWidth="3" strokeLinejoin="round" pathLength={1} strokeDasharray="1" />
       {lus.map((p, i) =>
         p.valeur === null ? null : (
-          <g key={p.mois}>
+          <g key={p.mois} className="animate-fondu" style={{ animationDelay: `${300 + i * 150}ms` }}>
             <circle cx={x(i)} cy={y(p.valeur)} r="5" className="fill-marque" />
             <text x={x(i)} y={y(p.valeur) - 10} textAnchor="middle" className="fill-nuit text-[11px] font-bold">
               {p.valeur}

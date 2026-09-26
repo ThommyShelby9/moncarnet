@@ -34,8 +34,8 @@ export function CourbeTension({ releves }: { releves: { date: DateISO; sys: numb
             </text>
           </g>
         ))}
-        <polyline points={ligne("dia")} fill="none" className="stroke-lavande-5" strokeWidth="2.5" strokeLinejoin="round" />
-        <polyline points={ligne("sys")} fill="none" className="stroke-marque" strokeWidth="3" strokeLinejoin="round" />
+        <polyline points={ligne("dia")} fill="none" className="animate-tracer stroke-lavande-5" strokeWidth="2.5" strokeLinejoin="round" pathLength={1} strokeDasharray="1" />
+        <polyline points={ligne("sys")} fill="none" className="animate-tracer stroke-marque" strokeWidth="3" strokeLinejoin="round" pathLength={1} strokeDasharray="1" />
         {releves.map((r, i) => (
           <circle key={r.date + i} cx={x(i)} cy={y(r.sys)} r="5" className={trop(r) ? "fill-urgence" : "fill-marque"} />
         ))}

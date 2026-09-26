@@ -23,6 +23,152 @@
   --radius-bouton: 1rem;
   --radius-carte: 1.5rem;
   --radius-grande: 1.875rem;
+
+  /* Mouvement : « douce » pour ce qui arrive, « ressort » pour les moments forts (tampon, confirmation). */
+  --ease-douce: cubic-bezier(0.22, 1, 0.36, 1);
+  --ease-ressort: cubic-bezier(0.34, 1.56, 0.64, 1);
+
+  --animate-apparition: apparition 0.55s var(--ease-douce) backwards;
+  --animate-fondu: fondu 0.6s var(--ease-douce) backwards;
+  --animate-arrivee: arrivee 0.45s var(--ease-ressort) backwards;
+  --animate-tampon: tampon 0.55s var(--ease-ressort) backwards;
+  --animate-remplir: remplir 1s var(--ease-douce) backwards;
+  --animate-tracer: tracer 1.4s var(--ease-douce) backwards;
+  --animate-respire: respire 9s ease-in-out infinite;
+  --animate-flotte: flotte 5s ease-in-out infinite alternate;
+  --animate-pulsation: pulsation 1.4s ease-out infinite;
+  --animate-onde: onde 2.4s ease-out infinite;
+  --animate-battement: battement 1.1s ease-in-out infinite;
+
+  @keyframes apparition {
+    from {
+      opacity: 0;
+      transform: translateY(14px);
+    }
+  }
+  @keyframes fondu {
+    from {
+      opacity: 0;
+    }
+  }
+  @keyframes arrivee {
+    from {
+      opacity: 0;
+      transform: translateY(-12px) scale(0.97);
+    }
+  }
+  /* Le coup de tampon : il tombe de haut, s'écrase un peu, puis se pose (l'inclinaison reste celle du tampon). */
+  @keyframes tampon {
+    0% {
+      opacity: 0;
+      transform: rotate(var(--inclinaison, 0deg)) scale(1.9);
+    }
+    60% {
+      opacity: 1;
+      transform: rotate(var(--inclinaison, 0deg)) scale(0.9);
+    }
+    100% {
+      opacity: 1;
+      transform: rotate(var(--inclinaison, 0deg)) scale(1);
+    }
+  }
+  @keyframes remplir {
+    from {
+      transform: scaleX(0);
+    }
+  }
+  @keyframes tracer {
+    from {
+      stroke-dashoffset: 1;
+    }
+    to {
+      stroke-dashoffset: 0;
+    }
+  }
+  /* Les ondes de la voix, en décor : elles respirent lentement. */
+  @keyframes respire {
+    0%,
+    100% {
+      transform: scale(1) rotate(0deg);
+    }
+    50% {
+      transform: scale(1.08) rotate(8deg);
+    }
+  }
+  @keyframes flotte {
+    from {
+      transform: translateY(0);
+    }
+    to {
+      transform: translateY(-10px);
+    }
+  }
+  @keyframes pulsation {
+    from {
+      box-shadow: 0 0 0 0 rgb(255 194 26 / 0.6);
+    }
+    to {
+      box-shadow: 0 0 0 18px rgb(255 194 26 / 0);
+    }
+  }
+  @keyframes onde {
+    from {
+      transform: scale(0.55);
+      opacity: 0.8;
+    }
+    to {
+      transform: scale(1.7);
+      opacity: 0;
+    }
+  }
+  @keyframes battement {
+    0%,
+    100% {
+      transform: scale(1);
+    }
+    50% {
+      transform: scale(1.08);
+    }
+  }
+}
+
+/* Les blocs d'une page arrivent l'un après l'autre. */
+@utility cascade {
+  & > * {
+    animation: var(--animate-apparition);
+  }
+  & > *:nth-child(2) {
+    animation-delay: 60ms;
+  }
+  & > *:nth-child(3) {
+    animation-delay: 120ms;
+  }
+  & > *:nth-child(4) {
+    animation-delay: 180ms;
+  }
+  & > *:nth-child(5) {
+    animation-delay: 240ms;
+  }
+  & > *:nth-child(6) {
+    animation-delay: 300ms;
+  }
+  & > *:nth-child(n + 7) {
+    animation-delay: 340ms;
+  }
+}
+
+/* Apparition au défilement, sans JavaScript, là où le navigateur sait lier une animation au défilement. */
+@utility revele {
+  @supports (animation-timeline: view()) {
+    animation: apparition linear backwards;
+    animation-timeline: view();
+    animation-range: entry 0% entry 55%;
+  }
+}
+
+/* Décalage d'un élément d'une liste : style="--rang: 3". */
+@utility decale {
+  animation-delay: calc(var(--rang, 0) * 70ms);
 }
 
 html {
@@ -40,11 +186,31 @@ body {
   outline-offset: 2px;
 }
 
+/* Un geste qui répond : le bouton s'enfonce un instant sous le doigt. */
+@layer base {
+  button:not(:disabled),
+  a[class*="rounded-bouton"] {
+    transition:
+      transform 0.15s var(--ease-douce),
+      background-color 0.2s,
+      box-shadow 0.2s,
+      opacity 0.2s;
+  }
+  button:not(:disabled):active,
+  a[class*="rounded-bouton"]:active {
+    transform: scale(0.97);
+  }
+}
+
+/* « Réduire les animations » : tout s'arrête, les boucles et les révélations au défilement comprises. */
 @media (prefers-reduced-motion: reduce) {
   *,
   *::before,
   *::after {
     animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    animation-delay: 0ms !important;
+    animation-timeline: auto !important;
     transition-duration: 0.01ms !important;
   }
 }

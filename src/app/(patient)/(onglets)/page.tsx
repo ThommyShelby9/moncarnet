@@ -175,8 +175,8 @@ function Retour({ note, carte, traitements, retour }: { note?: string; carte?: s
 
 function Felicitations({ naissance }: { naissance: { bebeId: string; prenom: string; sexe: "F" | "M"; le: Date } }) {
   return (
-    <Link href={`/carnet?pour=${naissance.bebeId}`} className="flex items-center gap-3 rounded-carte bg-soleil p-4 text-nuit">
-      <Icone nom="ph-confetti" className="size-9 shrink-0" />
+    <Link href={`/carnet?pour=${naissance.bebeId}`} className="flex animate-arrivee items-center gap-3 rounded-carte bg-soleil p-4 text-nuit">
+      <Icone nom="ph-confetti" className="size-9 shrink-0 animate-battement" />
       <span className="min-w-0 flex-1">
         <b className="block text-lg leading-tight">Bienvenue à {naissance.prenom} !</b>
         <small className="text-sm">

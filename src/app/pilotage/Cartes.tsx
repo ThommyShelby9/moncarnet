@@ -148,7 +148,7 @@ function VueNationale(p: {
       <defs>
         <Hachures id={p.motif} />
       </defs>
-      {visibles.map((g) => {
+      {visibles.map((g, rang) => {
         const lecture = lectureDe(g.membres);
         const nom = g.membres.length > 1 ? `${g.zone} (${g.membres.length} zones sanitaires)` : g.zone;
         const fill = remplissage(lecture, p.motif);
@@ -158,7 +158,8 @@ function VueNationale(p: {
             href={g.membres.length > 1 ? "/pilotage/zones" : p.lien(g.zone)}
             aria-label={decrire(nom, lecture)}
             tabIndex={p.agrandie ? -1 : undefined}
-            className="group outline-none"
+            className="group animate-fondu outline-none"
+            style={{ animationDelay: `${rang * 22}ms` }}
           >
             <title>{decrire(nom, lecture)}</title>
             {g.communes.map((c) => (
@@ -311,11 +312,13 @@ export function CarteZone({
         {voisines.map((c) => (
           <path key={c.nom} d={c.d} fill="#fff" stroke="var(--color-lavande-3)" strokeWidth={1} vectorEffect="non-scaling-stroke" />
         ))}
-        {traces.map((c) => {
+        {traces.map((c, rang) => {
           const lecture = lectureDe(c.nom);
           return (
             <path
               key={c.nom}
+              className="animate-fondu"
+              style={{ animationDelay: `${150 + rang * 120}ms` }}
               d={c.d}
               fill={code ? remplissage(lecture, motif) : "var(--color-lavande-3)"}
               stroke="#fff"

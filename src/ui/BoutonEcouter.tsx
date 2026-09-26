@@ -69,7 +69,7 @@ export function BoutonEcouter({ libelle, sousLibelle, source, texte, langueTexte
         title={disponible ? libelle : "Audio indisponible"}
         className={`grid shrink-0 place-items-center rounded-full text-nuit disabled:opacity-50 ${
           rond ? "size-11 bg-soleil shadow-[0_0_0_6px_rgb(255_194_26_/_0.25)]" : "size-8 bg-soleil-pale"
-        } ${className}`}
+        } ${enLecture ? "animate-pulsation" : ""} ${className}`}
       >
         <Icone nom={enLecture ? "ph-pause" : "ph-speaker-high"} className={rond ? "size-5" : "size-4"} />
       </button>
@@ -85,7 +85,7 @@ export function BoutonEcouter({ libelle, sousLibelle, source, texte, langueTexte
       title={disponible ? undefined : "Audio indisponible"}
       className={`inline-flex items-center gap-3 text-left disabled:opacity-50 ${className}`}
     >
-      <span className="grid size-14 shrink-0 place-items-center rounded-full bg-soleil text-nuit shadow-[0_0_0_7px_rgb(255_194_26_/_0.25)]">
+      <span className={`grid size-14 shrink-0 place-items-center rounded-full bg-soleil text-nuit shadow-[0_0_0_7px_rgb(255_194_26_/_0.25)] ${enLecture ? "animate-pulsation" : ""}`}>
         <Icone nom={enLecture ? "ph-pause" : "ph-play"} className="size-6" />
       </span>
       <span>

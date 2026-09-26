@@ -98,6 +98,7 @@ Ouvrez https://moncarnet.kheios.com/demo : un clic entre dans un compte.
 - Audit automatique **axe-core (WCAG 2.1 A et AA)** en production sur 43 écrans (présentation, démo, faux téléphone, connexion, patient, relais, soignant avec agenda, suivis, relais et alertes, pharmacie avec historique et ruptures, pilotage de la zone et du ministère, administration) : **aucune violation**.
 - Tout s'écoute (dans sa langue quand le message est enregistré) ; pictogramme et mot ; gros boutons ; lecteur d'écran ; contrastes vérifiés ; tout se fait au clavier.
 - Malentendants : tout ce qui s'entend est aussi écrit et dessiné, et les rappels ne les appellent jamais.
+- Mouvement : les pages arrivent en cascade, le tampon « VU » tombe, les ondes de la voix respirent, les courbes se tracent et la carte s'allume zone par zone. Seulement transformation et opacité, sans bibliothèque ; tout s'arrête quand le téléphone demande de réduire les animations.
 
 ## Démarrer en local
 

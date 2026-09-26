@@ -73,7 +73,7 @@ export default async function FauxTelephone({ searchParams }: PageProps<"/demo/t
   const messages = (await messagesDuTelephone(db(), choisi.numero)).reverse();
   const note = NOTES[String(params.note ?? "")];
   return (
-    <main className="mx-auto flex max-w-4xl flex-col gap-6 px-4 py-8">
+    <main className="cascade mx-auto flex max-w-4xl flex-col gap-6 px-4 py-8">
       <header className="flex items-center gap-3">
         <Logo className="size-11" />
         <p className="text-2xl font-bold">{env.NEXT_PUBLIC_APP_NAME}</p>

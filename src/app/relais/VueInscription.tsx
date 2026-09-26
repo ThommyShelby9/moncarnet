@@ -44,7 +44,7 @@ export function VueInscription({ foyers, foyerId, onRetour, onInscrire }: Props)
   }
 
   return (
-    <main className="mx-auto flex min-h-dvh max-w-xl flex-col gap-4 bg-lavande px-4 py-5">
+    <main className="cascade mx-auto flex min-h-dvh max-w-xl flex-col gap-4 bg-lavande px-4 py-5">
       <button type="button" onClick={onRetour} className="flex items-center gap-2 self-start rounded-bouton bg-white px-3 py-2 text-sm font-bold text-marque">
         <Icone nom="ph-arrow-left" className="size-5" />
         Ma tournée

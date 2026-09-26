@@ -102,7 +102,12 @@ export function FormulaireSignalement({ patientId, prenom, signes, centre, conse
     return (
       <>
         <RetourAction message="Le centre a reçu votre alerte" />
-        <section className="flex flex-col gap-2 rounded-grande bg-white p-5">
+        <section className="relative flex flex-col gap-2 overflow-hidden rounded-grande bg-white p-5">
+          <span aria-hidden="true" className="pointer-events-none absolute -top-6 -right-6 size-28">
+            {[0, 800, 1600].map((delai) => (
+              <i key={delai} className="absolute inset-0 animate-onde rounded-full border-4 border-marque/40" style={{ animationDelay: `${delai}ms` }} />
+            ))}
+          </span>
           <h1 className="text-xl font-bold">Alerte reçue à {heureLocale(etat.recueLe)}</h1>
           <p>Le {etat.centre} a reçu l&apos;alerte. Un soignant va s&apos;en occuper.</p>
           <p className="font-bold">{conseil}</p>

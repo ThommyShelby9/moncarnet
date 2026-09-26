@@ -54,7 +54,7 @@ export function CarteSalleAttente({ patientId, prenom, place }: { patientId: str
 
   return (
     <section className={`flex items-center gap-4 rounded-grande p-5 ${bientot ? "bg-soleil text-nuit" : "bg-white"}`}>
-      <div className={`grid size-20 shrink-0 place-items-center rounded-2xl ${bientot ? "bg-white/60" : "bg-lavande-2 text-marque"}`}>
+      <div className={`grid size-20 shrink-0 place-items-center rounded-2xl ${bientot ? "animate-battement bg-white/60" : "bg-lavande-2 text-marque"}`}>
         <span className="text-center">
           <small className="block text-xs font-bold">N°</small>
           <b className="block text-3xl leading-none tabular-nums">{place.numero}</b>
