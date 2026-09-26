@@ -43,6 +43,13 @@
       "when": 1790387029649,
       "tag": "0005_salle_attente",
       "breakpoints": true
+    },
+    {
+      "idx": 6,
+      "version": "7",
+      "when": 1790389285532,
+      "tag": "0006_rappels",
+      "breakpoints": true
     }
   ]
 }

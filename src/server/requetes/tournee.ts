@@ -6,6 +6,7 @@ import { statutEtape } from "@/domain/statuts";
 import { debutDuJourAuBenin } from "@/domain/temps";
 import { raisonsDe, trierFoyers, urgenceDuFoyer, type FoyerTournee, type Tournee } from "@/domain/tournee";
 import type { Db } from "../db/client";
+import { sansReponseAuTelephone } from "../rappels";
 import { alertes, evenements, foyers, inscriptions, ordonnances, patients, rendezVous } from "../db/schema";
 import { cleEtape, etapesFaites } from "./etapes-faites";
 import { risquesDes } from "./risques";
@@ -61,6 +62,7 @@ export async function tourneeDuRelais(db: Db, relaisId: string, relais: string, 
       ])
     : [new Map<string, string>(), [], new Map(), [], new Map(), [], [], [], []];
   const vues = new Set(visites.map((v) => v.patientId));
+  const injoignables = await sansReponseAuTelephone(db, ids, aujourdhui);
   const delivrees = new Set(delivrances.map((d) => d.donnees.ordonnanceId));
 
   tournee.foyers = trierFoyers(
@@ -101,6 +103,7 @@ export async function tourneeDuRelais(db: Db, relaisId: string, relais: string, 
               risque: risques.get(p.id)?.global ?? { niveau: "normal", motifs: [] },
               ordonnancesARetirer: lesOrdonnances.filter((o) => o.patientId === p.id && !delivrees.has(o.id)).map((o) => o.code),
               etapesProches,
+              rappelsSansReponse: injoignables.has(p.id),
             }),
           };
         })

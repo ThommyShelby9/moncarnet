@@ -38,6 +38,10 @@ describe("raisonsDe", () => {
     });
   });
 
+  it("demande au relais de passer quand les rappels par téléphone sont restés sans réponse", () => {
+    expect(raisonsDe({ ...calme, rappelsSansReponse: true })).toEqual([{ texte: "Rappels sans réponse (SMS, appel) : prévenir de vive voix", urgence: 1 }]);
+  });
+
   it("ne répète pas en motif de risque les étapes déjà dites manquées", () => {
     expect(
       raisonsDe({

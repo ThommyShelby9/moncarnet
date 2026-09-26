@@ -1,9 +1,10 @@
 import { randomUUID } from "node:crypto";
-import { asc, eq, sql } from "drizzle-orm";
+import { and, asc, eq, isNotNull, isNull, sql } from "drizzle-orm";
 import { planifier } from "@/domain/calendrier";
 import { ageEnAnnees, ajouterJours, depuisDateISO, joursEntre, type DateISO } from "@/domain/dates";
 import { agreger, CODES_INDICATEURS, INDICATEURS, moisPrecedents, premierDuMois, type CodeIndicateur, type Valeurs } from "@/domain/pilotage";
 import { PROGRAMMES, type CodeProgramme, type MotifRdv } from "@/domain/programmes";
+import { texteRappel } from "@/domain/rappels";
 import { hacher } from "../auth/mots-de-passe";
 import type { Db } from "../db/client";
 import * as t from "../db/schema";
@@ -46,7 +47,7 @@ const VILLAGES_SEHOUN = ["Sèhoun", "Kinta", "Adingnigon"] as const;
 const ALPHABET_CODE = "ABCDEFGHJKLMNPQRSTUVWXYZ23456789";
 
 const TABLES = [
-  "passages", "indicateurs_zones", "fichiers", "alertes", "liste_attente",
+  "rappels", "passages", "indicateurs_zones", "fichiers", "alertes", "liste_attente",
   "contenus_traductions", "contenus", "ordonnances", "evenements", "rendez_vous", "creneaux", "modeles_plages",
   "inscriptions", "responsables", "consentements", "contacts", "patients", "foyers", "sessions", "comptes",
   "etablissements", "communes",
@@ -508,8 +509,9 @@ export async function semerDemo(db: Db, { aujourdhui }: { aujourdhui: DateISO })
   }
 
   // --- Mariam a une place ce matin : Codjo dira qu'ils sont arrivés, et suivra son tour ---
+  let rdvMariam: string | null = null;
   if (consultationDuMatin) {
-    await db.insert(t.rendezVous).values({
+    const [rdv] = await db.insert(t.rendezVous).values({
       patientId: idsPersonnages.mariam!,
       motif: "consultation",
       datePrevue: aujourdhui,
@@ -518,8 +520,60 @@ export async function semerDemo(db: Db, { aujourdhui }: { aujourdhui: DateISO })
       etablissementId: cs!.id,
       source: "patient",
       reserveLe: depuisDateISO(ajouterJours(aujourdhui, -2)),
-    });
+    }).returning({ id: t.rendezVous.id });
+    rdvMariam = rdv!.id;
     nbRendezVous++;
+  }
+
+  // --- Rappels (canaux simulés) : Mariam a répondu « Je viendrai » ; Codjo n'a pas encore répondu ; Afiavi n'a pas été jointe ---
+  const centreRappel = "Centre de santé de Bohicon";
+  const il = (jours: number, heures: number) => new Date(depuisDateISO(ajouterJours(aujourdhui, jours)).getTime() + heures * 3_600_000);
+  if (rdvMariam) {
+    await db.insert(t.rappels).values({
+      patientId: idsPersonnages.mariam!,
+      rendezVousId: rdvMariam,
+      canal: "whatsapp",
+      telephone: "+2290197000001",
+      contenu: texteRappel({ pour: "Mariam", vaccin: false, date: aujourdhui, moment: "matin", centre: centreRappel, canal: "whatsapp" }),
+      envoyeLe: il(-2, 8),
+      statut: "repondu",
+      reponse: "viendra",
+      reponduLe: il(-2, 9),
+    });
+  }
+  const [rdvCodjo] = await db
+    .select()
+    .from(t.rendezVous)
+    .where(and(eq(t.rendezVous.patientId, idsPersonnages.codjo!), isNotNull(t.rendezVous.creneauId), isNull(t.rendezVous.annuleLe)));
+  if (rdvCodjo) {
+    await db.insert(t.rappels).values({
+      patientId: idsPersonnages.codjo!,
+      rendezVousId: rdvCodjo.id,
+      canal: "whatsapp",
+      telephone: "+2290197000001",
+      contenu: texteRappel({ pour: null, vaccin: false, date: rdvCodjo.datePrevue, moment: rdvCodjo.moment, centre: centreRappel, canal: "whatsapp" }),
+      envoyeLe: il(0, 7),
+    });
+  }
+  const [cpn3Afiavi] = await db
+    .select()
+    .from(t.rendezVous)
+    .where(and(eq(t.rendezVous.patientId, idsPersonnages.afiavi!), eq(t.rendezVous.etapeCode, "cpn3")));
+  if (cpn3Afiavi) {
+    const pourAfiavi = (canal: "sms" | "vocal") =>
+      texteRappel({ pour: null, vaccin: false, date: cpn3Afiavi.datePrevue, moment: cpn3Afiavi.moment, centre: centreRappel, canal });
+    await db.insert(t.rappels).values([
+      { patientId: idsPersonnages.afiavi!, rendezVousId: cpn3Afiavi.id, canal: "sms", telephone: "+2290197000003", contenu: pourAfiavi("sms"), envoyeLe: il(-1, 8), statut: "sans_reponse" },
+      { patientId: idsPersonnages.afiavi!, rendezVousId: cpn3Afiavi.id, canal: "vocal", telephone: "+2290197000003", contenu: pourAfiavi("vocal"), envoyeLe: il(-1, 11), statut: "sans_reponse" },
+      {
+        patientId: idsPersonnages.afiavi!,
+        rendezVousId: cpn3Afiavi.id,
+        canal: "relais",
+        telephone: null,
+        contenu: "À prévenir de vive voix : les rappels par téléphone sont restés sans réponse.",
+        envoyeLe: il(-1, 14),
+      },
+    ]);
   }
 
   // --- Alertes des 30 derniers jours, toutes prises en charge : délais réalistes pour le pilotage ---

@@ -335,3 +335,26 @@ export const passages = pgTable(
   },
   (t) => [uniqueIndex("passages_numero").on(t.etablissementId, t.jour, t.numero), uniqueIndex("passages_patient").on(t.etablissementId, t.jour, t.patientId)],
 );
+
+/** Rappels de rendez-vous, canal par canal (spec §4.3) : WhatsApp, SMS et appel vocal sont simulés ; le relais passe de vive voix. */
+export const rappels = pgTable(
+  "rappels",
+  {
+    id: uuid("id").primaryKey().defaultRandom(),
+    patientId: uuid("patient_id")
+      .notNull()
+      .references(() => patients.id, { onDelete: "cascade" }),
+    rendezVousId: uuid("rendez_vous_id")
+      .notNull()
+      .references(() => rendezVous.id, { onDelete: "cascade" }),
+    canal: canal("canal").notNull(),
+    /** Numéro qui a reçu le message ; aucun pour le relais. */
+    telephone: text("telephone"),
+    contenu: text("contenu").notNull(),
+    envoyeLe: horodatage("envoye_le").notNull(),
+    statut: text("statut").$type<"envoye" | "repondu" | "sans_reponse">().notNull().default("envoye"),
+    reponse: text("reponse").$type<"viendra" | "empeche">(),
+    reponduLe: horodatage("repondu_le"),
+  },
+  (t) => [uniqueIndex("rappels_rendez_vous_canal").on(t.rendezVousId, t.canal)],
+);
