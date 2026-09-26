@@ -38,7 +38,7 @@ Ouvrez https://moncarnet.kheios.com/demo : un clic entre dans un compte.
 ## Rappels en cascade (canaux simulés)
 
 - **À J-2**, chaque place réservée reçoit un rappel sur le premier canal de la personne : WhatsApp si elle l'a et y consent, sinon SMS, un appel vocal si elle préfère la voix, le relais si elle n'a pas de téléphone.
-- **Sans réponse après 2 heures**, le rappel passe au canal suivant : WhatsApp → SMS → appel vocal → relais. Au bout de la cascade, la personne apparaît dans la tournée du relais : « Rappels sans réponse : prévenir de vive voix ».
+- **Sans réponse après 2 heures**, le rappel passe au canal suivant : WhatsApp → SMS → appel vocal → relais. Une personne malentendante n'est jamais appelée : un message écrit, puis le relais. Au bout de la cascade, la personne apparaît dans la tournée du relais : « Rappels sans réponse : prévenir de vive voix ».
 - **« 1 : Je viendrai »** confirme ; **« 2 : Je ne peux pas »** libère la place, et l'application propose un autre jour. Le rappel s'affiche aussi sur l'accueil, avec les mêmes réponses.
 - **Contenu neutre** : date, lieu, « vaccin » ou « rendez-vous », jamais la maladie, car un téléphone se partage.
 - **Le faux téléphone** (`/demo/telephone`) montre ce que reçoivent Codjo, Afiavi (téléphone basique) et Aïcha : WhatsApp, SMS, appel vocal lu à voix haute. Rien n'est vraiment envoyé ; un fournisseur réel (WhatsApp Cloud API, SMS, voix) se branche à la place de la simulation.
@@ -78,23 +78,26 @@ Ouvrez https://moncarnet.kheios.com/demo : un clic entre dans un compte.
 
 ## Pilotage (État)
 
-- **Agents de l'État, zone sanitaire Zogbodomey-Bohicon-Zakpota** : les indicateurs de la zone calculés en direct depuis les carnets, commune par commune. On y lit la 4ᵉ consultation prénatale, les naissances au centre, les vaccins Penta3 et rougeole-rubéole, la tension contrôlée, les alertes prises en charge en moins de 15 minutes et leur délai moyen, les visites des relais et les rendez-vous manqués. S'y ajoutent la tendance sur 6 mois et l'écart avec le mois dernier.
-- **Ministère de la Santé** : la vue nationale. Elle réunit la zone de la démo (en direct) et dix autres zones du pays (**données fictives**, signalées comme telles), le classement des zones par indicateur, la tendance nationale et les zones à appuyer.
+- **Agents de l'État, zone sanitaire Zogbodomey-Bohicon-Zakpota** : les indicateurs de la zone calculés en direct depuis les carnets, commune par commune. On y lit la 4ᵉ consultation prénatale, les naissances au centre, les vaccins Penta3 et rougeole-rubéole, la tension contrôlée, les alertes prises en charge en moins de 15 minutes et leur délai moyen, les visites des relais et les rendez-vous manqués. S'y ajoutent la carte de la zone (chaque commune avec sa valeur, le centre de santé et la pharmacie en points), la tendance sur 6 mois et l'écart avec le mois dernier.
+- **Ministère de la Santé** : la vue nationale. Elle réunit la zone de la démo (en direct) et les 33 autres zones sanitaires du pays (**données fictives**, signalées comme telles) sur une **carte du Bénin** : chaque zone colorée selon l'objectif (atteint, presque, à appuyer, masqué), sa valeur écrite dessus, le Sud agrandi à côté, et chaque zone ouvre sa fiche. S'y ajoutent la tendance nationale et les zones à appuyer.
 - **Indicateurs** : un indicateur à la fois, avec sa définition, son objectif, sa tendance, puis le détail commune par commune (zone) ou zone par zone (ministère).
 - **Centres et relais** (zone) : pour chaque centre, les consultations, l'attente moyenne en salle, les alertes et leur délai, les places des 7 jours à venir ; pour chaque relais, les foyers suivis, les visites et la part des foyers visités.
 - **Alertes** : en direct et semaine par semaine pour la zone, centre par centre ; zone par zone pour le ministère.
 - **Zones** (ministère) : toutes les zones côte à côte, et la fiche de chacune (en direct pour la zone de la démo).
 - **Exports CSV au format DHIS2** (unité, période, élément, numérateur, dénominateur, valeur) : indicateurs du mois, historique sur 6 mois, activité des centres et des relais.
+- **Cartes** : les 77 communes et les 34 zones sanitaires, d'après geoBoundaries (domaine public), simplifiées en gardant les frontières communes et dessinées sur le serveur en SVG (55 Ko, sans tuiles ni bibliothèque). La couleur n'est jamais seule : la valeur est écrite, la légende est en mots, et les tableaux donnent les mêmes chiffres. `pnpm carte` refait le fond de carte.
 - **Aucun nom** ne sort du pilotage. Un chiffre qui porte sur moins de 5 personnes est masqué, à l'écran comme dans l'export : la petite commune de Zogbodomey le montre.
 
 ## Administration
 
-- L'état de la démo (comptes, carnets, foyers, alertes en cours, salle d'attente) et **« Réinitialiser la démo »** en un clic, pour rejouer les parcours (compte `admin`).
+- **Gestion des contenus de santé** (`/admin/contenus`) : les conseils de grossesse par trimestre, les messages des prises de médicaments, la vaccination, le signe de danger, les rendez-vous. Le texte français se modifie ; la **version parlée** s'enregistre au micro ou s'envoie en fichier, en fon, adja, yoruba, bariba ou dendi. Chez les familles, « Écouter » joue l'enregistrement dans la langue de la personne qui tient le téléphone, sinon la voix du téléphone lit le français.
+- L'état de la démo (comptes, carnets, foyers, alertes en cours, salle d'attente) et **« Réinitialiser la démo »** en un clic, pour rejouer les parcours (compte `admin`). La remise à zéro garde les contenus et leurs voix enregistrées.
 
 ## Accessibilité
 
 - Audit automatique **axe-core (WCAG 2.1 A et AA)** en production sur 43 écrans (présentation, démo, faux téléphone, connexion, patient, relais, soignant avec agenda, suivis, relais et alertes, pharmacie avec historique et ruptures, pilotage de la zone et du ministère, administration) : **aucune violation**.
-- Tout s'écoute ; pictogramme et mot ; gros boutons ; lecteur d'écran ; contrastes vérifiés ; tout se fait au clavier.
+- Tout s'écoute (dans sa langue quand le message est enregistré) ; pictogramme et mot ; gros boutons ; lecteur d'écran ; contrastes vérifiés ; tout se fait au clavier.
+- Malentendants : tout ce qui s'entend est aussi écrit et dessiné, et les rappels ne les appellent jamais.
 
 ## Démarrer en local
 

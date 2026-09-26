@@ -100,19 +100,21 @@ const POSTE: { icone: NomIcone; titre: string; texte: string }[] = [
 ];
 
 const PRINCIPES: { icone: NomIcone; titre: string; texte: string }[] = [
-  { icone: "ph-speaker-high", titre: "Tout s'écoute", texte: "Chaque carte, chaque conseil, chaque posologie se lit à voix haute : on n'a pas besoin de savoir lire." },
+  { icone: "ph-speaker-high", titre: "Tout s'écoute", texte: "Chaque carte, chaque conseil se lit à voix haute ; en fon, adja, yoruba, bariba ou dendi dès que le centre enregistre le message." },
   { icone: "ph-list-checks", titre: "Un pictogramme et un mot", texte: "Les signes de danger, les moments de prise et les motifs de rendez-vous sont dessinés." },
   { icone: "ph-check-circle", titre: "Une chose à la fois", texte: "L'accueil dit ce qu'il faut faire maintenant : le comprimé du soir, le vaccin de mercredi." },
   { icone: "ph-wifi-slash", titre: "Sans réseau", texte: "Les pages déjà ouvertes restent lisibles ; la tournée du relais marche hors ligne et part au retour du réseau." },
   { icone: "ph-users-three", titre: "Un téléphone pour la famille", texte: "Un même téléphone gère les carnets de toute la famille ; la déconnexion efface ce qu'il garde." },
-  { icone: "ph-shield-check", titre: "Pour les malvoyants aussi", texte: "Lecteur d'écran, gros boutons, contrastes forts, et Rachida suivie par sa fille et par le relais." },
+  { icone: "ph-shield-check", titre: "Malvoyants et malentendants", texte: "Lecteur d'écran, gros boutons, contrastes forts ; tout ce qui s'entend est aussi écrit, et une personne malentendante n'est jamais appelée." },
 ];
 
 const CAPOT: { icone: NomIcone; texte: string }[] = [
   { icone: "ph-device-mobile", texte: "Application installable (PWA), service worker, pages de moins de 300 Ko : pensée pour la 2G." },
   { icone: "ph-cloud-arrow-up", texte: "File d'envoi sans doublon : chaque saisie porte un identifiant créé sur le téléphone (UUID v7)." },
   { icone: "ph-heartbeat", texte: "Un programme de suivi tient dans un fichier : le suivi après l'accouchement a été ajouté ainsi." },
-  { icone: "ph-list-checks", texte: "Plus de 400 tests automatiques ; Next.js 16, TypeScript strict, Postgres ; déployée sur Coolify." },
+  { icone: "ph-list-checks", texte: "Plus de 470 tests automatiques ; Next.js 16, TypeScript strict, Postgres ; déployée sur Coolify." },
+  { icone: "ph-microphone", texte: "Gestion de contenu : l'administration écrit les messages de santé et enregistre leur voix dans chaque langue, au micro ou en fichier." },
+  { icone: "ph-map-trifold", texte: "Cartes des 77 communes et des 34 zones sanitaires, dessinées sur le serveur en SVG léger, sans tuiles ni bibliothèque." },
   { icone: "ph-download-simple", texte: "Export des indicateurs au format DHIS2, l'outil du système national d'information sanitaire." },
   { icone: "ph-shield-check", texte: "Droits stricts : un soignant ne voit que son centre, un relais que ses foyers, l'État que des chiffres." },
 ];
@@ -352,7 +354,7 @@ export default function PageDecouvrir() {
               {[
                 { icone: "ph-heartbeat" as NomIcone, texte: "Calculés en direct depuis les carnets : 4ᵉ consultation, naissances au centre, vaccins, tension, alertes." },
                 { icone: "ph-shield-check" as NomIcone, texte: "Un chiffre qui porte sur moins de 5 personnes est masqué, à l'écran comme dans l'export." },
-                { icone: "ph-chart-line-up" as NomIcone, texte: "Tendance sur 6 mois, classement des zones et zones à appuyer pour le ministère." },
+                { icone: "ph-chart-line-up" as NomIcone, texte: "Des cartes : chaque zone colorée selon l'objectif, sa valeur écrite dessus ; la tendance sur 6 mois et les zones à appuyer." },
                 { icone: "hi-ambulatory-clinic" as NomIcone, texte: "Centre par centre : consultations, attente en salle, délai des alertes ; relais par relais : foyers visités." },
                 { icone: "ph-map-trifold" as NomIcone, texte: "Pour le ministère, une fiche par zone sanitaire, et les alertes prises à temps zone par zone." },
                 { icone: "ph-download-simple" as NomIcone, texte: "Exports au format DHIS2 (mois, 6 mois, centres), pour rejoindre le système national d'information sanitaire." },
@@ -366,14 +368,14 @@ export default function PageDecouvrir() {
             <div className="grid gap-8 lg:grid-cols-3">
               <Navigateur
                 src="pilotage-zone"
-                alt="Pilotage de la zone sanitaire Zogbodomey-Bohicon-Zakpota : 4ᵉ consultation 61 %, naissances au centre 95 %, Penta3 86 %, avec les objectifs"
-                legende="Les agents de la zone sanitaire : les indicateurs en direct, commune par commune."
+                alt="Carte de la zone sanitaire Zogbodomey-Bohicon-Zakpota : Bohicon à 61 % pour la 4ᵉ consultation prénatale, le centre de santé et la pharmacie en points, et la tendance sur 6 mois"
+                legende="Les agents de la zone sanitaire : la carte de leurs communes, en direct, et la tendance."
                 sombre
               />
               <Navigateur
                 src="pilotage-ministere"
-                alt="Vue nationale du ministère : classement des zones sanitaires pour le vaccin Penta3, tendance nationale et zones à appuyer"
-                legende="Le ministère : toutes les zones, la tendance nationale, les zones à appuyer (données fictives)."
+                alt="Carte du Bénin pour le ministère : les 34 zones sanitaires colorées selon le vaccin Penta3, le Sud agrandi, la tendance nationale et les zones à appuyer"
+                legende="Le ministère : la carte des 34 zones sanitaires, chaque zone ouvre sa fiche (données fictives hors zone de démo)."
                 sombre
               />
               <Navigateur

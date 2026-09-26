@@ -65,3 +65,30 @@
 
 ### Tâche 6 : finitions
 README, page de présentation, audit axe, suite complète, envoi, déploiement, démo réinitialisée, vérification en production.
+
+## Bilan
+
+Tâches 1 à 6 livrées.
+
+**Cartes**
+- Carte nationale des 34 zones, avec le Sud agrandi.
+- Carte de chaque zone : communes, établissements.
+- Présentes sur les tableaux de bord, la fiche de zone, les indicateurs et les centres.
+
+**Gestion de contenu**
+- 10 contenus : texte, et voix par langue enregistrée au micro ou envoyée en fichier.
+- Joués chez les familles dans la langue de la personne qui tient le téléphone.
+- Conservés lors d'une remise à zéro de la démo.
+
+**Inclusion**
+- Plus d'appel vocal pour une personne malentendante.
+- La promesse du fon est maintenant exacte.
+
+**Décisions**
+- Un fond de carte calculé à l'avance plutôt qu'une bibliothèque de cartes, pour rester léger et lisible sans réseau.
+- Cotonou (4 zones sur une seule commune) est affichée comme un seul ensemble qui renvoie au tableau des zones.
+- Le texte affiché reste en français : la voix du téléphone ne sait pas lire le fon. Seul l'enregistrement change de langue.
+
+**Mineurs laissés de côté**
+- Aucune voix en fon n'est préenregistrée : elles se font dans l'administration.
+- La vidéo en langue des signes reste un champ prévu, sans écran.
